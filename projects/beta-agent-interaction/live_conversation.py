@@ -112,6 +112,224 @@ You will receive the discussion transcript for one specific section.
 Write ONLY the requested output. No commentary, no meta-text, no 'based on the discussion'.
 Just the spec content as if you're writing the document directly."""
 
+# -- BMAD workflow mode --
+
+from bmad_workflow_parser import scan_bmad_workflows, parse_workflow, parsed_to_sections
+
+BMAD_PRODUCT_BRIEF = {
+    "name": "Product Brief",
+    "template": "product-brief",
+    "sections": [
+        {
+            "name": "Problem & Vision",
+            "bmad_step": 2,
+            "prompt": (
+                "What core problem does this product solve? Who feels the pain most? "
+                "What happens if it goes unsolved? Debate the framing -- is the obvious "
+                "problem the REAL problem, or is there a deeper one? The group must "
+                "converge on a crisp problem statement and vision."
+            ),
+            "extract": (
+                "Write: 1) A one-paragraph problem statement. 2) A one-sentence vision. "
+                "3) Why existing solutions fail (2-3 bullets). Output ONLY these sections."
+            ),
+            "output_section": "## Core Vision",
+        },
+        {
+            "name": "Target Users",
+            "bmad_step": 3,
+            "prompt": (
+                "Who is the primary user? Describe a specific person, not a category. "
+                "Are there secondary users? Argue about who would actually PAY vs who "
+                "would just think it's cool. Walk through their day -- where does this "
+                "product fit? What's their 'aha' moment?"
+            ),
+            "extract": (
+                "Write: 1) Primary user persona (name, context, needs). "
+                "2) Secondary users if any. 3) User journey from discovery to daily use. "
+                "Output ONLY these sections."
+            ),
+            "output_section": "## Target Users",
+        },
+        {
+            "name": "Differentiators",
+            "bmad_step": 5,
+            "prompt": (
+                "What makes this product genuinely different from what exists? "
+                "What's the unfair advantage? Why can't competitors just copy this? "
+                "Argue about whether the differentiation is real or imagined. "
+                "If a competitor launched a clone tomorrow, what would they miss?"
+            ),
+            "extract": (
+                "Write: 1) Primary differentiator (one paragraph). "
+                "2) Competitive moat (why it's hard to copy). "
+                "3) What competitors would miss in a clone. Output ONLY these sections."
+            ),
+            "output_section": "## Differentiators",
+        },
+        {
+            "name": "Success Metrics",
+            "bmad_step": 4,
+            "prompt": (
+                "How do we know if this product is working? What are the 3-5 KPIs "
+                "that matter most? Argue about vanity metrics vs real signals. "
+                "What does 'success' look like at 1 month, 6 months, 1 year? "
+                "Be specific -- numbers, not vibes."
+            ),
+            "extract": (
+                "Write: A numbered list of 3-5 KPIs with target values and timeframes. "
+                "Include what 'good' vs 'great' looks like for each. Output ONLY the list."
+            ),
+            "output_section": "## Success Metrics",
+        },
+        {
+            "name": "Scope & Boundaries",
+            "bmad_step": 5,
+            "prompt": (
+                "What's in v1 and what's explicitly out? What's the biggest scope trap -- "
+                "the feature everyone will ask for that we must say no to? "
+                "Argue about what's truly essential vs nice-to-have. "
+                "If you could only ship 3 things, what are they?"
+            ),
+            "extract": (
+                "Write: 1) Must-have features for v1 (3-5 bullets). "
+                "2) Explicitly excluded from v1 (3-5 bullets with reasons). "
+                "3) Biggest scope trap to avoid. Output ONLY these sections."
+            ),
+            "output_section": "## Scope & Boundaries",
+        },
+    ],
+}
+
+BMAD_BRAINSTORM = {
+    "name": "Brainstorming",
+    "template": "brainstorm",
+    "sections": [
+        {
+            "name": "What Makes This Game Special",
+            "bmad_step": 1,
+            "prompt": (
+                "We're building a browser-based multiplayer version of this game. "
+                "What are the 3-5 things that made the original game magical that we MUST preserve? "
+                "And what are 3-5 new opportunities that multiplayer and the browser platform open up "
+                "that the original never had? Be specific -- name concrete mechanics, moments, and feelings. "
+                "Each person: name ONE thing to preserve and ONE new opportunity."
+            ),
+            "extract": (
+                "Write two lists: 1) PRESERVE -- the core elements that must survive (with why each matters). "
+                "2) NEW OPPORTUNITIES -- what multiplayer and browser add that the original couldn't do. "
+                "Output ONLY these two lists."
+            ),
+            "output_section": "## Core Identity",
+        },
+        {
+            "name": "Multiplayer Design",
+            "bmad_step": 2,
+            "prompt": (
+                "How does multiplayer actually work in this game? Shared persistent universe, "
+                "instanced sessions, or something else? How many players in one space? "
+                "What happens when a trader meets a pirate player? Can players form factions? "
+                "How do we handle the economy when real humans are trading? "
+                "Each person: propose ONE specific multiplayer interaction that would be amazing."
+            ),
+            "extract": (
+                "Write: 1) Multiplayer model (persistent/instanced/hybrid and why). "
+                "2) Player count and world structure. "
+                "3) Key multiplayer interactions (PvP, trading, factions, cooperation). "
+                "4) Economy approach with real players. Output ONLY these sections."
+            ),
+            "output_section": "## Multiplayer Design",
+        },
+        {
+            "name": "Core Loop & Progression",
+            "bmad_step": 3,
+            "prompt": (
+                "What does a player DO in their first session? Their tenth? Their hundredth? "
+                "Walk through the fly-fight-trade-upgrade loop for this multiplayer version. "
+                "How does ship progression work when other players have endgame ships? "
+                "What keeps someone coming back -- what's the daily hook? "
+                "Each person: describe ONE specific gameplay moment that would hook a player."
+            ),
+            "extract": (
+                "Write: 1) First session experience (step by step). "
+                "2) Core gameplay loop. "
+                "3) Progression system (ships, equipment, reputation). "
+                "4) Retention hooks (what brings players back). Output ONLY these sections."
+            ),
+            "output_section": "## Core Loop & Progression",
+        },
+        {
+            "name": "V1 Scope",
+            "bmad_step": 4,
+            "prompt": (
+                "What's in the FIRST PLAYABLE version? Not the dream game -- the smallest "
+                "version that's fun and tests the core idea. How many ships, how many systems, "
+                "what combat, what trading? What do we explicitly cut from v1? "
+                "The group must agree on a concrete feature list for v1 and a NOT-in-v1 list."
+            ),
+            "extract": (
+                "Write: 1) V1 feature list (specific: number of ships, systems, mechanics included). "
+                "2) NOT in V1 (features saved for later, with brief reason). "
+                "3) The one-sentence pitch for what V1 proves. Output ONLY these sections."
+            ),
+            "output_section": "## V1 Scope",
+        },
+    ],
+}
+
+# Map of curated workflows by key
+BMAD_CURATED_WORKFLOWS = {
+    "product-brief": BMAD_PRODUCT_BRIEF,
+    "brainstorming": BMAD_BRAINSTORM,
+}
+
+# Default turns per section for each workflow
+BMAD_SECTION_TURNS = {
+    "product-brief": [5, 5, 4, 4, 4],
+    "brainstorming": [3, 6, 4, 5],
+}
+
+ADVERSARIAL_REVIEW_PROMPT = """You are a cynical, jaded reviewer with zero patience for sloppy thinking.
+Review this spec section and find at least 5 problems. Look for:
+- Vague claims with no specifics
+- Assumptions that haven't been tested
+- Missing considerations
+- Things that sound good but wouldn't survive contact with reality
+- Contradictions with locked decisions from earlier sections
+
+Output a numbered list of problems. Be specific and brutal. No praise."""
+
+
+def get_bmad_sections(workflow_key: str) -> list[dict]:
+    """Get debate sections for a BMAD workflow.
+
+    Resolution order:
+    1. Check curated workflows (hand-tuned debate prompts)
+    2. Fall back to parsing BMAD skill step files
+    """
+    # Check curated first
+    if workflow_key in BMAD_CURATED_WORKFLOWS:
+        return BMAD_CURATED_WORKFLOWS[workflow_key]["sections"]
+
+    # Fall back to parser
+    skills_root = Path(__file__).resolve().parent.parent.parent / ".claude" / "skills"
+
+    # Try common naming patterns
+    for prefix in ["bmad-create-", "bmad-"]:
+        skill_dir = skills_root / f"{prefix}{workflow_key}"
+        if skill_dir.exists():
+            workflow = parse_workflow(skill_dir)
+            return parsed_to_sections(workflow)
+
+    return []
+
+
+def get_bmad_workflow_name(workflow_key: str) -> str:
+    """Get display name for a workflow key."""
+    if workflow_key in BMAD_CURATED_WORKFLOWS:
+        return BMAD_CURATED_WORKFLOWS[workflow_key]["name"]
+    return workflow_key.replace("-", " ").title()
+
 HTML_PAGE = r"""<!DOCTYPE html>
 <html>
 <head>
@@ -283,6 +501,32 @@ HTML_PAGE = r"""<!DOCTYPE html>
   .restart-btn { font:9px var(--mono); color:var(--dim); background:none; border:1px solid var(--border);
     padding:2px 8px; cursor:pointer; margin-left:8px; }
   .restart-btn:hover { color:var(--red); border-color:var(--red); }
+
+  /* Post-session actions panel */
+  .actions-bar {
+    padding:8px 14px; border-top:1px solid var(--border); display:none;
+    background:var(--surface);
+  }
+  .actions-bar.visible { display:block; }
+  .actions-bar h3 { font-size:9px; color:var(--amber); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .actions-bar .action-row { display:flex; gap:6px; margin-bottom:6px; }
+  .actions-bar input { flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    font:10px var(--mono); padding:4px 8px; outline:none; }
+  .actions-bar input:focus { border-color:var(--purple); }
+  .actions-bar button { background:var(--surface2); border:1px solid var(--border); color:var(--purple);
+    font:9px var(--mono); padding:4px 10px; cursor:pointer; text-transform:uppercase; letter-spacing:1px; white-space:nowrap; }
+  .actions-bar button:hover { background:var(--border); }
+  .actions-bar button:disabled { opacity:0.4; cursor:default; }
+  .actions-queue { font-size:9px; color:var(--dim); }
+  .actions-queue .aq-item { padding:3px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:center; }
+  .actions-queue .aq-status { font-size:8px; padding:1px 6px; border-radius:2px; }
+  .actions-queue .aq-status.running { background:rgba(168,85,247,0.15); color:var(--purple); }
+  .actions-queue .aq-status.complete { background:rgba(34,197,94,0.15); color:var(--green); }
+
+  /* Adversarial review card */
+  .msg.adversarial { border-left-color:var(--red); background:rgba(255,77,106,0.06); border:1px solid rgba(255,77,106,0.2); }
+  .msg.adversarial .m-name { color:var(--red); }
+  .msg.adversarial .m-body { color:var(--text); font-size:9px; white-space:pre-wrap; }
 </style>
 </head>
 <body>
@@ -296,9 +540,10 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <div class="row">
       <div>
         <label>Mode</label>
-        <select id="setup-mode">
+        <select id="setup-mode" onchange="onModeChange()">
           <option value="chat">Chat (open discussion)</option>
           <option value="spec">Spec (structured spec builder)</option>
+          <option value="bmad" selected>BMAD (workflow-driven)</option>
         </select>
       </div>
       <div>
@@ -312,6 +557,17 @@ HTML_PAGE = r"""<!DOCTYPE html>
           <option value="opus">Opus</option>
           <option value="haiku">Haiku</option>
         </select>
+      </div>
+    </div>
+    <label>Project Context (folder of .md files agents should know about)</label>
+    <input type="text" id="setup-context" placeholder="e.g. C:\Users\Brian.Rankin\claude-workspace\projects\EscapeVelocity" />
+    <label>Output Directory (where specs/transcripts get saved)</label>
+    <input type="text" id="setup-output-dir" placeholder="Leave blank for default sessions/ folder" />
+    <div id="bmad-options">
+      <label>BMAD Workflow</label>
+      <select id="setup-workflow"></select>
+      <div style="margin-top:8px">
+        <label style="display:inline;cursor:pointer"><input type="checkbox" id="setup-adversarial" checked style="margin-right:4px" />Adversarial review (review each section before locking)</label>
       </div>
     </div>
     <button class="go-btn" onclick="startConversation()">START</button>
@@ -330,6 +586,14 @@ HTML_PAGE = r"""<!DOCTYPE html>
     </div>
     <div class="messages" id="messages"></div>
     <div class="turn-counter" id="counter">Turn 0</div>
+    <div class="actions-bar" id="actions-bar">
+      <h3>Post-Session Actions</h3>
+      <div class="action-row">
+        <input type="text" id="research-input" placeholder="What should we research deeper? (uses session context)" onkeydown="if(event.key==='Enter')queueResearch()" />
+        <button onclick="queueResearch()" id="research-btn">Research</button>
+      </div>
+      <div class="actions-queue" id="actions-queue"></div>
+    </div>
     <div class="mod-bar">
       <input type="text" id="mod-input" placeholder="Steer the conversation..." onkeydown="if(event.key==='Enter')sendMod()" />
       <button onclick="sendMod()">Moderate</button>
@@ -384,6 +648,26 @@ async function loadTeams() {
   }
 }
 
+async function loadWorkflows() {
+  const res = await fetch('/api/workflows');
+  const workflows = await res.json();
+  const sel = document.getElementById('setup-workflow');
+  sel.innerHTML = '';
+  for (const w of workflows) {
+    const opt = document.createElement('option');
+    opt.value = w.key;
+    opt.textContent = w.name + (w.curated ? ' (curated)' : '');
+    sel.appendChild(opt);
+  }
+}
+
+function onModeChange() {
+  const mode = document.getElementById('setup-mode').value;
+  const bmadOpts = document.getElementById('bmad-options');
+  bmadOpts.style.display = mode === 'bmad' ? 'block' : 'none';
+  if (mode === 'bmad') loadWorkflows();
+}
+
 function toggleTeam(team, btn) {
   const idx = selectedTeams.findIndex(t => t.key === team.key);
   if (idx >= 0) { selectedTeams.splice(idx, 1); btn.classList.remove('selected'); }
@@ -400,17 +684,28 @@ async function startConversation() {
   if (!question) { alert('Enter a topic'); return; }
   if (selectedTeams.length === 0) { alert('Select at least one team'); return; }
 
+  const mode = document.getElementById('setup-mode').value;
   const config = {
     question: question,
     teams: selectedTeams.map(t => ({key: t.key, path: t.path, name: t.name})),
-    mode: document.getElementById('setup-mode').value,
+    mode: mode,
     turns: parseInt(document.getElementById('setup-turns').value) || 15,
     model: document.getElementById('setup-model').value,
   };
+  if (mode === 'bmad') {
+    config.workflow = document.getElementById('setup-workflow').value;
+    config.adversarial = document.getElementById('setup-adversarial').checked;
+  }
+  const ctxPath = document.getElementById('setup-context').value.trim();
+  if (ctxPath) config.context_path = ctxPath;
+  const outDir = document.getElementById('setup-output-dir').value.trim();
+  if (outDir) config.output_dir = outDir;
 
   // Clear UI
   messages.innerHTML = '';
   roster.innerHTML = '<h2>Agents</h2>';
+  document.getElementById('actions-bar').classList.remove('visible');
+  document.getElementById('actions-queue').innerHTML = '';
   topic.textContent = question.substring(0, 120);
   document.getElementById('pulse').style.background = 'var(--green)';
   document.getElementById('pulse').style.animation = 'pulse 2s infinite';
@@ -441,10 +736,12 @@ function connectSSE() {
 if (Object.keys(C).length === 0) {
   // No conversation running -- show setup
   loadTeams();
+  loadWorkflows();
 } else {
   // Conversation already started via CLI
   document.getElementById('setup-overlay').classList.add('hidden');
   loadTeams(); // Still load for restart
+  loadWorkflows();
 }
 
 let selectedAgent = null;
@@ -524,6 +821,8 @@ function handleEvent(e) {
     case 'conversation_start':
       topic.textContent = ev.question;
       info.textContent = ev.agents.length + ' agents | max ' + ev.max_turns + ' turns';
+      // Update colors from server (fixes UI-started conversations)
+      if (ev.agent_colors) { C = ev.agent_colors; }
       for (const a of ev.agent_profiles) {
         agentProfiles[a.key] = a;
         agentMessages[a.key] = [];
@@ -652,6 +951,13 @@ function handleEvent(e) {
       scrollBottom();
       break;
 
+    case 'adversarial_review':
+      messages.insertAdjacentHTML('beforeend',
+        '<div class="msg adversarial"><div class="m-header"><span class="m-name">ADVERSARIAL REVIEW: ' + esc(ev.section) + '</span></div>' +
+        '<div class="m-body">' + esc(ev.findings) + '</div></div>');
+      scrollBottom();
+      break;
+
     case 'synthesis_final':
       messages.insertAdjacentHTML('beforeend',
         '<div class="msg system" style="border-left-color:var(--green);background:rgba(34,197,94,0.04)">' +
@@ -664,8 +970,55 @@ function handleEvent(e) {
       document.getElementById('pulse').style.background = 'var(--green)';
       document.getElementById('pulse').style.animation = 'none';
       counter.textContent = 'Done: ' + ev.turns + ' turns in ' + ev.elapsed;
+      if (ev.has_session) {
+        document.getElementById('actions-bar').classList.add('visible');
+      }
       break;
+
+    case 'action_started':
+      addActionToQueue(ev.action_id, ev.question, 'running');
+      break;
+
+    case 'action_complete': {
+      updateActionStatus(ev.action_id, 'complete');
+      messages.insertAdjacentHTML('beforeend',
+        '<div class="msg system" style="border-left-color:var(--purple);background:rgba(168,85,247,0.04)">' +
+        '<div class="m-header"><span class="m-name" style="color:var(--purple)">RESEARCH COMPLETE: ' + esc(ev.question) + '</span></div>' +
+        '<div class="m-body" style="white-space:pre-wrap;font-size:9px">' + esc(ev.result_preview) + '...</div></div>');
+      scrollBottom();
+      break;
+    }
   }
+}
+
+// -- Post-session actions --
+async function queueResearch() {
+  const input = document.getElementById('research-input');
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = '';
+  document.getElementById('research-btn').disabled = true;
+  const res = await fetch('/api/actions', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({type: 'research', question: question})
+  });
+  const data = await res.json();
+  if (data.error) { alert(data.error); }
+  document.getElementById('research-btn').disabled = false;
+}
+
+function addActionToQueue(id, question, status) {
+  const queue = document.getElementById('actions-queue');
+  queue.insertAdjacentHTML('beforeend',
+    '<div class="aq-item" id="action-' + id + '">' +
+    '<span class="aq-status ' + status + '" id="action-status-' + id + '">' + status + '</span>' +
+    '<span>' + esc(question) + '</span></div>');
+}
+
+function updateActionStatus(id, status) {
+  const el = document.getElementById('action-status-' + id);
+  if (el) { el.textContent = status; el.className = 'aq-status ' + status; }
 }
 
 // Connect SSE if conversation is already running (CLI mode)
@@ -773,6 +1126,100 @@ moderator_queue = deque()
 _active_thread = None
 _server_ref = None
 
+# -- Post-session actions --
+_session_context = {}  # Populated when a conversation ends
+_pending_actions = []  # Queued post-session actions
+_action_threads = {}   # action_id -> thread
+
+
+RESEARCH_SYSTEM_PROMPT = """You are a thorough researcher. You have been given the output of an
+AI agent discussion session. Your job is to conduct deep research on
+the specific topic requested, informed by what the agents discussed.
+
+Write a comprehensive research report that:
+- Goes deeper than the agents did on the specific research question
+- Provides concrete data, examples, comparisons, and evidence
+- Identifies things the agents missed or got wrong
+- Gives actionable recommendations based on the research
+- Is structured with clear sections and headers
+
+Write the report in markdown. Be thorough but concise -- substance over fluff."""
+
+
+def _run_research_action(action_id: str, research_question: str, session_ctx: dict, model: str = None):
+    """Run a research action in a background thread."""
+    import asyncio as _asyncio
+
+    loop = _asyncio.new_event_loop()
+    _asyncio.set_event_loop(loop)
+
+    emit("action_started", {"action_id": action_id, "type": "research", "question": research_question})
+
+    # Build context from the session
+    context_parts = []
+    if session_ctx.get("product_description"):
+        context_parts.append(f"## Product/Topic\n{session_ctx['product_description']}")
+    if session_ctx.get("spec_document"):
+        context_parts.append("## Decisions Made by Agents")
+        for name, content in session_ctx["spec_document"].items():
+            context_parts.append(f"### {name}\n{content}")
+    if session_ctx.get("synthesis"):
+        context_parts.append(f"## Session Synthesis\n{session_ctx['synthesis']}")
+    if session_ctx.get("history"):
+        # Include last 20 messages as discussion context
+        recent = session_ctx["history"][-20:]
+        context_parts.append("## Recent Discussion (last 20 messages)")
+        for msg in recent:
+            context_parts.append(f"**{msg['name']}**: {msg['text']}")
+
+    session_summary = "\n\n".join(context_parts)
+
+    payload = (
+        f"## Session Context\n\n{session_summary}\n\n"
+        f"---\n\n"
+        f"## Research Request\n\n{research_question}\n\n"
+        f"Conduct thorough research on this topic. Use the session context to understand "
+        f"what has already been discussed and go deeper. Provide concrete data, examples, "
+        f"and actionable findings the team can use in their next session."
+    )
+
+    result = loop.run_until_complete(
+        run_claude_async(RESEARCH_SYSTEM_PROMPT, payload, timeout=300, model=model or "sonnet")
+    )
+
+    # Save the research output
+    output_dir = Path(__file__).resolve().parent.parent.parent / "sessions" / "research"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y-%m-%d_%H%M")
+    safe_q = research_question[:50].replace(" ", "_").replace("/", "-")
+    output_path = output_dir / f"{ts}_{safe_q}.md"
+
+    report = f"# Research: {research_question}\n"
+    report += f"*Generated {ts} | Post-session action*\n\n"
+    if session_ctx.get("product_description"):
+        report += f"*Session topic: {session_ctx['product_description'][:100]}*\n\n"
+    report += "---\n\n"
+    report += result
+
+    output_path.write_text(report, encoding="utf-8")
+
+    # Update action state
+    for action in _pending_actions:
+        if action["id"] == action_id:
+            action["status"] = "complete"
+            action["output_path"] = str(output_path)
+            action["result_preview"] = result[:500]
+            break
+
+    emit("action_complete", {
+        "action_id": action_id,
+        "type": "research",
+        "question": research_question,
+        "output_path": str(output_path),
+        "result_preview": result[:500],
+    })
+    emit("system_message", {"message": f"Research complete: {output_path.name}"})
+
 
 def _scan_teams():
     """Scan config/teams/ for available YAML files."""
@@ -818,11 +1265,16 @@ def _start_conversation(config: dict):
         _server_ref._agent_colors = agent_colors
         _server_ref._team_labels = team_labels
 
+    workflow = config.get("workflow", "product-brief")
+    adversarial = config.get("adversarial", mode == "bmad")
+    context_path = config.get("context_path", None)
+    output_dir_override = config.get("output_dir", None)
+
     _active_thread = threading.Thread(
         target=run_conversation_thread,
         args=(questions, agent_keys, turns, 90, model,
               team_configs[0]["path"] if len(team_configs) == 1 else team_configs[0]["path"],
-              turns_per_topic, True, mode),
+              turns_per_topic, True, mode, workflow, adversarial, context_path, output_dir_override),
         daemon=True,
     )
     _active_thread.start()
@@ -853,6 +1305,47 @@ class ConvHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(b'{"ok":true}')
+        elif self.path == "/api/actions":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length).decode()
+            data = json.loads(body)
+            action_type = data.get("type", "research")
+            question = data.get("question", "").strip()
+            model = data.get("model", None)
+            if not question:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"error":"question required"}')
+                return
+            if not _session_context:
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"error":"no session context available"}')
+                return
+            action_id = f"{action_type}_{datetime.now().strftime('%H%M%S')}"
+            action = {
+                "id": action_id,
+                "type": action_type,
+                "question": question,
+                "status": "running",
+                "output_path": None,
+                "result_preview": None,
+            }
+            _pending_actions.append(action)
+            if action_type == "research":
+                t = threading.Thread(
+                    target=_run_research_action,
+                    args=(action_id, question, dict(_session_context), model),
+                    daemon=True,
+                )
+                t.start()
+                _action_threads[action_id] = t
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"ok": True, "action_id": action_id}).encode())
         else:
             self.send_response(404)
             self.end_headers()
@@ -871,6 +1364,24 @@ class ConvHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(teams).encode())
+        elif self.path == "/api/actions":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(_pending_actions).encode())
+        elif self.path == "/api/workflows":
+            # Combine curated workflows with parsed ones
+            curated_keys = set(BMAD_CURATED_WORKFLOWS.keys())
+            workflows = []
+            for key, wf in BMAD_CURATED_WORKFLOWS.items():
+                workflows.append({"key": key, "name": wf["name"], "curated": True})
+            for parsed in scan_bmad_workflows():
+                if parsed["key"] not in curated_keys:
+                    workflows.append({"key": parsed["key"], "name": parsed["name"], "curated": False})
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(workflows).encode())
         elif self.path == "/events":
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
@@ -913,14 +1424,48 @@ def _build_agent_colors(agent_keys: list[str]) -> dict[str, str]:
     return {key: _PALETTE[i % len(_PALETTE)] for i, key in enumerate(agent_keys)}
 
 
+def _load_context_files(context_path: str) -> str:
+    """Load markdown files from a directory as project context.
+
+    Prefers files with 'context' in the name (distilled summaries).
+    Falls back to all .md files with size limits.
+    """
+    ctx_dir = Path(context_path)
+    if not ctx_dir.exists():
+        return ""
+
+    # Prefer distilled context files (e.g. ev-context.md)
+    context_files = list(ctx_dir.glob("*context*.md"))
+    if context_files:
+        parts = []
+        for f in context_files:
+            content = f.read_text(encoding="utf-8")
+            parts.append(content)
+        return "## PROJECT CONTEXT (reference material -- use this to inform your discussion)\n\n" + "\n\n---\n\n".join(parts)
+
+    # Fallback: load all .md files with size limits
+    parts = []
+    for f in sorted(ctx_dir.glob("*.md")):
+        content = f.read_text(encoding="utf-8")
+        if len(content) > 5000:
+            content = content[:5000] + "\n\n[... truncated for context window ...]"
+        parts.append(f"### {f.stem}\n\n{content}")
+    if not parts:
+        return ""
+    return "## PROJECT CONTEXT (reference material -- use this to inform your discussion)\n\n" + "\n\n---\n\n".join(parts)
+
+
 async def run_conversation(questions: list[str], agent_keys: list[str], max_turns: int, timeout: int,
                            model: str = None, team_config: str = None,
                            turns_per_topic: int = 0, synthesize: bool = True,
-                           mode: str = "chat") -> dict:
+                           mode: str = "chat", workflow: str = "product-brief",
+                           adversarial: bool = False, context_path: str = None,
+                           output_dir_override: str = None) -> dict:
     """Run a multi-turn conversation, optionally across multiple topics.
 
     mode="chat": open-ended discussion
     mode="spec": structured spec-building with locked sections
+    mode="bmad": BMAD workflow-driven with curated or parsed sections
 
     Returns dict with 'history', 'synthesis', 'snapshots' for downstream use.
     """
@@ -931,22 +1476,48 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
     agent_colors = _build_agent_colors(agent_keys)
     system_prompts = {}
 
-    # In spec mode, the original question is the product description.
-    # Questions are auto-generated from SPEC_SECTIONS.
+    # In spec/bmad mode, the original question is the product description.
+    # Questions are auto-generated from sections.
     spec_document = {}  # {section_name: extracted_content}
     product_description = questions[0]
 
+    # Resolve sections for structured modes
+    active_sections = None  # The section definitions driving the conversation
+
+    if mode == "bmad":
+        active_sections = get_bmad_sections(workflow)
+        if not active_sections:
+            emit("system_message", {"message": f"No sections found for workflow '{workflow}', falling back to chat mode"})
+            mode = "chat"
+        else:
+            workflow_name = get_bmad_workflow_name(workflow)
+            emit("system_message", {"message": f"BMAD workflow: {workflow_name} ({len(active_sections)} sections)"})
+            questions = [
+                f"PRODUCT: {product_description}\n\nSECTION: {s['name']}\n\n{s['prompt']}"
+                for s in active_sections
+            ]
+            turns_per_topic = turns_per_topic or 3
+            max_turns = len(questions) * turns_per_topic
+
     if mode == "spec":
+        active_sections = SPEC_SECTIONS
         questions = [
             f"PRODUCT: {product_description}\n\nSECTION: {s['name']}\n\n{s['prompt']}"
             for s in SPEC_SECTIONS
         ]
-        turns_per_topic = turns_per_topic or 5  # Tight budget per section
+        turns_per_topic = turns_per_topic or 4
         max_turns = len(questions) * turns_per_topic
 
     question = questions[0]
     question_index = 0
     all_histories = []  # Track history per question
+
+    # Load project context files if provided
+    project_context = ""
+    if context_path:
+        project_context = _load_context_files(context_path)
+        if project_context:
+            emit("system_message", {"message": f"Loaded project context from: {context_path}"})
 
     # Build system prompts with conversation rules
     # Skip project context for non-default teams (they're not software agents)
@@ -954,6 +1525,8 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
     for key in agent_keys:
         base_prompt = build_system_prompt(team.agents[key], include_project_context=include_project)
         system_prompts[key] = base_prompt + "\n\n" + CONVERSATION_SYSTEM
+        if project_context:
+            system_prompts[key] += "\n\n" + project_context
 
     # Build agent profiles for UI (real data from config -- everything that affects behavior)
     profiles = []
@@ -998,6 +1571,7 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
         "questions": questions,
         "agents": agent_keys,
         "max_turns": max_turns,
+        "agent_colors": agent_colors,
         "agent_profiles": profiles,
     })
 
@@ -1093,7 +1667,7 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
             payload += f"## THE QUESTION (stay focused on this): {question}\n\n"
 
             if history:
-                recent_count = 5
+                recent_count = 7
                 older = history[:-recent_count] if len(history) > recent_count else []
                 recent = history[-recent_count:]
 
@@ -1103,17 +1677,32 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                 if older:
                     payload += "[Earlier discussion summary]\n"
                     for msg in older[-10:]:  # Cap at 10 older messages
-                        # First sentence only
-                        first_sentence = msg['text'].split('.')[0].strip() + '.'
-                        payload += f"- {msg['name']}: {first_sentence}\n"
+                        if msg['agent'] == '__moderator__':
+                            # Never compress moderator messages
+                            payload += f">>> MODERATOR: {msg['text']} <<<\n"
+                        else:
+                            first_sentence = msg['text'].split('.')[0].strip() + '.'
+                            payload += f"- {msg['name']}: {first_sentence}\n"
                     payload += "\n"
 
                 # Recent messages: verbatim
                 payload += "[Recent exchanges]\n"
+                has_moderator = False
                 for msg in recent:
-                    payload += f"[{msg['name']}]: {msg['text']}\n\n"
+                    if msg['agent'] == '__moderator__':
+                        payload += f"\n>>> MODERATOR (the human running this session): {msg['text']} <<<\n\n"
+                        has_moderator = True
+                    else:
+                        payload += f"[{msg['name']}]: {msg['text']}\n\n"
 
                 payload += "=== End Conversation ===\n\n"
+
+                if has_moderator:
+                    payload += (
+                        "IMPORTANT: The MODERATOR just spoke. They are the human running this session. "
+                        "Address their point FIRST before anything else. Their input overrides the current thread.\n\n"
+                    )
+
                 payload += (
                     f"REMEMBER: The topic is: {question[:100]}\n"
                     f"Respond to what was just said BUT stay on topic. "
@@ -1207,10 +1796,10 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                 should_advance = True
 
         if should_advance:
-            # In spec mode: extract the section content before advancing
-            if mode == "spec":
-                section = SPEC_SECTIONS[question_index]
-                emit("system_message", {"message": f"Extracting spec section: {section['name']}..."})
+            # In spec/bmad mode: extract the section content before advancing
+            if active_sections and question_index < len(active_sections):
+                section = active_sections[question_index]
+                emit("system_message", {"message": f"Extracting section: {section['name']}..."})
 
                 # Build the section discussion transcript
                 section_msgs = [h for h in history if h.get("turn", 0) > (turn - topic_turn_count)]
@@ -1221,12 +1810,70 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                 extracted = await run_claude_async(SPEC_EXTRACT_SYSTEM, extract_prompt, timeout=60, model=model)
 
                 if "[Error" not in extracted and "[Claude CLI" not in extracted:
+                    # Adversarial review pass (bmad mode default, optional for spec)
+                    if adversarial:
+                        emit("system_message", {"message": f"Running adversarial review of {section['name']}..."})
+                        locked_ref = ""
+                        if spec_document:
+                            locked_ref = "\n\nLocked decisions so far:\n"
+                            for n, c in spec_document.items():
+                                locked_ref += f"### {n}\n{c}\n"
+                        review = await run_claude_async(
+                            ADVERSARIAL_REVIEW_PROMPT,
+                            f"Section: {section['name']}\n\nContent:\n{extracted}{locked_ref}",
+                            timeout=60, model=model
+                        )
+                        if "[Error" not in review and "[Claude CLI" not in review and len(review.strip()) > 20:
+                            emit("adversarial_review", {"section": section['name'], "findings": review})
+                            # Inject findings back as a follow-up discussion
+                            followup_prompt = (
+                                f"The adversarial review found these problems with your {section['name']} section:\n\n"
+                                f"{review}\n\nAddress these concerns. Fix what's valid, push back on what's not."
+                            )
+                            history.append({
+                                "agent": "__system__",
+                                "name": "ADVERSARIAL REVIEW",
+                                "text": followup_prompt,
+                                "turn": turn,
+                            })
+                            # Run 2 more agent turns addressing the findings
+                            for extra_turn in range(2):
+                                extra_order = compute_speaking_order_with_urgency(agent_keys, team, urgency)
+                                for agent_key in extra_order:
+                                    agent = team.agents[agent_key]
+                                    display_name = display_names.get(agent_key, agent_key)
+                                    emit("agent_speaking", {"agent": agent_key, "display_name": display_name})
+                                    reminder = build_perspective_reminder(agent)
+                                    payload = f"{reminder}\n\n## THE QUESTION (stay focused): {question}\n\n"
+                                    recent = history[-5:]
+                                    payload += "=== Recent ===\n"
+                                    for msg in recent:
+                                        payload += f"[{msg['name']}]: {msg['text']}\n\n"
+                                    payload += "=== End ===\n\nAddress the adversarial review findings. 2-3 sentences."
+                                    resp = await run_claude_async(system_prompts[agent_key], payload, timeout=timeout, model=model)
+                                    if "[Error" not in resp and "[Claude CLI" not in resp:
+                                        history.append({"agent": agent_key, "name": display_name, "text": resp, "turn": turn})
+                                        emit("agent_spoke", {
+                                            "agent": agent_key, "display_name": display_name,
+                                            "response": resp, "elapsed": "0", "turn": turn,
+                                            "max_turns": max_turns, "messages_sent": 0,
+                                            "context_messages": 0, "spoke_position": 1, "spoke_of": 1,
+                                        })
+                                    await asyncio.sleep(1)
+
+                            # Re-extract with the additional discussion
+                            all_section_msgs = section_msgs + [h for h in history if h not in section_msgs and h.get("turn", 0) >= turn]
+                            full_text = "\n".join(f"[{m['name']}]: {m['text']}" for m in all_section_msgs)
+                            re_extract = await run_claude_async(SPEC_EXTRACT_SYSTEM, f"PRODUCT: {product_description}\n\nSECTION: {section['name']}\n\n{section['extract']}\n\nDISCUSSION:\n{full_text}", timeout=60, model=model)
+                            if "[Error" not in re_extract and "[Claude CLI" not in re_extract:
+                                extracted = re_extract
+
                     spec_document[section['name']] = extracted
                     emit("spec_section", {
                         "section": section['name'],
                         "content": extracted,
                         "section_index": question_index + 1,
-                        "total_sections": len(SPEC_SECTIONS),
+                        "total_sections": len(active_sections),
                     })
                     emit("system_message", {"message": f"LOCKED: {section['name']}"})
                 else:
@@ -1240,8 +1887,8 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
             question = questions[question_index]
             topic_turn_count = 0
 
-            # In spec mode: inject locked decisions into the next question
-            if mode == "spec" and spec_document:
+            # In structured mode: inject locked decisions into the next question
+            if active_sections and spec_document:
                 locked_context = "\n\n--- LOCKED DECISIONS (do not revisit) ---\n"
                 for name, content in spec_document.items():
                     locked_context += f"\n### {name}\n{content}\n"
@@ -1258,7 +1905,7 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                 synthesizer = LiveSynthesizer(question, synthesis_interval=5, model=model)
 
             # Show clean topic name in UI
-            section_name = SPEC_SECTIONS[question_index]['name'] if mode == "spec" else ""
+            section_name = active_sections[question_index]['name'] if active_sections and question_index < len(active_sections) else ""
             display_question = f"Section: {section_name}" if section_name else question[:120]
 
             emit("topic_change", {
@@ -1267,7 +1914,7 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                 "total_questions": len(questions),
             })
             emit("system_message", {
-                "message": f"--- {'Section' if mode == 'spec' else 'Topic'} {question_index + 1}/{len(questions)}: {display_question} ---"
+                "message": f"--- Section {question_index + 1}/{len(questions)}: {display_question} ---"
             })
             # Don't clear history -- prior context carries forward
             continue
@@ -1283,9 +1930,9 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                     emit("system_message", {"message": "Agents are converging. Ending discussion."})
                     break
 
-    # Extract last section if in spec mode and we haven't already
-    if mode == "spec" and question_index < len(SPEC_SECTIONS):
-        section = SPEC_SECTIONS[question_index]
+    # Extract last section if in structured mode and we haven't already
+    if active_sections and question_index < len(active_sections):
+        section = active_sections[question_index]
         if section['name'] not in spec_document:
             emit("system_message", {"message": f"Extracting final section: {section['name']}..."})
             section_msgs = [h for h in history if h.get("turn", 0) > (turn - topic_turn_count)]
@@ -1298,7 +1945,7 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                     "section": section['name'],
                     "content": extracted,
                     "section_index": question_index + 1,
-                    "total_sections": len(SPEC_SECTIONS),
+                    "total_sections": len(active_sections),
                 })
                 emit("system_message", {"message": f"LOCKED: {section['name']}"})
 
@@ -1308,9 +1955,16 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
     total_elapsed = time.time() - total_start
 
     # Save transcript
-    output_dir = Path(__file__).resolve().parent.parent.parent / "sessions" / "conversations"
-    if mode == "spec":
-        output_dir = Path(__file__).resolve().parent.parent.parent / "sessions" / "specs"
+    if output_dir_override:
+        output_dir = Path(output_dir_override)
+    else:
+        base_sessions = Path(__file__).resolve().parent.parent.parent / "sessions"
+        if mode == "bmad":
+            output_dir = base_sessions / "bmad"
+        elif mode == "spec":
+            output_dir = base_sessions / "specs"
+        else:
+            output_dir = base_sessions / "conversations"
     output_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y-%m-%d_%H%M")
     transcript_path = output_dir / f"{ts}_conversation.md"
@@ -1320,21 +1974,28 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
     transcript_path.write_text("\n".join(lines), encoding="utf-8")
     emit("system_message", {"message": f"Transcript saved: {transcript_path.name}"})
 
-    # In spec mode: assemble the full spec document
+    # In structured mode: assemble the full document
     final_summary = ""
-    if mode == "spec" and spec_document:
-        spec_lines = [f"# Product Spec: {product_description[:80]}\n"]
-        spec_lines.append(f"*Generated {ts} by {len(agent_keys)} agents over {len(history)} turns*\n")
-        for section in SPEC_SECTIONS:
+    if active_sections and spec_document:
+        if mode == "bmad":
+            workflow_name = get_bmad_workflow_name(workflow)
+            spec_lines = [f"# {workflow_name}: {product_description[:80]}\n"]
+            spec_lines.append(f"*Generated {ts} by {len(agent_keys)} agents over {len(history)} turns*\n")
+        else:
+            spec_lines = [f"# Product Spec: {product_description[:80]}\n"]
+            spec_lines.append(f"*Generated {ts} by {len(agent_keys)} agents over {len(history)} turns*\n")
+        for section in active_sections:
             if section['name'] in spec_document:
-                spec_lines.append(f"\n## {section['name']}\n")
+                output_header = section.get('output_section', f"## {section['name']}")
+                spec_lines.append(f"\n{output_header}\n")
                 spec_lines.append(spec_document[section['name']])
                 spec_lines.append("")
         final_summary = "\n".join(spec_lines)
-        spec_path = output_dir / f"{ts}_spec.md"
+        doc_suffix = f"_{workflow}" if mode == "bmad" else "_spec"
+        spec_path = output_dir / f"{ts}{doc_suffix}.md"
         spec_path.write_text(final_summary, encoding="utf-8")
         emit("synthesis_final", {"summary": final_summary})
-        emit("system_message", {"message": f"Product spec saved: {spec_path.name}"})
+        emit("system_message", {"message": f"Document saved: {spec_path.name}"})
     elif synthesizer:
         # Chat mode: run final synthesis
         emit("system_message", {"message": "Running final synthesis..."})
@@ -1344,9 +2005,24 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
         emit("synthesis_final", {"summary": final_summary})
         emit("system_message", {"message": f"Synthesis saved: {summary_path.name}"})
 
+    # Populate session context for post-session actions
+    global _session_context
+    _session_context = {
+        "product_description": product_description,
+        "spec_document": dict(spec_document),
+        "synthesis": final_summary,
+        "history": list(history),
+        "mode": mode,
+        "workflow": workflow if mode == "bmad" else None,
+        "model": model,
+        "output_dir": str(output_dir),
+        "timestamp": ts,
+    }
+
     emit("conversation_done", {
         "turns": len(history),
         "elapsed": f"{total_elapsed / 60:.1f}m",
+        "has_session": True,
     })
 
     return {
@@ -1363,13 +2039,16 @@ _conversation_result = None  # Store result for external use
 
 
 def run_conversation_thread(questions, agent_keys, max_turns, timeout, model=None,
-                            team_config=None, turns_per_topic=0, synthesize=True, mode="chat"):
+                            team_config=None, turns_per_topic=0, synthesize=True, mode="chat",
+                            workflow="product-brief", adversarial=False, context_path=None,
+                            output_dir_override=None):
     global _conversation_result
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     _conversation_result = loop.run_until_complete(
         run_conversation(questions, agent_keys, max_turns, timeout, model, team_config,
-                         turns_per_topic, synthesize, mode)
+                         turns_per_topic, synthesize, mode, workflow, adversarial,
+                         context_path, output_dir_override)
     )
 
 
@@ -1393,8 +2072,16 @@ def main():
                         help="Path to team YAML config (default: beta-agents.yaml)")
     parser.add_argument("--no-synthesis", action="store_true",
                         help="Disable rolling synthesis and final summary")
-    parser.add_argument("--mode", choices=["chat", "spec"], default="chat",
-                        help="Mode: 'chat' for open discussion, 'spec' for structured spec building")
+    parser.add_argument("--mode", choices=["chat", "spec", "bmad"], default="chat",
+                        help="Mode: 'chat' for open discussion, 'spec' for structured spec building, 'bmad' for BMAD workflows")
+    parser.add_argument("--workflow", default="product-brief",
+                        help="BMAD workflow: product-brief, brainstorming, prd, architecture, ux-design (default: product-brief)")
+    parser.add_argument("--adversarial", action="store_true", default=False,
+                        help="Enable adversarial review of each section before locking (default: on for bmad mode)")
+    parser.add_argument("--context", default=None,
+                        help="Path to a directory of .md files to load as project context for agents")
+    parser.add_argument("--output-dir", default=None,
+                        help="Directory to save output files (transcripts, specs) instead of default sessions/")
 
     args = parser.parse_args()
 
@@ -1411,8 +2098,11 @@ def main():
         else:
             questions = [args.question]
 
-        if args.mode == "spec" and args.turns == 10:
+        if args.mode in ("spec", "bmad") and args.turns == 10:
             args.turns = 35
+
+        # Adversarial defaults: on for bmad, off otherwise
+        use_adversarial = args.adversarial or args.mode == "bmad"
 
         team_config = args.team or str(TEAM_CONFIG)
         team = load_team(team_config)
@@ -1428,13 +2118,17 @@ def main():
         session_thread = threading.Thread(
             target=run_conversation_thread,
             args=(questions, agent_keys, args.turns, args.timeout, args.model, team_config,
-                  args.turns_per_topic, not args.no_synthesis, args.mode),
+                  args.turns_per_topic, not args.no_synthesis, args.mode, args.workflow, use_adversarial,
+                  args.context, args.output_dir),
             daemon=True,
         )
         session_thread.start()
 
         print(f"\n  Live conversation: http://localhost:{args.port}")
         print(f"  Mode: {args.mode.upper()}")
+        if args.mode == "bmad":
+            print(f"  Workflow: {args.workflow}")
+            print(f"  Adversarial review: {'on' if use_adversarial else 'off'}")
         print(f"  Agents: {', '.join(agent_keys)}")
         print(f"  Max turns: {args.turns}")
     else:
