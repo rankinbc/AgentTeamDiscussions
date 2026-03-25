@@ -18,6 +18,14 @@ Reading guide for the AgentTeamDiscussions design documentation.
 
 4. **[design_specs/conversation-engine/turn-anatomy.md](design_specs/conversation-engine/turn-anatomy.md)** -- Requirements spec for the Turn: context layers, turn types, output signals, perspective reminders, positional awareness, and deliberation budgets.
 
+5. **[design_specs/conversation-engine/key-takeaway-mechanism.md](design_specs/conversation-engine/key-takeaway-mechanism.md)** -- How the system recognizes, records, and acts on productive conclusions during a conversation. Covers the takeaway lifecycle (proposal, voting, confirmation/rejection), context compression, tombstone records, contestation scalars, challenge integration, and Morning Brief output. Derived from two live conversations (2026-03-25).
+
+6. **[design_specs/conversation-engine/orchestrator-event-cadence.md](design_specs/conversation-engine/orchestrator-event-cadence.md)** -- What the orchestrator does and when: per-turn pattern capture, periodic threshold checks, phase-boundary synthesis, and post-session Morning Brief export. Defines the composite stagnation/convergence signal, disruption injection via dropped-thread callbacks, and the complete cost profile (2 LLM calls total overhead per session). Derived from live conversation (2026-03-25).
+
+7. **[design_specs/conversation-engine/context-assembly-template.md](design_specs/conversation-engine/context-assembly-template.md)** -- The exact prompt template for every agent turn. Defines assembly order (7 sections), 4,000-token ceiling, cut priority tiers, structured response footer, and how phase briefings replace history. Integrates takeaway block, orchestrator events, and conversation history into a single payload spec with explicit conflict resolution.
+
+8. **[design_specs/conversation-engine/morning-brief-format.md](design_specs/conversation-engine/morning-brief-format.md)** -- The user-facing output artifact. Four sections: RED (max 2 blocked decisions with positions and contestation scores), YELLOW (max 3 unresolved threads), GREEN (all confirmed takeaways), System Alerts (failure flags). Under 300 words, 90-second read, zero LLM calls to generate.
+
 ---
 
 ## How Agents Think Differently
@@ -65,6 +73,10 @@ docs/
             design-decisions.md
             turn-anatomy.md
             agent-behavior-mechanisms.md
+            key-takeaway-mechanism.md
+            orchestrator-event-cadence.md
+            context-assembly-template.md
+            morning-brief-format.md
             moderator-input.md
             rebuttal-priority.md
     beta-agent-output/                    # Test run artifacts

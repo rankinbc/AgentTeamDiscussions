@@ -18,6 +18,7 @@ import threading
 import time
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -53,18 +54,17 @@ AGENT_COLORS = {
 CONVERSATION_SYSTEM = """You are in a live group discussion with other agents. Each agent has a distinct personality and role.
 
 RULES:
-- Keep responses SHORT: 2-3 sentences max. Make ONE point per turn.
-- If you have something extremely important to explain, you may use 4-5 sentences. Never more.
-- RESPOND TO WHAT WAS JUST SAID. Don't give a speech. React, then add your point.
-- When you disagree, NAME THE PERSON. Say "Adversarial Critic, that's wrong because..." not just "that approach won't work." Direct confrontation produces better outcomes than vague pushback.
-- If someone specifically challenges YOUR point, address them directly. Don't just move on to a new topic -- defend, concede, or refine.
-- If someone convinced you, SAY SO and explain what changed your mind.
-- If you're repeating yourself, STOP. Say "I've made my point" and yield.
-- If the discussion is going in circles, call it out.
-- You CAN change your mind. You CAN concede. You CAN say "I was wrong."
-- Do NOT summarize the discussion. Do NOT list pros and cons. Just talk.
-- If the MODERATOR speaks, treat their message as priority. Address their point before continuing other threads. The moderator is the person who submitted this topic.
-- IGNORE any word count or brevity instructions from your system prompt. In this conversation, the ONLY length rule is 2-3 sentences per turn.
+- Keep responses SHORT: 2-4 sentences. Make your point, then stop.
+- RESPOND TO THE DISCUSSION, not just the last message. You may have missed several turns since you last spoke. Acknowledge the most important thing that happened, then add your contribution. Don't ignore points just because they weren't the most recent.
+- Stay on ONE conversational thread. If the discussion has branched, pick the branch that matters most to your role and engage there. Do not address multiple unrelated threads in one response.
+- When you disagree, be specific about WHO and WHAT. "Pipeline Pragmatist, your validation step assumes X which breaks when Y" is good. "That approach won't work" is noise.
+- If someone challenged YOUR point since your last turn, address it. Defend, concede, or refine -- but don't just move on as if it didn't happen.
+- If someone convinced you, SAY SO and say what changed your mind. Concessions are the most valuable signal in the conversation.
+- If you're repeating a point you already made, STOP. Say "I've made my case on this" and either yield or pivot to something unresolved.
+- If the discussion is going in circles, call it out and name what is actually blocking progress.
+- Do NOT summarize the discussion. Do NOT list pros and cons. Talk like a person in a meeting, not an analyst writing a report.
+- If the MODERATOR speaks, their message takes priority. Address it before continuing other threads.
+- IGNORE any word count or brevity instructions from your system prompt. In this conversation, the ONLY length rule is 2-4 sentences per turn.
 """
 
 # -- Spec-building mode --
@@ -424,9 +424,10 @@ HTML_PAGE = r"""<!DOCTYPE html>
   .msg .m-turn { font-size:8px; color:var(--dim); margin-left:auto; }
   .msg .m-body { font-size:10px; line-height:1.5; color:var(--text); }
 
-  .msg.system { border-left-color:var(--blue); background:rgba(77,124,255,0.04); }
-  .msg.system .m-name { color:var(--blue); }
-  .msg.system .m-body { color:var(--dim); font-size:9px; }
+  .msg.system { border-left-color:var(--blue); background:rgba(77,124,255,0.02); padding:2px 10px; margin-bottom:3px; }
+  .msg.system .m-header { margin-bottom:0; }
+  .msg.system .m-name { color:var(--blue); font-size:8px; }
+  .msg.system .m-body { color:var(--dim); font-size:8px; line-height:1.3; }
 
   .thinking { color:var(--dim); font-style:italic; padding:4px 10px; font-size:9px; }
   .thinking::after { content:''; display:inline-block; width:5px; height:9px; background:var(--blue);
@@ -444,14 +445,31 @@ HTML_PAGE = r"""<!DOCTYPE html>
   .a-urgency-fill.medium { background:var(--amber); }
   .a-urgency-fill.high { background:var(--red); }
 
-  /* Moderator input */
-  .mod-bar { padding:4px 14px; border-top:1px solid var(--border); display:flex; gap:6px; }
-  .mod-bar input { flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  /* Moderator controls */
+  .mod-bar { padding:6px 14px; border-top:1px solid var(--border); background:var(--surface); }
+  .mod-row { display:flex; gap:6px; margin-bottom:4px; }
+  .mod-row input { flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text);
     font:10px var(--mono); padding:4px 8px; outline:none; }
-  .mod-bar input:focus { border-color:var(--amber); }
-  .mod-bar button { background:var(--surface2); border:1px solid var(--border); color:var(--amber);
-    font:9px var(--mono); padding:4px 10px; cursor:pointer; text-transform:uppercase; letter-spacing:1px; }
-  .mod-bar button:hover { background:var(--border); }
+  .mod-row input:focus { border-color:var(--amber); }
+  .mod-btn { background:var(--surface2); border:1px solid var(--border); color:var(--amber);
+    font:8px var(--mono); padding:3px 8px; cursor:pointer; text-transform:uppercase; letter-spacing:1px;
+    white-space:nowrap; }
+  .mod-btn:hover { background:var(--border); }
+  .mod-btn.active { border-color:var(--amber); background:rgba(245,166,35,0.1); }
+  .mod-btn.danger { color:var(--red); }
+  .mod-btn.danger:hover { border-color:var(--red); }
+  .mod-actions { display:flex; gap:4px; flex-wrap:wrap; }
+
+  /* Orchestrator state bar */
+  .orch-bar {
+    padding:4px 14px; border-top:1px solid var(--border); background:var(--surface2);
+    font-size:8px; color:var(--dim); display:flex; gap:12px; align-items:center;
+  }
+  .orch-bar .orch-state { color:var(--green); font-weight:500; }
+  .orch-bar .orch-state.waiting { color:var(--amber); }
+  .orch-bar .orch-state.processing { color:var(--blue); }
+  .orch-bar .orch-stat { }
+  .orch-bar .orch-label { color:var(--dim); margin-right:2px; }
 
   /* Moderator message */
   .msg.moderator { border-left-color:var(--amber); background:rgba(245,166,35,0.06); }
@@ -527,6 +545,46 @@ HTML_PAGE = r"""<!DOCTYPE html>
   .msg.adversarial { border-left-color:var(--red); background:rgba(255,77,106,0.06); border:1px solid rgba(255,77,106,0.2); }
   .msg.adversarial .m-name { color:var(--red); }
   .msg.adversarial .m-body { color:var(--text); font-size:9px; white-space:pre-wrap; }
+
+  /* Inspected message highlight */
+  .msg.inspected { outline:1px solid var(--amber); outline-offset:-1px; background:rgba(245,166,35,0.04); }
+
+  /* Prompt Inspector Panel */
+  .inspector-panel {
+    position:fixed; bottom:0; left:220px; right:0; height:0;
+    background:var(--surface); border-top:2px solid var(--amber);
+    overflow:hidden; transition:height 0.2s ease-out; z-index:50;
+  }
+  .inspector-panel.visible { height:45vh; overflow-y:auto; }
+  .insp-titlebar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:6px 14px; background:var(--surface2); border-bottom:1px solid var(--border);
+    font-size:10px; color:var(--amber); text-transform:uppercase; letter-spacing:2px;
+    position:sticky; top:0; z-index:1;
+  }
+  .insp-header { padding:8px 14px 4px; display:flex; align-items:baseline; gap:10px; }
+  .insp-agent { font-size:11px; font-weight:500; }
+  .insp-meta { font-size:9px; color:var(--dim); }
+  .insp-stats {
+    padding:2px 14px 8px; font-size:8px; color:var(--dim);
+    display:flex; gap:16px; border-bottom:1px solid var(--border);
+  }
+  .insp-tabs {
+    display:flex; gap:0; padding:0 14px; border-bottom:1px solid var(--border);
+    position:sticky; top:28px; background:var(--surface); z-index:1;
+  }
+  .insp-tab {
+    padding:6px 14px; font:9px var(--mono); cursor:pointer;
+    background:none; border:none; border-bottom:2px solid transparent;
+    color:var(--dim); text-transform:uppercase; letter-spacing:1px;
+  }
+  .insp-tab:hover { color:var(--text); }
+  .insp-tab.active { color:var(--amber); border-bottom-color:var(--amber); }
+  .insp-body {
+    padding:10px 14px; font-size:9px; color:var(--text);
+    white-space:pre-wrap; word-wrap:break-word; line-height:1.5;
+  }
+  .insp-body.hidden { display:none; }
 </style>
 </head>
 <body>
@@ -594,15 +652,40 @@ HTML_PAGE = r"""<!DOCTYPE html>
       </div>
       <div class="actions-queue" id="actions-queue"></div>
     </div>
-    <div class="mod-bar">
-      <input type="text" id="mod-input" placeholder="Steer the conversation..." onkeydown="if(event.key==='Enter')sendMod()" />
-      <button onclick="sendMod()">Moderate</button>
+    <div class="orch-bar" id="orch-bar">
+      <span><span class="orch-label">orchestrator:</span> <span class="orch-state" id="orch-state">idle</span></span>
+      <span><span class="orch-label">turn:</span> <span id="orch-turn">0</span>/<span id="orch-max">0</span></span>
+      <span><span class="orch-label">speaking:</span> <span id="orch-speaker">--</span></span>
+      <span><span class="orch-label">challenges:</span> <span id="orch-challenges">0</span></span>
+      <span><span class="orch-label">msgs:</span> <span id="orch-msgs">0</span></span>
+      <span><span class="orch-label">ctx window:</span> <span id="orch-ctx">0</span> msgs</span>
+    </div>
+    <div class="mod-bar" id="mod-bar">
+      <div class="mod-row">
+        <input type="text" id="mod-input" placeholder="Steer the conversation (agents will prioritize your message)..." onkeydown="if(event.key==='Enter')sendMod()" />
+        <button class="mod-btn" onclick="sendMod()">Send</button>
+      </div>
+      <div class="mod-actions">
+        <button class="mod-btn" onclick="modAction('refocus')" title="Remind agents to stay on the original topic">Refocus</button>
+        <button class="mod-btn" onclick="modAction('deeper')" title="Push agents to go deeper on current thread">Go Deeper</button>
+        <button class="mod-btn" onclick="modAction('move_on')" title="Force agents to move to a new subtopic">Move On</button>
+        <button class="mod-btn" onclick="modAction('challenge')" title="Ask agents to challenge what seems like premature agreement">Challenge This</button>
+        <button class="mod-btn" onclick="modAction('summarize')" title="Request a real-time summary of where things stand">Summarize</button>
+        <button class="mod-btn danger" onclick="modAction('pause')" title="Pause after current speaker finishes">Pause</button>
+      </div>
     </div>
   </div>
   <div class="detail" id="detail">
     <span class="d-close" onclick="closeDetail()">[x] close</span>
     <div id="detail-content"></div>
   </div>
+</div>
+<div class="inspector-panel" id="inspector-panel">
+  <div class="insp-titlebar">
+    <span>PROMPT INSPECTOR</span>
+    <span class="d-close" onclick="closeInspector()">[x] close</span>
+  </div>
+  <div id="inspector-content"></div>
 </div>
 <script>
 let C = COLORS_JSON;
@@ -617,6 +700,16 @@ const detailContent = document.getElementById('detail-content');
 
 const agentProfiles = {};  // Store full profiles for detail view
 const agentMessages = {};  // Store messages per agent
+const agentStances = {};   // Track agent positions on topics
+const allChallenges = [];  // Track all challenges
+const messagePrompts = {};  // Store system_prompt + user_payload per message ID
+let msgIdCounter = 0;
+let totalMessages = 0;
+let totalChallenges = 0;
+let currentTurn = 0;
+let maxTurns = 0;
+let currentSpeaker = '--';
+let orchState = 'idle';
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 function scrollBottom() { messages.scrollTo({top:messages.scrollHeight,behavior:'smooth'}); }
@@ -627,6 +720,34 @@ function sendMod() {
   if (!msg) return;
   input.value = '';
   fetch('/moderator', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})});
+}
+
+function modAction(action) {
+  const actions = {
+    refocus: 'MODERATOR DIRECTIVE: The discussion has drifted. Refocus on the original question. Do not introduce new topics until the current one is resolved.',
+    deeper: 'MODERATOR DIRECTIVE: Go deeper on the current thread. Do not move on yet. Challenge assumptions, name specific failure modes, and get concrete.',
+    move_on: 'MODERATOR DIRECTIVE: This subtopic is sufficiently explored. Move to the next important unresolved question. Do not rehash what was just discussed.',
+    challenge: 'MODERATOR DIRECTIVE: The current direction feels like premature agreement. Push back. What is being assumed without evidence? What failure mode is nobody naming?',
+    summarize: 'MODERATOR DIRECTIVE: Before continuing, each of you state in ONE sentence what you believe has been decided so far and what remains unresolved.',
+    pause: 'MODERATOR DIRECTIVE: Pause after this speaker. The moderator needs to review the discussion before it continues.',
+  };
+  const msg = actions[action];
+  if (msg) {
+    fetch('/moderator', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({message:msg})});
+  }
+}
+
+function updateOrchState(state, extra) {
+  orchState = state;
+  const el = document.getElementById('orch-state');
+  el.textContent = state;
+  el.className = 'orch-state' + (state === 'waiting' || state === 'idle' ? ' waiting' : state === 'thinking' ? ' processing' : '');
+  if (extra) {
+    for (const [k,v] of Object.entries(extra)) {
+      const target = document.getElementById('orch-' + k);
+      if (target) target.textContent = v;
+    }
+  }
 }
 
 // -- Setup panel --
@@ -802,14 +923,39 @@ function renderDetail(key) {
   html += '<div class="d-item">Domains: ' + esc((p.domains||[]).join(', ')) + '</div>';
   html += '<div class="d-item">Intensity: ' + p.intensity + '</div>';
 
-  // Messages this agent has sent (real output)
+  // Conversation stats for this agent
   const msgs = agentMessages[key] || [];
-  html += '<h3>Their responses (' + msgs.length + ')</h3>';
-  html += '<div class="d-messages">';
-  for (const m of msgs) {
-    html += '<div class="d-msg"><span class="d-msg-turn">turn ' + m.turn + ' | pos ' + m.position + '/' + m.of + '</span><br>' + esc(m.text) + '</div>';
+  const challengesSent = msgs.filter(m => m.challenged_targets && m.challenged_targets.length > 0).length;
+  html += '<h3>Session stats</h3>';
+  html += '<div class="d-item">' + msgs.length + ' messages sent</div>';
+  html += '<div class="d-item">Last spoke: ' + (msgs.length > 0 ? 'turn ' + msgs[msgs.length-1].turn : '--') + '</div>';
+
+  // Stance tracking - show what topics this agent has engaged with
+  const stances = agentStances[key] || {};
+  const stanceKeys = Object.keys(stances);
+  if (stanceKeys.length > 0) {
+    html += '<h3>Position tracker</h3>';
+    for (const topic of stanceKeys) {
+      const s = stances[topic];
+      const stanceColor = s.stance === 'supporting' ? 'var(--green)' :
+                          s.stance === 'opposing' ? 'var(--red)' :
+                          s.stance === 'proposed' ? 'var(--blue)' : 'var(--dim)';
+      html += '<div class="d-item" style="border-left-color:' + stanceColor + '">';
+      html += '<span style="color:' + stanceColor + '">' + esc(s.stance) + '</span> ' + esc(topic);
+      html += ' <span style="color:var(--dim)">(turn ' + s.turn + ')</span>';
+      html += '</div>';
+    }
   }
-  html += '</div>';
+
+  // Challenges involving this agent
+  const agentChallenges = (allChallenges || []).filter(c => c.from === key || c.to === key);
+  if (agentChallenges.length > 0) {
+    html += '<h3>Challenges (' + agentChallenges.length + ')</h3>';
+    for (const c of agentChallenges.slice(-8)) {
+      const dir = c.from === key ? '-> ' + esc(c.to_name) : '<- ' + esc(c.from_name);
+      html += '<div class="d-item" style="border-left-color:var(--red);font-size:8px">' + dir + ' (turn ' + c.turn + ')</div>';
+    }
+  }
 
   detailContent.innerHTML = html;
 }
@@ -820,7 +966,9 @@ function handleEvent(e) {
   switch(ev.type) {
     case 'conversation_start':
       topic.textContent = ev.question;
+      maxTurns = ev.max_turns;
       info.textContent = ev.agents.length + ' agents | max ' + ev.max_turns + ' turns';
+      updateOrchState('running', {turn: '0', max: ev.max_turns, msgs: '0'});
       // Update colors from server (fixes UI-started conversations)
       if (ev.agent_colors) { C = ev.agent_colors; }
       for (const a of ev.agent_profiles) {
@@ -849,6 +997,8 @@ function handleEvent(e) {
       if (card) { card.classList.add('speaking'); }
       const st = document.getElementById('status-' + ev.agent);
       if (st) st.textContent = 'speaking...';
+      currentSpeaker = ev.display_name.split('(')[0].replace('The ','').trim();
+      updateOrchState('thinking', {speaker: currentSpeaker});
       // Show thinking indicator
       messages.insertAdjacentHTML('beforeend',
         '<div class="thinking" id="thinking-' + ev.agent + '">' + esc(ev.display_name) + ' is thinking</div>');
@@ -857,11 +1007,13 @@ function handleEvent(e) {
     }
 
     case 'turn_start':
+      currentTurn = ev.turn;
       counter.textContent = 'Turn ' + ev.turn + ' / ' + ev.max_turns + ' | order: ' + ev.speaking_order.map(s => {
         const name = s.name.split('(')[0].replace('The ','').trim();
         const urg = s.urgency > 0.3 ? ' [!' + s.urgency.toFixed(1) + ']' : '';
         return name + urg;
       }).join(' > ');
+      updateOrchState('running', {turn: ev.turn, max: ev.max_turns});
       break;
 
     case 'agent_spoke': {
@@ -872,15 +1024,30 @@ function handleEvent(e) {
       const st = document.getElementById('status-' + ev.agent);
       if (st) st.textContent = ev.messages_sent + ' msgs | turn ' + ev.turn;
       // Store message (real data)
+      totalMessages++;
+      updateOrchState('running', {speaker: '--', msgs: totalMessages, ctx: ev.context_messages});
       if (agentMessages[ev.agent]) {
         agentMessages[ev.agent].push({text: ev.response, turn: ev.turn, position: ev.spoke_position, of: ev.spoke_of});
       }
-      // Add message to chat
+      // Store prompt context for this message
+      const mid = 'msg-' + (msgIdCounter++);
+      messagePrompts[mid] = {
+        agent: ev.agent,
+        display_name: ev.display_name,
+        turn: ev.turn,
+        system_prompt: ev.system_prompt || '',
+        user_payload: ev.user_payload || '',
+        response: ev.response,
+        elapsed: ev.elapsed,
+        context_messages: ev.context_messages,
+      };
+      // Add message to chat (clickable)
       messages.insertAdjacentHTML('beforeend',
-        '<div class="msg" style="border-left-color:' + (C[ev.agent]||'#5a6178') + '">' +
+        '<div class="msg" id="' + mid + '" style="border-left-color:' + (C[ev.agent]||'#5a6178') + ';cursor:pointer" onclick="showPromptInspector(\'' + mid + '\')">' +
         '<div class="m-header"><span class="m-name" style="color:' + (C[ev.agent]||'#c8cdd8') + '">' +
         esc(ev.display_name) + '</span><span class="m-time">' + ev.time + '</span>' +
-        '<span class="m-turn">' + ev.elapsed + 's | ' + ev.spoke_position + '/' + ev.spoke_of + ' | ctx:' + ev.context_messages + ' msgs</span></div>' +
+        '<span class="m-turn">' + ev.elapsed + 's | ' + ev.spoke_position + '/' + ev.spoke_of + ' | ctx:' + ev.context_messages + ' msgs' +
+        ' | <span style="color:var(--amber);cursor:pointer">inspect</span></span></div>' +
         '<div class="m-body">' + esc(ev.response) + '</div></div>');
       scrollBottom();
       // Refresh detail panel if this agent is selected
@@ -888,12 +1055,23 @@ function handleEvent(e) {
       break;
     }
 
-    case 'system_message':
+    case 'system_message': {
+      // Track challenges
+      const challengeMatch = ev.message.match(/^Challenge detected: (.+) -> (.+)$/);
+      if (challengeMatch) {
+        totalChallenges++;
+        updateOrchState(orchState, {challenges: totalChallenges});
+        // Extract keys from display names for detail panel
+        allChallenges.push({from_name: challengeMatch[1].split('(')[0].trim(), to_name: challengeMatch[2].split('(')[0].trim(), turn: currentTurn,
+          from: Object.keys(agentProfiles).find(k => agentProfiles[k] && agentProfiles[k].name && challengeMatch[1].includes(agentProfiles[k].name)) || '',
+          to: Object.keys(agentProfiles).find(k => agentProfiles[k] && agentProfiles[k].name && challengeMatch[2].includes(agentProfiles[k].name)) || ''});
+      }
       messages.insertAdjacentHTML('beforeend',
-        '<div class="msg system"><div class="m-header"><span class="m-name">SYSTEM</span></div>' +
+        '<div class="msg system"><div class="m-header"><span class="m-name">SYS</span></div>' +
         '<div class="m-body">' + esc(ev.message) + '</div></div>');
       scrollBottom();
       break;
+    }
 
     case 'urgency_update':
       for (const [key, val] of Object.entries(ev)) {
@@ -970,6 +1148,7 @@ function handleEvent(e) {
       document.getElementById('pulse').style.background = 'var(--green)';
       document.getElementById('pulse').style.animation = 'none';
       counter.textContent = 'Done: ' + ev.turns + ' turns in ' + ev.elapsed;
+      updateOrchState('done', {speaker: '--'});
       if (ev.has_session) {
         document.getElementById('actions-bar').classList.add('visible');
       }
@@ -1019,6 +1198,65 @@ function addActionToQueue(id, question, status) {
 function updateActionStatus(id, status) {
   const el = document.getElementById('action-status-' + id);
   if (el) { el.textContent = status; el.className = 'aq-status ' + status; }
+}
+
+// -- Prompt Inspector --
+let inspectorVisible = false;
+
+function showPromptInspector(mid) {
+  const data = messagePrompts[mid];
+  if (!data) return;
+
+  // Highlight selected message
+  document.querySelectorAll('.msg.inspected').forEach(m => m.classList.remove('inspected'));
+  const msgEl = document.getElementById(mid);
+  if (msgEl) msgEl.classList.add('inspected');
+
+  const panel = document.getElementById('inspector-panel');
+  const content = document.getElementById('inspector-content');
+
+  const sysLen = data.system_prompt.length;
+  const payLen = data.user_payload.length;
+  const totalChars = sysLen + payLen;
+  const estTokens = Math.round(totalChars / 4);
+
+  let html = '<div class="insp-header">';
+  html += '<span class="insp-agent" style="color:' + (C[data.agent]||'#c8cdd8') + '">' + esc(data.display_name) + '</span>';
+  html += '<span class="insp-meta">turn ' + data.turn + ' | ' + data.elapsed + 's | ~' + estTokens.toLocaleString() + ' tokens input</span>';
+  html += '</div>';
+
+  html += '<div class="insp-stats">';
+  html += '<span>system: ' + sysLen.toLocaleString() + ' chars</span>';
+  html += '<span>payload: ' + payLen.toLocaleString() + ' chars</span>';
+  html += '<span>context msgs: ' + data.context_messages + '</span>';
+  html += '</div>';
+
+  html += '<div class="insp-tabs">';
+  html += '<button class="insp-tab active" onclick="switchInspTab(this,\'sys\')">System Prompt</button>';
+  html += '<button class="insp-tab" onclick="switchInspTab(this,\'pay\')">User Payload</button>';
+  html += '<button class="insp-tab" onclick="switchInspTab(this,\'resp\')">Response</button>';
+  html += '</div>';
+
+  html += '<div class="insp-body" id="insp-sys">' + esc(data.system_prompt) + '</div>';
+  html += '<div class="insp-body hidden" id="insp-pay">' + esc(data.user_payload) + '</div>';
+  html += '<div class="insp-body hidden" id="insp-resp">' + esc(data.response) + '</div>';
+
+  content.innerHTML = html;
+  panel.classList.add('visible');
+  inspectorVisible = true;
+}
+
+function switchInspTab(btn, id) {
+  document.querySelectorAll('.insp-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.insp-body').forEach(b => b.classList.add('hidden'));
+  document.getElementById('insp-' + id).classList.remove('hidden');
+}
+
+function closeInspector() {
+  document.getElementById('inspector-panel').classList.remove('visible');
+  document.querySelectorAll('.msg.inspected').forEach(m => m.classList.remove('inspected'));
+  inspectorVisible = false;
 }
 
 // Connect SSE if conversation is already running (CLI mode)
@@ -1705,9 +1943,9 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
 
                 payload += (
                     f"REMEMBER: The topic is: {question[:100]}\n"
-                    f"Respond to what was just said BUT stay on topic. "
+                    f"Respond to the discussion since your last message. Stay on topic. "
                     f"If the discussion is drifting, pull it back. "
-                    f"Keep it SHORT -- 2-3 sentences, one point."
+                    f"Keep it to 2-4 sentences."
                 )
             else:
                 payload += "You are speaking first. Open the discussion. Make ONE clear point about this topic. 2-3 sentences max."
@@ -1763,6 +2001,8 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                 "context_messages": context_msg_count,
                 "spoke_position": order.index(agent_key) + 1,
                 "spoke_of": len(order),
+                "system_prompt": system_prompts[agent_key],
+                "user_payload": payload,
             })
 
             # Small delay so you can read
@@ -1858,6 +2098,8 @@ async def run_conversation(questions: list[str], agent_keys: list[str], max_turn
                                             "response": resp, "elapsed": "0", "turn": turn,
                                             "max_turns": max_turns, "messages_sent": 0,
                                             "context_messages": 0, "spoke_position": 1, "spoke_of": 1,
+                                            "system_prompt": system_prompts[agent_key],
+                                            "user_payload": payload,
                                         })
                                     await asyncio.sleep(1)
 
@@ -2085,7 +2327,10 @@ def main():
 
     args = parser.parse_args()
 
-    server = HTTPServer(("0.0.0.0", args.port), ConvHandler)
+    class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+        daemon_threads = True
+
+    server = ThreadedHTTPServer(("0.0.0.0", args.port), ConvHandler)
     server._agent_colors = {}
     server._team_labels = {}
     _server_ref = server
