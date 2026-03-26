@@ -35,9 +35,11 @@ Thumbs.db
 _bmad/
 _bmad-output/
 
-# Session output (large, generated)
+# Session output (large, generated) — but track engine session data
 sessions/
 output/
+!_SYSTEM/projects/engine/output/
+!_SYSTEM/projects/engine/output/sessions/
 
 # .NET build artifacts
 bin/

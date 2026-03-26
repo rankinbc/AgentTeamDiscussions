@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "created": "2026-03-26T16:18:56.4815875Z",
+  "title": "10-question session",
+  "decided": [],
+  "questions": [
+    {
+      "number": 1,
+      "title": "What is the critical path for V2?",
+      "body": "**What is the critical path for V2?** Of the major features (BIT system, blind proposals, key takeaways, phase system, stale detection, anti-sycophancy), which ones are foundational and must be built first because others depend on them? Draw the dependency graph."
+    },
+    {
+      "number": 2,
+      "title": "Should V2 be built as incremental upgrades to V1 or as a parallel rewrite?",
+      "body": "**Should V2 be built as incremental upgrades to V1 or as a parallel rewrite?** The V1 engine works. Some V2 features (blind proposals, phase gates) require restructuring the round loop. Others (BIT system, key takeaways) could layer on top. What is the migration strategy that minimizes risk while enabling the structural changes?"
+    },
+    {
+      "number": 3,
+      "title": "The context window is the hardest constraint. How should V2 allocate it?",
+      "body": "**The context window is the hardest constraint. How should V2 allocate it?** Agent identity takes tokens. Private inventory takes tokens. Conversation history takes tokens. Takeaway state takes tokens. Prior design docs take tokens. We cannot have all of them at full fidelity. Propose a concrete token budget with percentages and hard caps per category."
+    },
+    {
+      "number": 4,
+      "title": "What V2 features should be behind feature flags vs always-on?",
+      "body": "**What V2 features should be behind feature flags vs always-on?** Some mechanisms (ego simulation, anti-coordination scoring, graduated resistance) are experimental and could hurt discussion quality if miscalibrated. Others (blind proposals, structured takeaways) are well-understood improvements. Which features need a kill switch and which should just ship?"
+    },
+    {
+      "number": 5,
+      "title": "How should we validate that V2 mechanisms actually work?",
+      "body": "**How should we validate that V2 mechanisms actually work?** The research doc warns about illusory diversity \uFFFD linguistically different but substantively identical outputs. How do we measure whether BITs produce genuinely different reasoning vs cosmetic variation? What evaluation framework catches real improvements vs theater?"
+    },
+    {
+      "number": 6,
+      "title": "What is the right testing strategy for a system where correctness is subjective?",
+      "body": "**What is the right testing strategy for a system where correctness is subjective?** Unit tests can verify config loading and prompt assembly, but how do you test whether a discussion produced genuine intellectual friction? Should we use LLM-as-judge evaluation? Human blind comparison? Automated diversity metrics on output embeddings?"
+    },
+    {
+      "number": 7,
+      "title": "The Claude CLI subprocess model vs SDK migration.",
+      "body": "**The Claude CLI subprocess model vs SDK migration.** V1 shells out to claude CLI for every agent turn. This means no streaming, no token control, no proper cancellation. SDK migration would give us all of that but is a significant rewrite of ClaudeRunner. When in the V2 timeline should this happen? Is it a prerequisite for other features or can it happen in parallel?"
+    },
+    {
+      "number": 8,
+      "title": "How do we handle the personality system transition?",
+      "body": "**How do we handle the personality system transition?** V1 has 7 carefully crafted agents with 6-layer identity stacks. V2 might replace parts of that with BITs and motivation-first design. How do we transition without losing the good parts? Should we A/B test old vs new agent definitions? What is the rollback plan if BITs produce worse output?"
+    },
+    {
+      "number": 9,
+      "title": "Concurrency and scaling: what does reliable overnight operation look like?",
+      "body": "**Concurrency and scaling: what does reliable overnight operation look like?** V1 has no rate limiting on Claude CLI calls and no concurrency control. For V2 to run reliably overnight on large briefs (10\u002B questions, multiple phases), what infrastructure is needed? Semaphores, retry with backoff, health monitoring, graceful degradation on API errors?"
+    },
+    {
+      "number": 10,
+      "title": "What is the minimum viable V2?",
+      "body": "**What is the minimum viable V2?** If we could only ship 3 features from the full V2 wishlist, which 3 would have the biggest impact on discussion quality? What is the smallest coherent set of changes that would make overnight runs noticeably better than V1?"
+    }
+  ],
+  "team": "beta-agents",
+  "agents": [
+    "cognitive_architect",
+    "systems_pragmatist",
+    "adversarial_critic",
+    "context_surgeon",
+    "product_oracle",
+    "flow_orchestrator"
+  ],
+  "mode": "compete",
+  "timeout": 120,
+  "source": "api",
+  "question_hash": "858263eb639e79d3",
+  "state": {
+    "status": "complete",
+    "session_complete": true,
+    "total_elapsed_seconds": 2092,
+    "completed_questions": 10,
+    "failed_questions": 0,
+    "questions": {
+      "q1": {
+        "status": "complete",
+        "title": "What is the critical path for V2?",
+        "elapsed_seconds": 208,
+        "file": "01-what-is-the-critical-path-for-v2.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q2": {
+        "status": "complete",
+        "title": "Should V2 be built as incremental upgrades to V1 or as a parallel rewrite?",
+        "elapsed_seconds": 192,
+        "file": "02-should-v2-be-built-as-incremental-upgrades-to-v1-or-as-a-par.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q3": {
+        "status": "complete",
+        "title": "The context window is the hardest constraint. How should V2 allocate it?",
+        "elapsed_seconds": 224,
+        "file": "03-the-context-window-is-the-hardest-constraint-how-should-v2-a.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q4": {
+        "status": "complete",
+        "title": "What V2 features should be behind feature flags vs always-on?",
+        "elapsed_seconds": 209,
+        "file": "04-what-v2-features-should-be-behind-feature-flags-vs-always-on.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q5": {
+        "status": "complete",
+        "title": "How should we validate that V2 mechanisms actually work?",
+        "elapsed_seconds": 200,
+        "file": "05-how-should-we-validate-that-v2-mechanisms-actually-work.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q6": {
+        "status": "complete",
+        "title": "What is the right testing strategy for a system where correctness is subjective?",
+        "elapsed_seconds": 199,
+        "file": "06-what-is-the-right-testing-strategy-for-a-system-where-correc.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q7": {
+        "status": "complete",
+        "title": "The Claude CLI subprocess model vs SDK migration.",
+        "elapsed_seconds": 214,
+        "file": "07-the-claude-cli-subprocess-model-vs-sdk-migration.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q8": {
+        "status": "complete",
+        "title": "How do we handle the personality system transition?",
+        "elapsed_seconds": 203,
+        "file": "08-how-do-we-handle-the-personality-system-transition.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q9": {
+        "status": "complete",
+        "title": "Concurrency and scaling: what does reliable overnight operation look like?",
+        "elapsed_seconds": 195,
+        "file": "09-concurrency-and-scaling-what-does-reliable-overnight-operati.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q10": {
+        "status": "complete",
+        "title": "What is the minimum viable V2?",
+        "elapsed_seconds": 213,
+        "file": "10-what-is-the-minimum-viable-v2.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      }
+    }
+  },
+  "resolved_team_path": "C:\\Users\\Brian.Rankin\\claude-workspace\\projects\\AgentTeamDiscussions\\_SYSTEM\\projects\\engine\\data\\teams\\beta-agents.yaml"
+}

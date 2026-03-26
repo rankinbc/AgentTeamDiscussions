@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "created": "2026-03-26T15:39:22.6849848Z",
+  "title": "10-question session",
+  "decided": [],
+  "questions": [
+    {
+      "number": 1,
+      "title": "The BIT System (Beliefs, Instincts, Traits) vs the current 6-layer agent model.",
+      "body": "**The BIT System (Beliefs, Instincts, Traits) vs the current 6-layer agent model.** The research says motivation-driven agents (what they WANT) produce better differentiation than personality-driven agents (what they ARE LIKE). Should V2 replace Position.Drives and Technique.Behaviors with structured BITs (conviction \u002B because \u002B triggers_when), or layer BITs on top of the existing system? What is the minimum viable identity that preserves genuine differentiation?"
+    },
+    {
+      "number": 2,
+      "title": "Token budget allocation: agent state vs conversation history vs synthesis.",
+      "body": "**Token budget allocation: agent state vs conversation history vs synthesis.** Every token spent on agent private inventory is a token not available for conversation history. More history means better context but earlier truncation. More synthesis calls mean better artifacts but longer wall-clock time. What is the right allocation strategy, and should it be static or adaptive based on discussion phase?"
+    },
+    {
+      "number": 3,
+      "title": "Blind proposal rounds: how much independence before interaction?",
+      "body": "**Blind proposal rounds: how much independence before interaction?** The research is clear that identical agents converge without structural independence. But pure independence wastes productive collaboration. When should agents see each others work? Should the blind round be mandatory for all discussion types or only brainstorming? How do we prevent the first-speaker anchoring effect in subsequent rounds?"
+    },
+    {
+      "number": 4,
+      "title": "The Key Takeaway mechanism: how should agents build shared conclusions during a discussion?",
+      "body": "**The Key Takeaway mechanism: how should agents build shared conclusions during a discussion?** Instead of unreliable post-hoc ledger extraction, agents could propose conclusions mid-discussion with 0-10 voting. But this adds latency (blocking votes) and token cost (every agent reads the takeaway state). What is the right proposal frequency? Should voting block the conversation or happen async? How do we handle re-derivation of already-rejected ideas?"
+    },
+    {
+      "number": 5,
+      "title": "Stale detection and orchestrator intervention: when should the system disrupt a conversation?",
+      "body": "**Stale detection and orchestrator intervention: when should the system disrupt a conversation?** Composite threshold checks can detect stagnation (repeated positions, dropped threads, position cycling). But how do we distinguish productive disagreement from genuine stagnation? The disruption mechanisms (resurfacing dropped threads, injecting new constraints) could derail a discussion thats actually making progress. What signals reliably indicate intervention is needed?"
+    },
+    {
+      "number": 6,
+      "title": "Phase separation: brainstorm vs refine vs specify vs review.",
+      "body": "**Phase separation: brainstorm vs refine vs specify vs review.** The Double Diamond model says divergent and convergent thinking must be strictly separated. Should V2 implement hard phase gates with different agent configurations per phase, or soft transitions where the orchestrator detects natural phase shifts? What changes between phases -- agent selection, anti-slop rules, communication mode, success criteria?"
+    },
+    {
+      "number": 7,
+      "title": "Anti-sycophancy architecture: structural mechanisms vs prompt engineering.",
+      "body": "**Anti-sycophancy architecture: structural mechanisms vs prompt engineering.** Research shows sycophancy has a linear structure in transformer activation space. In multi-agent settings, once 2 of 3 agents agree the third almost never maintains dissent. What structural mechanisms (beyond prompting) can break convergence cascades? Should we implement anti-coordination scoring where agents are penalized for semantic overlap? Is the ego simulation mechanism (defensive framing when challenged) worth the complexity?"
+    },
+    {
+      "number": 8,
+      "title": "Agent verbosity and context window management.",
+      "body": "**Agent verbosity and context window management.** The 250-word soft limit is advisory and frequently exceeded, causing accumulated discussion to grow faster than expected and earlier context to get truncated. Should V2 enforce hard token limits via CLI flags? Switch to the SDK for proper token control? Implement per-agent context filtering based on personality (low-patience agents get truncated history)? What is the right approach that preserves discussion quality while managing the context budget?"
+    },
+    {
+      "number": 9,
+      "title": "The Morning Brief and session output format.",
+      "body": "**The Morning Brief and session output format.** The current ledger extraction is unreliable (fragile regex, hallucination-prone). The Key Takeaway mechanism would give us structured conclusions, but the Morning Brief also needs to capture contested decisions, concessions, dropped threads, and tombstoned ideas. What should the ideal session output look like for someone reading it the next morning? What is the minimum information that makes the overnight discussion valuable?"
+    },
+    {
+      "number": 10,
+      "title": "Graduated resistance: how should discussion intensity change over time?",
+      "body": "**Graduated resistance: how should discussion intensity change over time?** Martial arts sparring uses light randori (generative, minimal criticism) then medium randori (probe weaknesses, suggest improvements) then hard randori (full adversarial stress-test). Should V2 discussions follow this pattern -- start collaborative, increase friction, end with stress-testing? How does this interact with the phase system? Should different agents have different resistance levels at the same time?"
+    }
+  ],
+  "team": "beta-agents",
+  "agents": [
+    "cognitive_architect",
+    "systems_pragmatist",
+    "adversarial_critic",
+    "context_surgeon",
+    "product_oracle",
+    "flow_orchestrator"
+  ],
+  "mode": "compete",
+  "timeout": 120,
+  "source": "api",
+  "question_hash": "28252feadc3799d0",
+  "state": {
+    "status": "complete",
+    "session_complete": true,
+    "total_elapsed_seconds": 2272,
+    "completed_questions": 10,
+    "failed_questions": 0,
+    "questions": {
+      "q1": {
+        "status": "complete",
+        "title": "The BIT System (Beliefs, Instincts, Traits) vs the current 6-layer agent model.",
+        "elapsed_seconds": 204,
+        "file": "01-the-bit-system-beliefs-instincts-traits-vs-the-current-6-lay.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q2": {
+        "status": "complete",
+        "title": "Token budget allocation: agent state vs conversation history vs synthesis.",
+        "elapsed_seconds": 226,
+        "file": "02-token-budget-allocation-agent-state-vs-conversation-history.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q3": {
+        "status": "complete",
+        "title": "Blind proposal rounds: how much independence before interaction?",
+        "elapsed_seconds": 253,
+        "file": "03-blind-proposal-rounds-how-much-independence-before-interacti.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q4": {
+        "status": "complete",
+        "title": "The Key Takeaway mechanism: how should agents build shared conclusions during a discussion?",
+        "elapsed_seconds": 240,
+        "file": "04-the-key-takeaway-mechanism-how-should-agents-build-shared-co.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q5": {
+        "status": "complete",
+        "title": "Stale detection and orchestrator intervention: when should the system disrupt a conversation?",
+        "elapsed_seconds": 244,
+        "file": "05-stale-detection-and-orchestrator-intervention-when-should-th.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q6": {
+        "status": "complete",
+        "title": "Phase separation: brainstorm vs refine vs specify vs review.",
+        "elapsed_seconds": 231,
+        "file": "06-phase-separation-brainstorm-vs-refine-vs-specify-vs-review.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q7": {
+        "status": "complete",
+        "title": "Anti-sycophancy architecture: structural mechanisms vs prompt engineering.",
+        "elapsed_seconds": 232,
+        "file": "07-anti-sycophancy-architecture-structural-mechanisms-vs-prompt.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q8": {
+        "status": "complete",
+        "title": "Agent verbosity and context window management.",
+        "elapsed_seconds": 209,
+        "file": "08-agent-verbosity-and-context-window-management.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q9": {
+        "status": "complete",
+        "title": "The Morning Brief and session output format.",
+        "elapsed_seconds": 205,
+        "file": "09-the-morning-brief-and-session-output-format.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q10": {
+        "status": "complete",
+        "title": "Graduated resistance: how should discussion intensity change over time?",
+        "elapsed_seconds": 194,
+        "file": "10-graduated-resistance-how-should-discussion-intensity-change.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      }
+    }
+  },
+  "resolved_team_path": "C:\\Users\\Brian.Rankin\\claude-workspace\\projects\\AgentTeamDiscussions\\_SYSTEM\\projects\\engine\\data\\teams\\beta-agents.yaml"
+}
