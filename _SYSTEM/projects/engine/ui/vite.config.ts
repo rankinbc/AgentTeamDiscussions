@@ -11,6 +11,7 @@ export default defineConfig({
       '/ledger': 'http://localhost:8899',
       '/moderator': 'http://localhost:8899',
       '/questions': 'http://localhost:8899',
+      '/api': 'http://localhost:8899',
     },
   },
 })
