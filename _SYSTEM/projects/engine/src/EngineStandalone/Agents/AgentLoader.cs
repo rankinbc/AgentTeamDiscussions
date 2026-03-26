@@ -16,9 +16,9 @@ public class AgentLoader : IAgentLoader
     private readonly string _teamsDir;
     private readonly IDeserializer _deserializer;
 
-    public AgentLoader(string dataDir)
+    public AgentLoader(string dataDir, string agentsSubdir = "agents")
     {
-        _agentsDir = Path.Combine(dataDir, "agents");
+        _agentsDir = Path.Combine(dataDir, agentsSubdir);
         _teamsDir = Path.Combine(dataDir, "teams");
         _deserializer = new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)

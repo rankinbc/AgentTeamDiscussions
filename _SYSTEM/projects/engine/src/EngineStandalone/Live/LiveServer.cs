@@ -3,6 +3,7 @@
 // POST /moderator, POST /questions/add. Adds CORS headers for Vite dev server.
 using System.Text.Json;
 using EngineStandalone.Abstractions;
+using EngineStandalone.Agents;
 using EngineStandalone.Session;
 
 namespace EngineStandalone.Live;
@@ -10,7 +11,7 @@ namespace EngineStandalone.Live;
 /// <summary>
 /// Configures and starts the ASP.NET Core Minimal API server for live SSE streaming.
 /// Endpoints: GET /events (SSE), GET /ledger, POST /moderator, POST /questions/add,
-/// GET /api/briefs, GET /api/agents, POST /api/session/start, POST /api/session/stop
+/// GET /api/briefs, GET /api/agents, GET /api/teams, POST /api/session/start, POST /api/session/stop
 /// </summary>
 public static class LiveServer
 {
@@ -21,6 +22,12 @@ public static class LiveServer
         builder.Logging.ClearProviders(); // Suppress Kestrel noise
 
         var app = builder.Build();
+
+        // Shared data directory: _SYSTEM/data (two levels up from engine baseDir which is _SYSTEM/projects/engine/)
+        var sharedDataDir = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "data"));
+        var sharedAgentLoader = Directory.Exists(Path.Combine(sharedDataDir, "discussionAgents"))
+            ? new AgentLoader(sharedDataDir, agentsSubdir: "discussionAgents")
+            : null;
 
         // CORS for Vite dev server
         app.Use(async (context, next) =>
@@ -111,14 +118,19 @@ public static class LiveServer
 
         // --- API endpoints for session management ---
 
-        // List available brief files
+        // List available brief files (engine input/ + shared data briefs/)
         app.MapGet("/api/briefs", () =>
         {
+            var dirs = new List<string>();
             var inputDir = Path.Combine(baseDir, "input");
-            if (!Directory.Exists(inputDir))
-                return Results.Json(Array.Empty<object>());
+            if (Directory.Exists(inputDir)) dirs.Add(inputDir);
+            var sharedBriefsDir = Path.Combine(sharedDataDir, "briefs");
+            if (Directory.Exists(sharedBriefsDir)) dirs.Add(sharedBriefsDir);
 
-            var briefs = Directory.GetFiles(inputDir, "*.md")
+            var seen = new HashSet<string>();
+            var briefs = dirs
+                .SelectMany(d => Directory.GetFiles(d, "*.md"))
+                .Where(f => seen.Add(Path.GetFileName(f))) // deduplicate by filename
                 .Select(f => new
                 {
                     filename = Path.GetFileName(f),
@@ -130,39 +142,90 @@ public static class LiveServer
             return Results.Json(briefs);
         });
 
-        // List all agents with profile data
+        // List all agents with profile data (engine + shared data)
         app.MapGet("/api/agents", () =>
         {
-            var agents = agentLoader.ListAgents();
             var result = new List<object>();
+            var seen = new HashSet<string>();
 
-            foreach (var (id, name, key, file) in agents)
+            void AddAgentsFrom(IAgentLoader loader)
             {
-                try
+                foreach (var (id, name, key, file) in loader.ListAgents())
                 {
-                    var config = agentLoader.LoadAgentByKey(key);
-                    result.Add(new
+                    if (!seen.Add(key)) continue; // skip duplicates
+                    try
                     {
-                        key,
-                        name = config.Name,
-                        role = config.Position?.Role ?? "",
-                        traits = config.Personality != null ? new Dictionary<string, double>
+                        var config = loader.LoadAgentByKey(key);
+                        result.Add(new
                         {
-                            ["assertiveness"] = config.Personality.Assertiveness,
-                            ["creativity"] = config.Personality.CreativityTemp,
-                            ["risk tolerance"] = config.Personality.RiskTolerance,
-                            ["stubbornness"] = config.Personality.Stubbornness,
-                            ["idea receptivity"] = config.Personality.IdeaReceptivity,
-                            ["bluntness"] = config.Personality.Bluntness,
-                        } : new Dictionary<string, double>(),
-                        drives = config.Position?.Drives ?? new List<string>(),
-                    });
-                }
-                catch
-                {
-                    result.Add(new { key, name, role = "", traits = new Dictionary<string, double>(), drives = new List<string>() });
+                            key,
+                            name = config.Name,
+                            role = config.Position?.Role ?? "",
+                            traits = config.Personality != null ? new Dictionary<string, double>
+                            {
+                                ["assertiveness"] = config.Personality.Assertiveness,
+                                ["creativity"] = config.Personality.CreativityTemp,
+                                ["risk tolerance"] = config.Personality.RiskTolerance,
+                                ["stubbornness"] = config.Personality.Stubbornness,
+                                ["idea receptivity"] = config.Personality.IdeaReceptivity,
+                                ["bluntness"] = config.Personality.Bluntness,
+                            } : new Dictionary<string, double>(),
+                            drives = config.Position?.Drives ?? new List<string>(),
+                        });
+                    }
+                    catch
+                    {
+                        result.Add(new { key, name, role = "", traits = new Dictionary<string, double>(), drives = new List<string>() });
+                    }
                 }
             }
+
+            // Engine agents first (these are the ones that actually work with the engine)
+            AddAgentsFrom(agentLoader);
+
+            // Shared agents (additional agents from _SYSTEM/data)
+            if (sharedAgentLoader != null)
+                AddAgentsFrom(sharedAgentLoader);
+
+            return Results.Json(result);
+        });
+
+        // List all teams (engine + shared data)
+        app.MapGet("/api/teams", () =>
+        {
+            var result = new List<object>();
+            var seen = new HashSet<string>();
+
+            void AddTeamsFrom(IAgentLoader loader)
+            {
+                foreach (var (name, file, count) in loader.ListTeams())
+                {
+                    var teamName = Path.GetFileNameWithoutExtension(file);
+                    if (!seen.Add(teamName)) continue;
+                    try
+                    {
+                        var team = loader.LoadTeamByName(teamName);
+                        var agentKeys = team.Agents.Keys.OrderBy(k => k).ToList();
+                        result.Add(new
+                        {
+                            name = teamName,
+                            displayName = name,
+                            agentCount = count,
+                            agents = agentKeys,
+                            modes = team.Modes.Keys.OrderBy(k => k).ToList(),
+                            defaultMode = team.DefaultMode,
+                        });
+                    }
+                    catch
+                    {
+                        result.Add(new { name = teamName, displayName = name, agentCount = count, agents = new List<string>(), modes = new List<string>(), defaultMode = "default" });
+                    }
+                }
+            }
+
+            AddTeamsFrom(agentLoader);
+            if (sharedAgentLoader != null)
+                AddTeamsFrom(sharedAgentLoader);
 
             return Results.Json(result);
         });
@@ -177,6 +240,7 @@ public static class LiveServer
             var body = await reader.ReadToEndAsync();
 
             string topic;
+            string? team = null;
             List<string>? agentKeys = null;
             try
             {
@@ -189,6 +253,8 @@ public static class LiveServer
                         .Where(a => a != null)
                         .ToList();
                 }
+                if (json.RootElement.TryGetProperty("team", out var teamEl))
+                    team = teamEl.GetString();
             }
             catch
             {
@@ -199,7 +265,7 @@ public static class LiveServer
                 return Results.BadRequest(new { error = "Topic is required" });
 
             var preparer = new SessionPreparer(agentLoader, sessionManager.ConfigLoader);
-            var config = preparer.PrepareFromArgs(topic, agents: agentKeys);
+            var config = preparer.PrepareFromArgs(topic, team: team, agents: agentKeys);
             config.Source = "api";
 
             var newEmitter = new SseSessionEmitter();
