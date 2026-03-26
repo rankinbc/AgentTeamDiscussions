@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "created": "2026-03-26T22:39:56.5948035Z",
+  "title": "knowledge-builder-review",
+  "decided": [
+    "Each game lives in \u0060analysis_games/\u003CGameName\u003E/\u0060 with a \u0060game_specs/\u0060 folder containing all knowledge",
+    "Knowledge is organized hierarchically: depth = precision (top = prose overviews, leaves = exact formulas/tables)",
+    "Flexible depth per system \u2014 combat may have 4\u002B levels, save system may only need 2",
+    "Two-role pipeline: research agents (find data, output raw files) and organizer agents (slot data into hierarchy, dedup, cross-reference, resolve conflicts)",
+    "This separation exists because parallel researchers create overlapping/misplaced data when they each try to organize findings into a shared structure",
+    "Provenance tagging on every factual claim: ROM_VERIFIED \u003E COMMUNITY_VERIFIED \u003E GUIDE_SOURCED \u003E INFERRED \u003E OBSERVED",
+    "[UNKNOWN: est X-Y] tags for unfindable data with plausible estimated ranges",
+    "Recursive research pipeline: Level 0 bootstraps from existing specs, Level 1\u002B waves investigate specific unknowns with user approval between waves",
+    "First consumer: The Magic of Scheherazade (NES, 1989) \u2014 Level 0 complete (18 system READMEs, ~71KB), Level 1 in progress (4 research agents active, 12 proposals prioritized)",
+    "### Folder Structure Example",
+    "\u0060\u0060\u0060",
+    "game_specs/",
+    "README.md                    # Level 0: Game overview, system index",
+    "systems/",
+    "combat/",
+    "README.md                # Level 1: How combat works conceptually",
+    "action_combat/",
+    "README.md              # Level 2: Detailed action combat mechanics",
+    "damage_formulas.md     # Level 3: Exact formulas, pseudocode",
+    "enemy_stats.json       # Level 3: Exact numeric tables",
+    "\u0060\u0060\u0060"
+  ],
+  "questions": [
+    {
+      "number": 1,
+      "title": "Is the hierarchical folder structure the right format for AI consumption?",
+      "body": "The knowledge is organized as a file tree where depth = precision. Would a database, single large structured document, or graph be better for downstream AI consumption (generating requirements docs, writing clone code)? What are the tradeoffs for each format at the point where an AI developer agent needs to actually USE this data?"
+    },
+    {
+      "number": 2,
+      "title": "Is the researcher/organizer split the right pipeline architecture?",
+      "body": "Research agents find data and output raw files. Organizer agents trail behind and slot findings into the hierarchy. Is this separation optimal, or is there a better way to prevent overlap and gaps? What happens when two researchers find conflicting data about the same mechanic?"
+    },
+    {
+      "number": 3,
+      "title": "Is the provenance tagging system well-designed?",
+      "body": "Every claim is tagged (ROM_VERIFIED, GUIDE_SOURCED, COMMUNITY_VERIFIED, INFERRED, OBSERVED, UNKNOWN). The hierarchy resolves conflicts. Is this sufficient? Too complex? Are there missing categories? How should provenance propagate when derived data combines multiple sources?"
+    },
+    {
+      "number": 4,
+      "title": "What problems will emerge at scale?",
+      "body": "Consider 10\u002B games, 1000\u002B files, multiple research waves per game. What breaks in the folder structure, the research pipeline, the organizer workflow, or the provenance system? Where are the bottlenecks?"
+    },
+    {
+      "number": 5,
+      "title": "Is the UNKNOWN estimation approach viable for game generation?",
+      "body": "When data can\u0027t be found, it\u0027s tagged as [UNKNOWN: est X-Y] with a plausible range so a downstream game generator could fill in a reasonable value. Is this the right strategy, or will estimated ranges create cascading inaccuracies when multiple unknowns interact in the generated game?"
+    },
+    {
+      "number": 6,
+      "title": "What\u0027s missing for the \u0022generate a clone from this data\u0022 step?",
+      "body": "Assume the knowledge base is complete. What additional information, structure, or metadata would an AI developer agent need to actually produce a working game clone? What\u0027s the gap between \u0022we know all the mechanics\u0022 and \u0022we can generate code\u0022?"
+    },
+    {
+      "number": 7,
+      "title": "How could the research process be smarter about finding data?",
+      "body": "Better sources, better search strategies, ROM analysis automation, community engagement patterns \u2014 what would make the research agents more effective at extracting precise mechanical data from retro games?"
+    }
+  ],
+  "team": "beta-agents",
+  "mode": "compete",
+  "timeout": 120,
+  "source": "C:\\claude-workspace\\AgentTeamDiscussions\\_SYSTEM\\projects\\engine\\input\\knowledge-builder-review.md",
+  "question_hash": "05d7a065edfc2676",
+  "state": {
+    "status": "complete",
+    "session_complete": true,
+    "total_elapsed_seconds": 1554,
+    "completed_questions": 7,
+    "failed_questions": 0,
+    "questions": {
+      "q1": {
+        "status": "complete",
+        "title": "Is the hierarchical folder structure the right format for AI consumption?",
+        "elapsed_seconds": 203,
+        "file": "01-is-the-hierarchical-folder-structure-the-right-format-for-ai.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q2": {
+        "status": "complete",
+        "title": "Is the researcher/organizer split the right pipeline architecture?",
+        "elapsed_seconds": 221,
+        "file": "02-is-the-researcher-organizer-split-the-right-pipeline-archite.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q3": {
+        "status": "complete",
+        "title": "Is the provenance tagging system well-designed?",
+        "elapsed_seconds": 241,
+        "file": "03-is-the-provenance-tagging-system-well-designed.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q4": {
+        "status": "complete",
+        "title": "What problems will emerge at scale?",
+        "elapsed_seconds": 229,
+        "file": "04-what-problems-will-emerge-at-scale.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q5": {
+        "status": "complete",
+        "title": "Is the UNKNOWN estimation approach viable for game generation?",
+        "elapsed_seconds": 200,
+        "file": "05-is-the-unknown-estimation-approach-viable-for-game-generatio.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q6": {
+        "status": "complete",
+        "title": "What\u0027s missing for the \u0022generate a clone from this data\u0022 step?",
+        "elapsed_seconds": 228,
+        "file": "06-what-s-missing-for-the-generate-a-clone-from-this-data-step.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      },
+      "q7": {
+        "status": "complete",
+        "title": "How could the research process be smarter about finding data?",
+        "elapsed_seconds": 206,
+        "file": "07-how-could-the-research-process-be-smarter-about-finding-data.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      }
+    }
+  },
+  "resolved_team_path": "C:\\claude-workspace\\AgentTeamDiscussions\\_SYSTEM\\projects\\engine\\data\\teams\\beta-agents.yaml"
+}

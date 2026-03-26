@@ -1,0 +1,67 @@
+{
+  "questions": {
+    "q1": {
+      "status": "complete",
+      "title": "How does the Morning Brief get generated?",
+      "elapsed_seconds": 169,
+      "file": "01-how-does-the-morning-brief-get-generated.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q2": {
+      "status": "complete",
+      "title": "How does decision extraction work?",
+      "elapsed_seconds": 169,
+      "file": "02-how-does-decision-extraction-work.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q3": {
+      "status": "complete",
+      "title": "What is the error handling strategy?",
+      "elapsed_seconds": 160,
+      "file": "03-what-is-the-error-handling-strategy.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q4": {
+      "status": "complete",
+      "title": "How do we keep the synthesis step from being a bottleneck?",
+      "elapsed_seconds": 191,
+      "file": "04-how-do-we-keep-the-synthesis-step-from-being-a-bottleneck.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q5": {
+      "status": "complete",
+      "title": "How does prior context get managed as questions accumulate?",
+      "elapsed_seconds": 157,
+      "file": "05-how-does-prior-context-get-managed-as-questions-accumulate.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    }
+  },
+  "question_hash": "e61bcfa1fed04402",
+  "mode": "compete",
+  "brief": "v1-spec-gaps.md"
+}

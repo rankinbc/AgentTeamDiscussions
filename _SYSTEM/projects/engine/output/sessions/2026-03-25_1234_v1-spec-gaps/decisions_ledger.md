@@ -1,0 +1,97 @@
+
+
+- DECIDED: Morning Brief is assembled from a fragment log, not raw design docs; design docs are archival only
+- DECIDED: Fragments are extracted after each question resolves; brief is generated once at session end from the complete fragment log
+- DECIDED: Fragment extraction runs async after each design doc is written and does not block the next question's context assembly
+- DECIDED: Fragment schema has four fields — question_id, decision, needs_your_call, blocker — each hard-limited to one sentence
+- DECIDED: Blocker extraction uses tagged convention (BLOCKER:/RISK: prefixes in critique round) via regex scan, not an extra LLM call
+- DECIDED: Empty blocker field is valid signal
+- DECIDED: Synthesis prompt receives exactly three inputs — fragment log, output format template, word limit
+- DECIDED: Output sections use decision-gate framing: Ready to Build, Needs Your Call, Don't Start Yet
+- DECIDED: Don't Start Yet section is omitted entirely if no blockers exist
+- DECIDED: One config field — brief_word_limit — with default of 300
+- DECIDED: Fragment log is an append-only .jsonl file written to the session folder after each question
+- DECIDED: decisions.json is not passed to the synthesis call; it remains a separate machine-readable artifact for downstream tooling
+- DECIDED: Fallback behavior concatenates fragment fields directly into the same three-section framing if synthesis LLM call fails
+- DECIDED: Session never exits without a morning_brief.md
+- DECIDED: Total synthesis input budget is approximately 1150 tokens; no chunking or summarization of summaries is required
+- OPEN: Exact prompt template for the per-question fragment extractor
+- OPEN: Retry policy for the synthesis call before falling back (two retries with 30-second backoff recommended but not decided)
+- OPEN: Whether the fragment extractor has a fallback if it fails
+
+- DECIDED: decisions.json is a low-stakes V1 artifact; the Morning Brief is the user-facing artifact and no design decision optimizes decisions.json at its expense.
+- DECIDED: Fragment extraction and decisions extraction share a single async LLM call triggered after each design doc is written to disk.
+- DECIDED: The extractor receives the design doc only, not the raw transcript or prior design docs; passing the transcript is explicitly disallowed.
+- DECIDED: The decisions schema is minimal — question_id, statement (one sentence active voice), and confidence — with no decision_id and no grounding field.
+- DECIDED: question_id + statement is the stable join key; array position must not be used as a join key by downstream tooling.
+- DECIDED: Confidence is an enum of firm | provisional | suggestion, not a scalar.
+- DECIDED: firm means past-tense resolved statement with no hedge words; provisional means modal hedges (should, recommend, consider, prefer); suggestion means speculative language or unclassifiable statements.
+- DECIDED: Linguistic marker classification rules belong in the extraction prompt, not in post-processing; "if you cannot classify with confidence, use suggestion" is normative.
+- DECIDED: The extractor does not distinguish original phrasing from synthesis paraphrase; precision loss from this is acceptable in V1.
+- DECIDED: Schema validation runs before any write; malformed JSON is logged, that question's decisions.json entry is omitted, and the session continues.
+- DECIDED: There is no garbage flag; low confidence statements emit as confidence: "suggestion" and downstream tooling filters by confidence level.
+- DECIDED: On combined call failure, log with question_id, omit both the fragment and the decisions entry for that question, and continue; the session never exits without a morning_brief.md.
+- OPEN: Retry policy for the combined extraction call (two retries with 30-second backoff recommended but not decided).
+- OPEN: Whether fragment extraction has its own fallback if the combined call fails and fragments are missing at brief synthesis time.
+
+- DECIDED: Retry taxonomy is two-policy — transient failures (timeout, 5xx) use 2 retries with 5-second fixed backoff; rate limit failures (429) use 2 retries with exponential backoff plus jitter, respecting retry-after header when present
+- DECIDED: Uniform retry policy across all call types is rejected
+- DECIDED: Round-level failure produces a partial transcript and a tombstone design doc; transcript is never discarded
+- DECIDED: Tombstone design doc contains one sentence identifying the question, failure type, and a statement that downstream questions lack this context
+- DECIDED: Question-level failure (propose fails after retries) produces a tombstone design doc occupying the question's slot in the prior-doc chain, not a separate stub file
+- DECIDED: QUESTION_FAILED is a terminal state, not recoverable after retries are exhausted
+- DECIDED: Tombstone is written as part of the transition into QUESTION_FAILED state
+- DECIDED: Context chain poisoning is the primary blast radius; tombstone design doc is the sole mitigation
+- DECIDED: Skip-and-continue-silently is rejected
+- DECIDED: Combined extraction call failure sentinel uses Cognitive Architect's sentinel format with question_id, decision "[extraction failed]", needs_your_call set to question title verbatim, and blocker as empty string
+- DECIDED: null fields in sentinel are rejected to avoid silent omission at synthesis time
+- DECIDED: Extraction is skipped entirely for tombstoned questions; sentinel is only for questions where rounds succeeded but extraction failed
+- DECIDED: Retry policy for combined extraction call is 2 retries with 30-second backoff
+- DECIDED: On combined extraction call failure after retries, log with question_id, write sentinel fragment, omit that question's decisions.json entry, and continue
+- DECIDED: partial: true header flag is not written in V1
+- DECIDED: Morning Brief uses three sections only; "Not Completed" as a fourth section is rejected
+- DECIDED: Failed questions surface in Morning Brief "Needs Your Call" section with a (session error) label
+- DECIDED: If more than half the questions fail, do not produce the Morning Brief; write a single-line error file instead
+- DECIDED: Session always exits with either morning_brief.md or error.md; one or the other is always written
+- DECIDED: Synthesis failure with all rounds succeeded falls to existing decided fallback of direct concatenation of fragment fields into three-section framing
+- OPEN: Exact prompt template for the per-question fragment extractor
+- OPEN: Retry policy for the synthesis call before falling back to deterministic concatenation (2 retries with 30-second backoff recommended but not yet decided)
+- OPEN: Whether the majority-failure abort threshold ("more than half") is hardcoded or a config key
+
+- DECIDED: Synthesis input is the fragment log only — full transcript is never passed; input bounded to ~1150 tokens
+- DECIDED: Per-agent position extraction rejected for V1
+- DECIDED: Prior design doc chain windowed at 3; earlier docs archived but not forwarded
+- DECIDED: Synthesis retry policy is 2 retries with 30-second backoff, then deterministic concatenation fallback
+- DECIDED: Deterministic fallback matches extraction call retry policy; no separate config keys for synthesis vs extraction
+- DECIDED: Per-call synthesis timeout is 60 seconds under config key `synthesis_call_timeout_seconds`
+- DECIDED: Deterministic fallback must apply the same empty-blocker conditional as the synthesis path — "Don't Start Yet" section omitted if no blockers
+- DECIDED: Sync point uses ID-slot tracking; slots registered by ID at session start; gate writes sentinel for any slot with no fragment at sync time
+- DECIDED: Majority-failure abort threshold is config key `min_success_fraction`, default 0.5, using strict `>`
+- DECIDED: Chunking and two-pass synthesis rejected for V1
+- DECIDED: Config block for synthesis reliability contains exactly five keys: `synthesis_retry_count` (2), `synthesis_retry_backoff_seconds` (30), `synthesis_call_timeout_seconds` (60), `min_success_fraction` (0.5), `prior_doc_window` (3)
+- OPEN: Exact prompt template for the per-question fragment extractor
+- OPEN: Whether the combined extraction call has its own fallback independent of the sync-gate sentinel for mid-execution failures vs never-launched calls
+
+- DECIDED: Prior design doc chain uses a sliding window of 3 docs, verbatim, tombstones included; earlier docs are archived and not passed forward
+- DECIDED: Tombstones occupy their slot in the chain and are never skipped; tombstone content explicitly signals the gap to downstream agents
+- DECIDED: Summarization of prior docs is rejected as lossy and unnecessary at this scale
+- DECIDED: Window size of 3 was established in Q4 and is not reopened
+- DECIDED: Context assembly for question N reads design docs from disk directly by slot position
+- DECIDED: Fragment log feeds synthesis only and must not be used for prior-doc context assembly
+- DECIDED: Prior doc injection format uses a labeled header per doc: `## Prior Context: Question {id} — {title or FAILED}`
+- DECIDED: Labeled headers are deterministic, require no LLM involvement, and are not subject to per-doc token cap
+- DECIDED: Raw concatenation of unlabeled docs is rejected due to context corruption risk
+- DECIDED: Per-doc token cap `prior_doc_max_tokens` is added with a default of 500 tokens
+- DECIDED: Truncation direction is bottom-up — rationale dropped before conclusions
+- DECIDED: Consecutive tombstone scenario is a session-abort concern owned by `min_success_fraction`, not the window design
+- DECIDED: Window passes tombstones as-is and does not detect or compensate for consecutive failure patterns
+- DECIDED: Config block for prior-doc context management contains exactly two keys: `prior_doc_window` (3) and `prior_doc_max_tokens` (500)
+- DECIDED: These two keys join the existing synthesis reliability config block (`synthesis_retry_count`, `synthesis_retry_backoff_seconds`, `synthesis_call_timeout_seconds`, `min_success_fraction`)
+- DECIDED: No additional keys are introduced for window behavior
+- DECIDED: Fragment extractor prompt template is the primary implementation blocker and must be addressed first in the next question, not deferred
+- OPEN: Exact prompt template for the per-question fragment extractor (carried from Q2–Q5; blocks implementation; must be addressed next)
+- OPEN: Whether the combined extraction call has its own fallback independent of the sync-gate sentinel (carried from Q4)
+- OPEN: Whether `prior_doc_max_tokens` truncation triggers a warning log with question_id and token count (carried from Q5; not a blocker)
+- OPEN: Actual distribution of design doc lengths in the beta system to validate the 500-token default (carried from Q5; not a prerequisite for shipping)
+
+<!-- complete -->

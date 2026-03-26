@@ -50,6 +50,8 @@ display:
 paths:
   sessions_dir: output/sessions    # Relative to base dir
   output_dir: output/design-docs   # For no-session mode
+  data_dir: C:/claude-workspace/AgentTeamDiscussions/_SYSTEM/data  # Agent/team YAML definitions
+  input_dir: C:/claude-workspace/AgentTeamDiscussions/_SYSTEM/projects/engine/input  # Brief files
   default_team: beta-agents        # Team used when none specified
 
 session:

@@ -1,0 +1,11 @@
+{
+  "question_hash": "05d7a065edfc2676",
+  "mode": "compete",
+  "brief": "C:\\claude-workspace\\AgentTeamDiscussions\\_SYSTEM\\projects\\engine\\input\\knowledge-builder-review.md",
+  "team": "C:\\claude-workspace\\AgentTeamDiscussions\\_SYSTEM\\projects\\engine\\data\\teams\\beta-agents.yaml",
+  "session_complete": false,
+  "total_elapsed_seconds": 0,
+  "completed_questions": 0,
+  "failed_questions": 0,
+  "questions": {}
+}

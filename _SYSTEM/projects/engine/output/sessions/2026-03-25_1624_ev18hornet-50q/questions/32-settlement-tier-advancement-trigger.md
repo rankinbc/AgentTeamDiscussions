@@ -1,0 +1,121 @@
+# Settlement Tier Advancement Trigger
+
+*Generated: 2026-03-25 18:29 | Question 32 | 237s | Mode: ev18hornet*
+
+## Decisions
+
+- DECIDED: Time-gated and session-gated tier advancement are rejected; both are Agency cap failures that remove player decisions from progression
+- DECIDED: Pure resource investment alone is an insufficient advancement trigger; a player who ignores faction standing entirely must not be able to advance tier through credits alone
+- DECIDED: Aerial intercept as a required advancement condition is rejected; it is a skill gate that does not distinguish between a player who managed airspace personally and a player who managed it through escorts — both made valid standing-consequential choices; this decision is consistent with the prior rejection of `raid_repelled_count` as a commitment NPC trigger condition
+- DECIDED: Tier advancement is a hard gate enforced by the engine, not a soft gravity produced by content design; economic gravity is a desirable design property of the mission economy but cannot be the sole enforcement mechanism
+- DECIDED: The tier advancement trigger is a conjunction of two conditions: (1) a resource investment threshold met, and (2) faction standing in Engaged band (≥ 40) with at least one faction at time of advancement check
+- DECIDED: The resource investment threshold is a single named config constant, `TIER_ADVANCEMENT_INVESTMENT_THRESHOLD`, required from day one; numeric value deferred pending M7 economy authoring and playtest data on mission credit rates at Outpost tier
+- DECIDED: The standing condition reuses the existing band architecture and `mutate_standing(player, faction, delta)` read path with no new data model entries
+- DECIDED: Standing requirement applies to at least one faction, not all factions; a player committed to Confederation with Rebel standing in Degraded band is eligible to advance provided Confederation standing is Engaged
+- DECIDED: Standing maintenance is not a separate hard gate on tier persistence; tier regression handles downward pressure through accumulated structural damage when standing drops and raids escalate — the advancement check standing requirement applies only at the moment of advancement, not continuously
+- DECIDED: The advancement trigger must be visible to the player before it fires; the tooltip system (crossing 40 in either direction) is the designated legibility surface for the standing condition, and the investment threshold must surface through an in-world signal before the check runs
+- DECIDED: The in-world signal for the investment threshold is a single Bar dialogue line from a faction-affiliated contact, not a UI progress meter; consistent with the project's pattern of diegetic feedback over HUD instrumentation
+- DECIDED: No new counter, no new event emission, and no new read path are required for the advancement trigger; the conjunction of existing standing band reads and existing credit/resource ledger comparison is the complete implementation
+- DECIDED: The escort-handled intercept edge case identified by Vera and Soren is not a problem for this trigger design; escorts repelling raids moves standing via existing `mutate_standing` calls, and the standing consequence registers correctly regardless of whether the player flew the intercept personally
+- DECIDED: Co-op advancement check reads each player's standing independently; either player meeting Engaged standing with at least one faction satisfies the standing condition; the `max()` operator from prior co-op decisions does not apply to advancement — progression is additive, not worst-case gated
+- DECIDED: Tier advancement check runs at the moment the player attempts to place a new building type that requires the next tier, not on a polling interval; this makes the trigger player-initiated and visible
+- DECIDED: `TIER_ADVANCEMENT_INVESTMENT_THRESHOLD` is expressed in a resource unit type that must be specified before M7 builds the ledger comparison; the form (credits, materials, or a combined index) is not decided here
+- OPEN: `TIER_ADVANCEMENT_INVESTMENT_THRESHOLD` numeric value — deferred pending M7 economy authoring and mission credit rate playtest data; config constant required from day one
+- OPEN: Resource unit form for investment threshold — whether the threshold is expressed in credits, a materials count, or a combined investment index; must be resolved before M7 builds the ledger comparison
+- OPEN: Whether economic gravity naturally closes the loops at Outpost tier — Vera's delta magnitude question; whether faction missions are the dominant credit source at Outpost tier determines whether the standing and investment conditions are naturally correlated or independently pursuable; requires M5 economy playtest data
+- OPEN: Bar dialogue line content for investment threshold signal — one line per faction contact, exact wording is content design out of scope; must be authored before M7 ships tier advancement check
+- OPEN: Whether the standing requirement at advancement time creates a legibility gap for players who have not yet received the standing tooltip — if a player accumulates credits fast enough to meet the investment threshold before their standing has crossed 40 in either direction, the standing condition fires without prior explanation; must be addressed in content design or tooltip trigger sequencing
+- OPEN: Co-op advancement check per-player independence rule — whether both players must individually meet Engaged standing or whether either player satisfying the condition is sufficient; decided as either-player-sufficient above but requires confirmation against co-op session state architecture before M8 co-op ships
+- OPEN: Building type count at Settlement, Colony, and City tiers — required inputs for advancement threshold calibration at each tier; Outpost floor confirmed at three; carried from Q12
+- OPEN: Tier regression milestone placement — whether geometry-legible regression ships in M7 or M8; carried from Q12
+- OPEN: `SETTLEMENT_REGRESSION_THRESHOLD` numeric value — carried from Q12
+- OPEN: Defense emplacement milestone placement — carried from Q12
+- OPEN: Power-emplacement dependency raid AI design — carried from Q12
+- OPEN: Power node degraded state visual signal — carried from Q12
+- OPEN: Scaffolding third geometry state asset estimate — per-building-type day count required; floor is 2–4 days per type; carried from Q13
+- OPEN: Tier regression rebuild cost mechanism — resource quantity, time, or step-count reduction, and named config constant; carried from Q13
+- OPEN: Which in-world surface carries the rebuild gate explanation — comms intercept string or Bar cold dialogue; carried from Q13
+- OPEN: Pad destruction and anchor invalidation — Option A vs Option B; carried from Q14
+- OPEN: Standing re-check at respawn time vs docking write time; carried from Q14
+- OPEN: Assault-scale split-vector spawn bearing offsets for M7 solo — two named config constants required; carried from Q11
+- OPEN: First-raid protection window co-op edge case — `player_has_had_clean_atmospheric_view` per-player or both-player requirement; carried from Q11
+- OPEN: `RAID_HARASSMENT_THRESHOLD` numeric value — named config constant required; carried from Q11
+- OPEN: `RAID_ASSAULT_THRESHOLD` numeric value — named config constant required; carried from Q11
+- OPEN: Per-faction rivalry heat values — config architecture must support per-faction overrides from day one; no authored values for any milestone; carried from Q3
+- OPEN: Defection multiplier post-commitment — whether `FACTION_STANDING_LOSS_MULTIPLIER` increases after commitment NPC trigger; carried from Q3
+- OPEN: Hostile floor numeric value — named config constant required; carried from Q5
+- OPEN: Authored Hostile recovery trigger form — intermediary NPC, specific mission string, or faction-unique narrative unlock; carried from Q5
+- OPEN: Mission pool sparsity definition in Degraded band — probability filter, reduced count, or mission type subset; carried from Q5
+- OPEN: Commitment NPC dialogue content and content system — exact dialogue across settlement tier contexts including advancement tier context; content system for reading settlement tier and raid history variables not yet designed; carried from Q3
+- OPEN: Standing floor behavior post-commitment — whether standing can fall below a threshold with an allied faction after commitment; carried from Q3
+- OPEN: Standing tooltip direction — whether tooltip fires at crossing 40 in both directions or only upward; threshold decided, directional trigger open; carried from Q3
+- OPEN: Joint action delta magnitude for co-op — full or fractional standing consequence per participating player; carried from Q4
+- OPEN: Standing change cause attribution for co-op — notification surface; deferred to M8; carried from Q4
+- OPEN: Contested airspace spawn geometry for split-commitment co-op settlement — deferred to M8; carried from Q3
+- OPEN: Passive decay milestone placement — carried from Q6
+- OPEN: Refusal-tracking attribution rule — carried from Q6
+- OPEN: `DECAY_FLOOR` numeric value — named config constant required above `HOSTILE_THRESHOLD`; carried from Q6
+- OPEN: Hull capture standing delta magnitude per faction — named config constants required; carried from Q9
+- OPEN: Relative magnitude of hull capture versus mission failure standing consequence; carried from Q9
+- OPEN: Comms intercept string content per faction — one line per faction contact; exact wording is content design out of scope; carried from Q10
+- OPEN: Patrol vector modifier numeric values — named config constants required; carried from Q10
+- OPEN: Bribe path design — deferred pending Bar rumor/informant surface; carried from Q9
+- OPEN: Salvage flag path design — deferred pending faction-specific grievance tracking; carried from Q9
+- OPEN: M6 scope capacity — galaxy-layer formation AI and threat-aware hold state placement; carried from Q7
+- OPEN: Build cost of threat-aware hold state — estimate gates M6 vs M7 placement; carried from Q7
+- OPEN: Escort hold visual treatment — circular orbit, stationary hover, or trailing vector; carried from Q7
+- OPEN: Mechanical resolution when raid spawns during escort hold; carried from Q8
+- OPEN: Terrain avoidance timing — deferred to M8; carried from Q7
+- OPEN: Attribution path selection — Path A vs Path B for co-op comms intercept attribution; carried from Q19
+- OPEN: Exact co-op comms intercept string content for `max()` conditions; carried from Q19
+- OPEN: Whether M5 shipped comms intercept infrastructure as decided in Q10 — blocking dependency for M7 and M8 extension estimates; carried from Q17
+- OPEN: Counter scope for `raids_since_last_docking` — per-faction or aggregate; carried from Q17
+- OPEN: `raids_since_last_docking` reset behavior on non-owned faction port docking; carried from Q17
+- OPEN: Exact string content for counter output at atmospheric entry; carried from Q17
+- OPEN: `ATMOSPHERIC_ENTRY_ALTITUDE` numeric value — carried from Q20
+- OPEN: `ATMOSPHERIC_FLOOR_ALTITUDE` numeric value — must satisfy `ATMOSPHERIC_FLOOR_ALTITUDE < BUILDING_ROOFLINE_HEIGHT`; carried from Q20
+- OPEN: `BUILDING_ROOFLINE_HEIGHT` as named constant — single authored constant or per-building-type value; carried from Q20
+- OPEN: Minimum range depth for pacing — requires Hornet Layer playtest data; carried from Q20
+- OPEN: Three feel-state band boundaries — deferred to post-Hornet-Layer playtest and M8; carried from Q20
+- OPEN: LOD transition altitude triggers — deferred pending terrain complexity and performance profiling; carried from Q20
+- OPEN: Canonical exit vector computation rule; carried from Q21
+- OPEN: Diegetic sky marker asset estimate; carried from Q21
+- OPEN: Patrol spawn point architecture — single anchor or distributed; carried from Q21
+- OPEN: Positional re-emergence milestone placement; carried from Q21
+- OPEN: M6 escort hold contract amendment for entry/exit vector asymmetry; carried from Q21
+- OPEN: Oblique and corkscrewing exit edge cases; carried from Q21
+- OPEN: Registration delta calibration — named config constants required; carried from Q16
+- OPEN: Galaxy map threat visibility option — Option A, B, or C beyond starting system; carried from Q22
+- OPEN: Galaxy map build cost per option for non-starting systems; carried from Q22
+- OPEN: Minimum galaxy-layer signal that creates urgency without enabling spectator behavior; carried from Q22
+- OPEN: Whether approach time precision should require atmospheric entry to resolve; carried from Q22
+- OPEN: First-raid protection window and approach signal interaction; carried from Q22
+- OPEN: What pulls a new player into the atmospheric layer before they understand why the threat matters; carried from Q22
+- OPEN: Total system count in the authored galaxy; carried from Q27
+- OPEN: Whether one or two contested chokepoints serves sessions 2–3; carried from Q27
+- OPEN: Rebel standing value at passive degradation during starting-system phase; carried from Q27
+- OPEN: Sessions-to-tooltip timing under expected mission pacing; carried from Q27
+- OPEN: Neutral buffer system faction presence; carried from Q27
+- OPEN: Planet sky hue — downstream dependency for dome snap; carried from Q29
+- OPEN: Q22 resolution status beyond starting system — blocking for ring-as-information-surface scope; carried from Q29
+- OPEN: Static ring milestone placement — Hornet Layer or later; carried from Q29
+- OPEN: Ring panel authored color for static version; carried from Q29
+- OPEN: Ring rotation behavior — rate and direction as named config constant; carried from Q29
+- OPEN: Live-faction-read ring full design — deferred pending Q22 resolution and static ring delivery; carried from Q29
+- OPEN: Whether static ring resolves the Q21 diegetic sky marker question; carried from Q29
+- OPEN: M7 on-foot combat milestone placement — minimum viable breach combat in M7 or M8; carried from Q23
+- OPEN: Enemy pathfinding scope inside building geometry — full pathfinding versus converging-vector; carried from Q23
+- OPEN: Death/fail state for on-foot breach — connection to Q14/Q15 respawn flow; carried from Q23
+- OPEN: Comms line exact wording at breach; carried from Q23
+- OPEN: Supply chain integration milestone for faction-sourced ammo; carried from Q23
+- OPEN: Building interior dimensions for shelter, power node, and storage unit — blocking for `ENEMY_ALERT_RANGE` and `ENEMY_ATTACK_RANGE`; carried from Q24
+- OPEN: Whether interior dimensions vary by tier; carried from Q24
+- OPEN: `ENEMY_ALERT_RANGE` numeric value — carried from Q24
+- OPEN: `ENEMY_ATTACK_RANGE` numeric value — carried from Q24
+- OPEN: Sidearm effective range numeric value — carried from Q23
+- OPEN: Patrol-tier audio dependency at M7 breach combat spawn point; carried from Q25
+- OPEN: Exact alarm audio asset — one or two assets; carried from Q25
+- OPEN: `HIT_DESATURATION_DURATION` numeric value — carried from Q25
+- OPEN: `HIT_DESATURATION_INTENSITY` numeric value — carried from Q25
+- OPEN: Damage-state desaturation depth modulation milestone; carried from Q25
+<!-- complete -->

@@ -1,0 +1,91 @@
+# Raid Defense Weapon Type
+
+*Generated: 2026-03-25 17:48 | Question 23 | 215s | Mode: ev18hornet*
+
+## Decisions
+
+- DECIDED: On-foot raid breach combat is a failure state, not a feature — the mechanical message is "you should have managed your airspace"; this is a behavioral contract, not a tuning preference
+- DECIDED: On-foot combat must not make dirtside defense the dominant strategy over aerial intercept; if dirtside is always the better answer, the atmospheric choice withers and the SimCopter payoff moment is lost
+- DECIDED: Weapon type is a short-range energy sidearm — low ammo ceiling, close-quarters only, limited effective range
+- DECIDED: The sidearm must read visually as improvised and last-resort, not as a primary loadout; flat-poly presentation carries the narrative EV used text for
+- DECIDED: Ammo scarcity, range punishment, and no survival guarantee are not tuning choices — they are the mechanical message that standing management failed
+- DECIDED: A single comms line fires at breach time communicating the aerial alternative that was unavailable; this line is the teaching surface that makes the standing → airspace → breach causality legible during the failure, not in a menu afterward
+- DECIDED: Comms line at breach is scoped as an extension of the Q10 comms intercept infrastructure, not a new system
+- DECIDED: Acquisition path for M7 is authored equipment — the sidearm is present without supply chain dependency; supply chain integration (faction-sourced ammo, standing-gated acquisition) is deferred pending playtest data on whether authored equipment makes dirtside dominant
+- DECIDED: Supply chain integration earns scope only when M5 event-only playtest data exists on standing movement rates and when Bar rumor/economy systems are live enough to price faction-sourced materials
+- DECIDED: On-foot breach combat requires first-person movement in constrained space, a weapon fire state with hit detection, enemy units with pathfinding inside building geometry, a health/damage model, and a death/fail state — none of these exist and they are not free at flat-poly
+- DECIDED: Minimum viable on-foot breach combat build estimate is 3–5 weeks solo; this must be explicitly acknowledged before M7 scope is locked
+- DECIDED: M7 on-foot combat milestone placement is an open question requiring explicit scope confirmation before weapon type implementation begins; the design contract above is settled, the milestone assignment is not
+- OPEN: M7 on-foot combat milestone placement — is minimum viable breach combat a named M7 build item or does it belong in M8? Requires explicit acknowledgment that 3–5 weeks of new system work fits M7 capacity before weapon type implementation is started
+- OPEN: Comms line exact wording at breach — one line communicating the aerial alternative that was unavailable; exact wording is content design out of scope; must be authored before M7 ships the breach combat surface
+- OPEN: Enemy pathfinding scope inside building geometry — what movement capability constitutes minimum viable for M7 breach; full pathfinding vs. converging-vector movement toward player position; must resolve before AI build begins
+- OPEN: Death/fail state for on-foot breach — what happens when the player dies to breach enemies; whether this connects to the Q14/Q15 respawn anchor and Shuttle assignment flow or resolves separately
+- OPEN: Supply chain integration milestone — at which milestone faction-sourced ammo or standing-gated sidearm acquisition earns scope; requires M5 standing movement playtest data and Bar economy live systems
+- OPEN: Sidearm ammo ceiling numeric value — must be a named config constant from day one; value deferred pending on-foot combat playtest data
+- OPEN: Sidearm effective range numeric value — must be a named config constant from day one; value deferred pending Hornet Layer floor altitude and building geometry authoring
+- OPEN: [Carried Q22] Galaxy map threat visibility option — which of Soren's three options applies: (A) faction ship presence already visible on galaxy map as part of base layer, repurposable at authoring cost only; (B) presence exists in simulation but not surfaced on the map, requires read path and icon state; (C) presence not modeled until atmospheric entry, constitutes a new system; this is the blocking question for all signal architecture below it
+- OPEN: [Carried Q22] Galaxy map build cost per option — Option A approximately two days authoring; Option B one to three days depending on data proximity; Option C unknown scope; cost estimate required before any signal design is committed
+- OPEN: [Carried Q22] Minimum galaxy-layer signal that creates urgency without enabling spectator behavior
+- OPEN: [Carried Q22] Whether approach time precision should require atmospheric entry to resolve
+- OPEN: [Carried Q22] First-raid protection window and approach signal interaction
+- OPEN: [Carried Q22] What pulls a new player into the atmospheric layer before they understand why the threat matters
+- OPEN: [Carried Q21] Canonical exit vector computation rule — heading at threshold crossing, average over final N meters, or other formulation; blocks 3D-to-2D coordinate transform build
+- OPEN: [Carried Q21] Diegetic sky marker asset estimate — per-marker day count for flat-poly orbital reference geometry; cannot be approved without that number
+- OPEN: [Carried Q21] Patrol spawn point architecture — single orbital insertion anchor or distributed across orbital shell
+- OPEN: [Carried Q21] Positional re-emergence milestone placement
+- OPEN: [Carried Q21] M6 escort hold contract amendment — escort coverage must be specified for both entry and exit vectors before M6 ships the layer-transition contract
+- OPEN: [Carried Q21] Oblique and corkscrewing exit edge cases
+- OPEN: [Carried Q20] `ATMOSPHERIC_ENTRY_ALTITUDE` numeric value — config constant required before Hornet Layer ships; value deferred pending flight model playtest data
+- OPEN: [Carried Q20] `ATMOSPHERIC_FLOOR_ALTITUDE` numeric value — must satisfy `ATMOSPHERIC_FLOOR_ALTITUDE < BUILDING_ROOFLINE_HEIGHT`; value deferred pending building height authoring decisions
+- OPEN: [Carried Q20] `BUILDING_ROOFLINE_HEIGHT` as named constant — whether single authored constant or per-building-type value; must resolve before pad damage model and collision surfaces are built
+- OPEN: [Carried Q20] Minimum range depth for pacing — requires Hornet Layer playtest data
+- OPEN: [Carried Q20] Three feel-state band boundaries — deferred to post-Hornet-Layer playtest and M8 faction system integration
+- OPEN: [Carried Q20] LOD transition altitude triggers — deferred pending terrain complexity decisions and Hornet Layer performance profiling
+- OPEN: [Carried Q19] Attribution path selection — Path A (content change, one conditional branch) vs Path B (new cross-player standing comparison surface naming the `max()` driver); must resolve before M7 or M8 attribution scope is locked
+- OPEN: [Carried Q19] Exact co-op comms intercept string content for `max()` conditions — what P2 reads at atmospheric entry when P1's standing is driving hostile airspace geometry
+- OPEN: [Carried Q17–Q19] Whether M5 shipped comms intercept infrastructure as decided in Q10 — blocking dependency for M7 and M8 extension estimates
+- OPEN: [Carried Q17–Q19] Counter scope for `raids_since_last_docking` — per-faction or aggregate
+- OPEN: [Carried Q17–Q19] `raids_since_last_docking` reset behavior on docking at non-owned neutral faction port
+- OPEN: [Carried Q17–Q19] Exact string content for counter output at atmospheric entry
+- OPEN: [Carried Q14–Q19] Pad destruction and anchor invalidation — Option A (degraded pad remains valid anchor) vs Option B (pad below threshold invalidates anchor with fallback chain)
+- OPEN: [Carried Q14–Q19] Standing re-check at respawn time vs docking write time
+- OPEN: [Carried Q13–Q19] Tier regression rebuild cost mechanism — resource quantity, time, or step-count reduction, and named config constant
+- OPEN: [Carried Q13–Q19] Which in-world surface carries the rebuild gate explanation — comms intercept string or Bar cold dialogue at moment of regression
+- OPEN: [Carried Q13–Q19] Scaffolding third geometry state asset estimate — per-building-type day count required; floor is 2–4 days per type
+- OPEN: [Carried Q12–Q19] Defense emplacement milestone placement — blocking for any scope estimate including the emplacement
+- OPEN: [Carried Q12–Q19] Power-emplacement dependency raid AI design — query path architecture for rational targeting unspecified
+- OPEN: [Carried Q12–Q19] Power node degraded state visual signal — what communicates "systems affected" at 500 meters in flat-poly; must resolve before degraded model is built
+- OPEN: [Carried Q12–Q19] `SETTLEMENT_REGRESSION_THRESHOLD` numeric value — deferred pending M7 building type count and structural damage accumulation rates
+- OPEN: [Carried Q12–Q19] Building type count at Settlement, Colony, and City tiers — required for M8 visual regression asset estimate; Outpost floor confirmed at three
+- OPEN: [Carried Q12–Q19] Tier regression milestone placement — stat-only regression could ship earlier; geometry regression requires asset pass acknowledgment first
+- OPEN: [Carried Q11–Q19] Assault-scale split-vector spawn bearing offsets for M7 solo — two approach bearings must be named config constants
+- OPEN: [Carried Q11–Q19] First-raid protection window co-op edge case — whether `player_has_had_clean_atmospheric_view` requires both players or only the triggering player
+- OPEN: [Carried Q3–Q19] Per-faction rivalry heat values — config architecture must support per-faction overrides from day one; no authored values for any milestone
+- OPEN: [Carried Q3–Q19] Defection multiplier post-commitment — whether `FACTION_STANDING_LOSS_MULTIPLIER` increases after commitment NPC trigger; deferred, applies post-commitment only
+- OPEN: [Carried Q5–Q19] Hostile floor numeric value — named config constant required; value deferred pending M5 playtest data
+- OPEN: [Carried Q5–Q19] Authored Hostile recovery trigger form — intermediary NPC, specific mission string, or faction-unique narrative unlock
+- OPEN: [Carried Q5–Q19] Mission pool sparsity definition in Degraded band — probability filter, reduced count, or mission type subset
+- OPEN: [Carried Q3–Q19] Commitment NPC dialogue content and content system — exact dialogue across settlement tier contexts; content system for reading settlement tier and raid history variables not yet designed
+- OPEN: [Carried Q3–Q19] Standing floor behavior post-commitment — whether standing can fall below a threshold with an allied faction after commitment
+- OPEN: [Carried Q3–Q19] Standing tooltip direction — whether tooltip fires at crossing 40 in both directions or only upward; threshold decided, directional trigger open
+- OPEN: [Carried Q4–Q19] Joint action delta magnitude for co-op — full or fractional standing consequence per participating player; must resolve before M8 mission resolution code ships
+- OPEN: [Carried Q4–Q19] Standing change cause attribution for co-op — notification surface for attributing triggering action and player role; deferred to M8; coupled to Path A / Path B selection
+- OPEN: [Carried Q3–Q19] Contested airspace spawn geometry — two-spawn-axis design for opposing faction intercepts in split-commitment co-op settlement; deferred to M8
+- OPEN: [Carried Q6–Q19] Passive decay milestone — at which milestone refusal-tracking decay earns scope; requires M5 event-only playtest data
+- OPEN: [Carried Q6–Q19] Refusal-tracking attribution rule — distinguishing deliberate decline from absence from never having reached a faction Bar
+- OPEN: [Carried Q6–Q19] `DECAY_FLOOR` numeric value — named config constant required, set above `HOSTILE_THRESHOLD`; value deferred pending M5 playtest data
+- OPEN: [Carried Q9–Q19] Hull capture standing delta magnitude per faction — named config constants required; numeric values deferred pending M5 playtest data
+- OPEN: [Carried Q9–Q19] Relative magnitude of hull capture versus mission failure standing consequence — unspecified
+- OPEN: [Carried Q10–Q19] Comms intercept string content per faction — one line per faction contact; exact wording is content design out of scope
+- OPEN: [Carried Q10–Q19] Patrol vector modifier numeric values — spawn timing offset and approach angle adjustment must be named config constants; values deferred pending M5 playtesting
+- OPEN: [Carried Q9–Q19] Bribe path design — fully deferred pending Bar rumor/informant surface and deferred-state store for hull provenance
+- OPEN: [Carried Q9–Q19] Salvage flag path design — fully deferred pending faction-specific grievance tracking
+- OPEN: [Carried Q7–Q19] M6 scope capacity — full committed M6 scope list required to determine whether galaxy-layer formation AI and threat-aware hold state both fit M6 or push to M7
+- OPEN: [Carried Q7–Q19] Build cost of threat-aware hold state — estimate gates M6 vs M7 placement
+- OPEN: [Carried Q7–Q19] Escort hold visual treatment — circular orbit, stationary hover, or trailing vector; UX decision required before M6 ships the layer-transition contract
+- OPEN: [Carried Q8–Q19] Mechanical resolution when a raid spawns during escort hold — escort engagement rules, destruction possibility, and player surface state unspecified
+- OPEN: [Carried Q7–Q19] Terrain avoidance timing — deferred alongside full atmospheric escort follow to M8
+- OPEN: [Carried Q11–Q19] `RAID_HARASSMENT_THRESHOLD` numeric value — named config constant required; value deferred pending M5 playtest data
+- OPEN: [Carried Q11–Q19] `RAID_ASSAULT_THRESHOLD` numeric value — named config constant required; value deferred pending M5 playtest data
+- OPEN: [Carried Q16–Q19] Registration delta calibration — whether standing cost at hot-hull registration is large enough to produce readable atmospheric pressure on Shuttle approach; cannot be answered before M5 playtest data; named config constants required from day one
+<!-- complete -->

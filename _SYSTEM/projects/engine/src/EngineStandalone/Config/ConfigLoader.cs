@@ -120,6 +120,27 @@ public class ConfigLoader : IConfigLoader
             };
         }
 
+        if (raw.TryGetValue("paths", out var pathsObj) && pathsObj is Dictionary<object, object> paths)
+        {
+            settings.Paths = new PathSettings
+            {
+                SessionsDir = GetString(paths, "sessions_dir", "output/sessions"),
+                OutputDir = GetString(paths, "output_dir", "output/design-docs"),
+                DataDir = GetString(paths, "data_dir", "data"),
+                InputDir = GetString(paths, "input_dir", "input"),
+                DefaultTeam = GetString(paths, "default_team", "beta-agents")
+            };
+        }
+
+        if (raw.TryGetValue("session", out var sessionObj) && sessionObj is Dictionary<object, object> session)
+        {
+            settings.Session = new SessionSettings
+            {
+                RunEval = GetBool(session, "run_eval", false),
+                LivePort = GetInt(session, "live_port", 8899)
+            };
+        }
+
         if (raw.TryGetValue("completion_marker", out var marker))
         {
             settings.CompletionMarker = marker?.ToString() ?? "\n<!-- complete -->\n";
@@ -286,6 +307,16 @@ public class ConfigLoader : IConfigLoader
         if (dict.TryGetValue(key, out var value))
         {
             return value?.ToString() ?? defaultValue;
+        }
+        return defaultValue;
+    }
+
+    private static bool GetBool(Dictionary<object, object> dict, string key, bool defaultValue)
+    {
+        if (dict.TryGetValue(key, out var value))
+        {
+            if (value is bool b) return b;
+            if (bool.TryParse(value?.ToString(), out var parsed)) return parsed;
         }
         return defaultValue;
     }

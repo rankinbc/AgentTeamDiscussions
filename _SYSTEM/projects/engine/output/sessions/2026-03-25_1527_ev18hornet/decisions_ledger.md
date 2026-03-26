@@ -1,0 +1,216 @@
+
+
+- DECIDED: Space Layer is 2D top-down, EV-faithful, binding through EV Core Loop milestone
+- DECIDED: Shallow 3D is deferred, not a current build target, and not permanently rejected
+- DECIDED: Navigation uses point-and-click or directional input on the map plane with no camera rotation, no altitude axis, no vertical targeting
+- DECIDED: System-to-system travel uses hyperspace jump via galaxy map selection and confirm
+- DECIDED: Within-system travel uses direct flight on the 2D plane with arrival proximity trigger
+- DECIDED: Hostile ships are rendered as standard sprites or flat-poly shapes on the nav plane
+- DECIDED: Combat is resolved fully on the 2D plane
+- DECIDED: Faction fleet raids appear as incoming contacts on the nav edge before reaching the planet
+- DECIDED: Planet entry is a deliberate player action triggering a layer transition from 2D space to 3D atmosphere
+- DECIDED: The 2D-to-3D dimensional shift at atmosphere entry is a core design feature, not a seam
+- DECIDED: Raid handoff gives player an intercept opportunity in 2D space first, then atmospheric engagement if fleet reaches the planet
+- DECIDED: Space layer must be readable within 60 seconds by a player with zero EV context
+- DECIDED: Player ship is always the most visually prominent element on screen
+- DECIDED: Planets and stations have persistent labels; size indicates rough importance
+- DECIDED: Hostile contacts use a distinct color from the faction palette
+- DECIDED: Jump points are visually distinct landmarks, not unmarked edges
+- DECIDED: Nav map defaults to current system view, not galaxy view
+- DECIDED: Each entity class must have a distinct silhouette at minimum nav-map scale
+- DECIDED: Shallow 3D review reopens after core loop is validated as fun with real player data
+- OPEN: Vertical range (min/max altitude delta between space and atmosphere boundary) if shallow 3D is revisited
+- OPEN: Camera system behavior for vertical movement in shallow 3D
+- OPEN: Targeting reticle communication for above/below enemies in a flat-poly environment
+- OPEN: Visual language for altitude readability without textures, lighting, or atmospheric haze
+
+- DECIDED: Galaxy scale at Milestone 3 is 4–6 systems
+- DECIDED: Systems are hand-authored in YAML, not procedurally generated
+- DECIDED: Atmospheric terrain at Milestone 3 is one placeholder mesh per planet, color-swapped for biome identity
+- DECIDED: Full galaxy map is visible from session one
+- DECIDED: Access is gated by standing, faction passage, or jump point control — not map visibility
+- DECIDED: Hidden systems mechanic is rejected
+- DECIDED: Authored investment at Milestone 3 is faction geography and mission string placement, not atmospheric terrain variety
+- DECIDED: Atmospheric identity expansion is deferred until after the EV Core Loop milestone
+- DECIDED: Atmospheric terrain is built only for planets that demonstrably earn repeat visits post-core-loop
+- DECIDED: Procedural generation reopens only after the authored template proves the loop works, and produces variants of a proven structure
+- DECIDED: Minimum viable faction structure requires 3–4 faction territories with deliberate overlap
+- DECIDED: 1–2 contested chokepoints required at Milestone 3
+- DECIDED: Player starting zone must be placed such that expansion leads naturally into contested area
+- DECIDED: Faction geography is defined in YAML as graph structure
+- DECIDED: Planet identity comes from faction logic and mission string placement, not terrain art
+- DECIDED: Each Milestone 3 planet has a faction owner or contested status, a mission string role, a standing threshold, and one placeholder mesh
+- DECIDED: The starting system has a distinct design contract from the rest of the map
+- DECIDED: Starting system must have one dominant faction with legible color and behavior
+- DECIDED: Starting system must contain a clear standing feedback moment within the first session
+- DECIDED: No contested chokepoint pressure until the player has made at least one voluntary jump
+- DECIDED: The first jump is the moment galaxy map, standing system, and atmospheric layer cohere as a single game, and must exist at Milestone 3
+- DECIDED: Building 45 distinct atmospheric planets before core loop validation is out of scope
+- OPEN: What is the minimum number of systems needed to support two simultaneous contested chokepoints that do not share a trade route
+- OPEN: How does the map communicate a standing-gated system to a player who has never encountered one
+- OPEN: Which faction owns the starting system and what is their relationship to the two contested chokepoints the player encounters in the first 2–3 sessions
+
+- DECIDED: Atmospheric entry is a gated transition with a designed entry sequence, not technically seamless simultaneous layer residency
+- DECIDED: Entry is committed and irrevocable — no abort once dive is initiated
+- DECIDED: All entities follow identical transition logic; no entity spawns inside atmosphere by designer fiat
+- DECIDED: First atmospheric entry in a session always plays the full cinematic beat with no skip option
+- DECIDED: Subsequent entries use the same beat unless the player opts out after demonstrating understanding
+- DECIDED: Entry sequence is approximately three seconds of external camera showing ship crossing the atmosphere boundary while the 3D layer loads behind it
+- DECIDED: Control returns to the player already in mouse-flight mode, at altitude, oriented downward toward terrain
+- DECIDED: Entry altitude is a function of dive angle, not a fixed designer value
+- DECIDED: Steep dive produces low entry point; shallow arc produces high entry point
+- DECIDED: Escorts emerge behind the player in formation order on physics-derived timing, not scripted timing
+- DECIDED: Faction raiders that breach the 2D intercept window initiate their own dive on their own timeline
+- DECIDED: The flat-poly atmosphere boundary must read as a distinct intentional surface, not ambient environmental detail
+- DECIDED: Layer legibility must come from geometry and color alone, not haze, blur, or atmospheric scattering
+- OPEN: Minimum altitude range — vertical delta between entry point and lowest flyable altitude
+- OPEN: Re-emergence behavior — whether exit triggers a symmetric sequence and what the player's state is in 2D space on return
+- OPEN: Raid timing communication — how the 2D nav layer signals raiding fleet approach time to a player who has not yet experienced an atmospheric raid
+
+- DECIDED: Enemy factions can permanently destroy buildings during raids
+- DECIDED: Loss condition is tier regression, not total destruction — settlement continues to exist but loses tier-unlocked functions
+- DECIDED: Raid damage is targeted, not random — raiders destroy infrastructure servicing competing factions or threatening raiding faction interests
+- DECIDED: Standing is the primary currency of recovery, not resources — rebuild flow is standing-gated to keep gameplay inside the faction system
+- DECIDED: Altitude-visible structures (e.g. docking towers) have deliberately slower rebuild speeds to create meaningful skyline absence
+- DECIDED: Destruction visual is removed geometry (absent silhouette), not particle-effect ruins — gap is the scar
+- DECIDED: Standing must be legible before it becomes consequential — players must have seen standing move, seen a faction contact on nav edge, and made a conscious intercept choice before a raid resolves
+- DECIDED: Emergence loop is faction standing mismanagement → escalating raid scale → atmospheric defense failure → tier loss → economy contraction → standing re-engagement → faction re-pressure
+- DECIDED: Every building requires per-settlement exists/destroyed state persisting across session boundaries, co-op sync, off-screen raid resolution, and the standing-gated rebuild flow
+- OPEN: Tier regression rebuild path — same founding investment as original construction, or faster recovery path? (standing must remain primary gate regardless)
+- OPEN: Minimum building type count at Outpost tier — drives all state persistence estimates, co-op sync scope, and raid targeting logic; must be defined before settlement scope can be estimated
+- OPEN: Faction system queryability milestone — standing-gated rebuilding at Settlement milestone (M7) requires faction standing API from M5; dependency must be flagged in M5 acceptance criteria
+
+- DECIDED: Fleet size is capped by physical fighter bay slots on the player's hull, not by a command rating pilot stat
+- DECIDED: Command rating as a named pilot stat is rejected; progression signal comes from ship class/hull architecture
+- DECIDED: Fleet composition docked at or patrolling a settlement contributes to that settlement's deterrence profile against faction raids
+- DECIDED: Raid scale (ships dispatched, aggression tier) is partially derived from demonstrated fleet strength at location
+- DECIDED: Deterrence effect is emergent cause-and-effect, not a designer-authored buff
+- DECIDED: Fleet deterrence interaction must be present in the raid calculation from the moment fleet escorts are functional
+- DECIDED: A captured ship cannot be added to the player's fleet immediately; a port run is required first
+- DECIDED: The faction that owned the captured ship registers the loss at moment of capture, creating a hot-hull window of earned risk
+- DECIDED: Capturing a faction ship is a standing trigger event for that faction
+- DECIDED: The standing consequence must be legible at or immediately after the moment of capture via bar contact, nav message, or faction comm
+- DECIDED: Standing must not move before the player understands why; hidden standing penalties are ruled out
+- DECIDED: Faction provenance of a captured hull (which faction, standing cost, registration options) must be surfaced before the player commits to the port run
+- DECIDED: Fighter bay AI scope is a separate decision from the cap mechanism and must be answered per milestone
+- DECIDED: The fleet milestone (M6) must specify how many escort ships have working AI at ship-off, what behaviors are included, and what is deferred
+- DECIDED: A capital ship with eight bay slots is not eight functional escorts unless eight escorts are explicitly scoped
+- OPEN: At which milestone does the first escort ship have working AI with formation behavior in 2D space (M6 architecture vs M6 functional AI)
+- OPEN: At what milestone does escort atmosphere-dive execute, and is it in scope for the same milestone as 2D escort AI
+- OPEN: Does port run registration offer player choices (bribe, salvage flag, accept consequence) or is the standing cost fixed on capture
+- OPEN: If interdicted during the hot-hull window, is the hull itself the hostility trigger for the owning faction or only the standing value
+
+- DECIDED: Option B (co-op state model) is adopted — the galaxy advances when the hosting player's instance is running; the world does not pause when one player goes offline
+- DECIDED: Option A (paused galaxy) is rejected — it reduces co-op to a scheduling dependency and strips the SimCopter offline-change payoff
+- DECIDED: Option C (independent instances that merge on reconnect) is rejected — sync deltas without shared cause are artifacts, not traceable consequences
+- DECIDED: The hosting player's machine is the authoritative simulation host — a hard architectural constraint, not a design choice
+- DECIDED: If the hosting player goes offline, the simulation pauses regardless of design intent
+- DECIDED: Offline settlements produce a distinct raid profile from crewed settlements — offline reads as low-threat, attracting harassment-scale raids, not assault-scale raids
+- DECIDED: This is deterrence math applied consistently, not a protection rule added to spare offline players
+- DECIDED: A docked fleet at a settlement contributes deterrence regardless of the owning player's online status
+- DECIDED: Player presence and ship presence are distinct variables in the raid calculation
+- DECIDED: The raid calculation reads hull count at location, not session status
+- DECIDED: The last-present player is the attributable actor for standing-consequential events in their session window
+- DECIDED: Standing moves originating from Player 1's active session are attributed to Player 1's standing track
+- DECIDED: The return-log is a required feature, not a print statement — it is discrete scope with its own implementation cost
+- DECIDED: Minimum readable return-log sentence includes: which faction acted, what was destroyed, what standing moved and on whose track, and what intercept opportunity existed or was taken
+- DECIDED: The return-log must be assigned a milestone slot before M8 co-op work begins
+- DECIDED: Standing uses per-player tracks with a shared settlement state — physical settlement state is shared, standing ledger is per-player
+- DECIDED: The raid calculation targeting a shared settlement reads the combined deterrence profile (both players' docked fleets) but attributes standing consequence to the player whose session window was active
+- OPEN: Harassment vs. assault raid definitions — concrete parameters (ship count ceiling, building damage cap, tier regression eligibility) must be defined before offline raid logic is implemented and before M8 co-op scope can be estimated
+- OPEN: Dual-offline resumption — canonical session state when both host and client go offline simultaneously (last committed save vs. elapsed-time reconstruction)
+- OPEN: Cross-player standing triggers — whether Player 1's action causing a standing consequence on a faction also pressuring Player 2 moves Player 2's track, or requires an explicit shared-action mechanic not yet designed; must be resolved before M5 faction standing API is specified
+- OPEN: Return-log milestone slot — M7 Settlement or M8 Co-op; if M7 proceeds without return-log, first offline damage events will be unreadable
+- OPEN: Host selection protocol — whether host role is fixed or negotiable, and how asymmetric hosting affects asymmetric faction pressure accumulation; must be surfaced in M8 co-op spec
+
+- DECIDED: Faction commitment uses a hybrid model — inverse standing math as ongoing pressure, authored bar mission as point-of-no-return gate
+- DECIDED: The point of no return is a mission accepted from a named bar NPC whose dialogue explicitly names the cost before player confirms
+- DECIDED: Mutual exclusivity is enforced by a boolean mission state flag, not a standing threshold value alone
+- DECIDED: Standing threshold triggers NPC availability; mission acceptance triggers faction string closure
+- DECIDED: Gaining standing with one major faction costs standing with the other on a shared inverse axis (arithmetic, not authored)
+- DECIDED: Standing must be legible before the commitment moment, not discovered retroactively
+- DECIDED: The bar NPC commitment gate serves as onboarding for the faction exclusivity system
+- DECIDED: Simultaneous allied standing with both factions is possible before the commitment mission; arithmetically self-defeating after; architecturally closed once mission is accepted
+- DECIDED: Two raid fleets on the nav edge simultaneously is a designed emergent situation, not a punishment
+- DECIDED: A player at negative standing who has not accepted the commitment mission is in a degraded but recoverable position (not locked)
+- DECIDED: Player faction formation is not current scope; flagged as post-City-tier design target pending City tier validation and explicit milestone slot
+- OPEN: Commitment threshold standing value — at what standing does the commitment NPC become available (required before M5 faction standing API)
+- OPEN: Inverse axis ratio — 1:1 or asymmetric (must be a named decision before M5 implementation)
+- OPEN: Commitment mission count per faction — one gate or multi-mission string leading to irrevocable final mission (affects bar content scope at M5)
+- OPEN: Faction string state persistence in co-op — does Player 1 accepting Confederation commitment close Player 2's Rebel string (must resolve before M5 faction standing API)
+- OPEN: Recovery from degraded-but-uncommitted standing — is recovery possible, what does it cost, is it standing-gated (must be consistent with tier regression rebuild path decision)
+
+- DECIDED: Bar and exploration use walking sim treatment — full investment as session one hook
+- DECIDED: Boarding is permanently abstracted as a stats check after shield depletion — not a candidate for FPS expansion
+- DECIDED: Raid breach defense gets minimal FPS treatment — one weapon type, raycast/simple projectile, basic enemy AI (idle/alert/attack/dead), hit feedback, death state, flat-poly assets, no cover geometry, no melee, no full animation rig
+- DECIDED: Melee is out of scope
+- DECIDED: Cover geometry is out of scope
+- DECIDED: On-foot combat scope is explicitly capped at Settlement milestone (M7)
+- DECIDED: On-foot combat cannot expand into hours belonging to atmospheric layer polish
+- DECIDED: If boarding FPS is ever revisited it becomes a separate milestone with a separate scope estimate — not added inside an existing milestone
+- DECIDED: EV's abstracted boarding model (positional and economic tension, stats check) is the design precedent — not a limitation to overcome
+- OPEN: Specific weapon type for raid breach defense not yet selected
+- OPEN: Exact enemy AI behavior thresholds (alert range, attack range) not yet specified
+- OPEN: Hit feedback implementation details not yet defined
+
+- DECIDED: Option B adopted — ship loss on death, player respawns at nearest friendly port in a starter ship
+- DECIDED: Standing is not lost on death — it is relational, not material, and survives across sessions
+- DECIDED: Credits are not lost on death — ship replacement cost is the sole economic consequence
+- DECIDED: Option A (zero penalty) rejected — severs emotional attachment required for meaningful consequence
+- DECIDED: Option C (unbanked credit loss) rejected — stacks redundant consequence on top of ship loss without adding signal
+- DECIDED: Option D (permadeath) rejected as default — ends emergence chain; may exist as a separate mode with its own milestone slot
+- DECIDED: Death is a world-state event, not a player-state reset — deterrence profile, faction combat outcome, and raid window all update on death
+- DECIDED: Deterrence profile drops immediately on death — destroyed ship is removed from hull count at location
+- DECIDED: The faction that killed the player registers a combat outcome as a standing-relevant event
+- DECIDED: Raid window advances after player death — contested space near settlement is recalculated as less defended
+- DECIDED: Death screen must surface exactly one sentence of faction consequence before respawn — format is faction acted, consequence, world change
+- DECIDED: Hidden consequences at the death screen are ruled out — same principle as hidden standing penalties elsewhere
+- DECIDED: Atmospheric death respawns the player at distance in 2D space above the system, not at port
+- DECIDED: After atmospheric death the player faces a second dive decision — return to contested settlement or not
+- DECIDED: Re-entry after atmospheric death follows existing dive angle rule — no designer override for return geometry
+- DECIDED: Standard Option B respawn (nearest friendly port) applies to death in 2D space only
+- DECIDED: Replacement ship arrival via death must feel like regression — perceptible loss, not merely arithmetic
+- DECIDED: Death path is a third entry into the existing replacement ship flow — no new system required
+- OPEN: Spatial model flag unresolved — whether space layer is 2D top-down or 3D must be adjudicated before M3 milestone estimates
+- OPEN: Specific respawn location rules for 2D space death — definition of "nearest" and "friendly" port required before death flow is implemented
+- OPEN: Starter ship acquisition model at respawn — given, loaned, or purchased; credit floor guarantee must be defined before death flow is built
+- OPEN: Hot-hull fate on death — whether hull destruction closes or escalates the owning faction's standing consequence remains unresolved from the capture flow decision log
+
+- DECIDED: Minimum ship count at EV Core Loop milestone is 3 (Shuttle, Light Fighter, one faction patrol class)
+- DECIDED: Shuttle must handle and bank perceptibly worse than the Light Fighter
+- DECIDED: Minimum system count at EV Core Loop milestone is 4 (starting system, two faction-territory systems, one contested chokepoint)
+- DECIDED: Contested chokepoint must exist in authored YAML graph before Milestone 3 ships
+- DECIDED: Minimum building count at Outpost tier is 4 (Generator, Landing Pad, Comm Tower, Defense Turret)
+- DECIDED: Each building must have a distinct silhouette readable from 400 meters altitude in flat-poly
+- DECIDED: Each building must map to a raider motivation or it is not on the Outpost list
+- DECIDED: Each of the four systems must have faction disposition authored before session one
+- DECIDED: Starting system is a distinct design artifact carrying full onboarding load with at least one standing-feedback moment the player did not cause
+- DECIDED: Landing Pad is the first building placed in the first playable session
+- DECIDED: First testable loop is one ship, one system, two buildings (Shuttle, Generator, Landing Pad, one faction patrol, one bar mission)
+- DECIDED: Build sequence is testable loop first, complete scope second
+- DECIDED: Standing is the primary gate for tier regression rebuild path
+- OPEN: Standing gate UX — how the map communicates a standing-gated system visually
+- OPEN: Starting system faction ownership and relationship to the two contested chokepoints in sessions 2–3
+- OPEN: Tier regression rebuild tempo — same founding investment or faster recovery path
+- OPEN: Faction system queryability milestone — must be flagged in M5 acceptance criteria before M7
+- OPEN: Fleet AI milestone scope — at which milestone does the first escort ship have working 2D formation AI
+- OPEN: Atmospheric escort behavior milestone timing
+- OPEN: Port run registration options — fixed standing cost or player-choice branching
+- OPEN: Hot-hull faction response — hull as hostility trigger vs. standing value
+- OPEN: Harassment vs. assault raid definitions — ship count ceiling, building damage cap, tier regression eligibility
+- OPEN: Dual-offline resumption canonical state — last committed save vs. elapsed-time reconstruction
+- OPEN: Cross-player standing triggers — whether Player 1's action moves Player 2's standing track
+- OPEN: Return-log milestone slot — M7 or M8
+- OPEN: Host selection protocol — fixed or negotiable
+- OPEN: Commitment threshold standing value for commitment NPC availability
+- OPEN: Inverse axis ratio — 1:1 or asymmetric; must be named decision before M5 implementation
+- OPEN: Commitment mission count per faction — one gate or multi-mission string
+- OPEN: Faction string state persistence in co-op — whether Player 1's commitment closes Player 2's string
+- OPEN: Recovery cost and gate for degraded-but-uncommitted standing
+- OPEN: Specific weapon type for raid breach defense
+- OPEN: Enemy AI behavior thresholds — alert range and attack range
+- OPEN: Respawn location rules — definition of nearest and friendly port for 2D death
+- OPEN: Starter ship acquisition at respawn — given, loaned, or purchased; credit floor guarantee required
+- OPEN: Hot-hull fate on death — whether hull destruction closes or escalates owning faction standing consequence
+
+<!-- complete -->

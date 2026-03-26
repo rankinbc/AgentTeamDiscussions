@@ -1,0 +1,116 @@
+# Atmosphere Boundary Visual Signature
+
+*Generated: 2026-03-25 18:16 | Question 29 | 271s | Mode: ev18hornet*
+
+## Decisions
+
+- DECIDED: The atmosphere boundary visual signature consists of two separable elements — a sky dome color-snap and an optional ring geometry — that are scoped and decided independently; neither blocks the other
+- DECIDED: Sky dome color-snap is not a design question; it is an implementation item: the sky polygon changes from planet-hue to space-black at `ATMOSPHERIC_ENTRY_ALTITUDE` as a single float swap on an existing mesh
+- DECIDED: Sky dome color-snap ships as a named config-constant-keyed behavior; the snap altitude is `ATMOSPHERIC_ENTRY_ALTITUDE`, already established in prior decisions; no new constants required
+- DECIDED: Color alone does not produce a legible surface in the flat-poly aesthetic; the snap requires a geometric event to read as crossing something real, not as a loading state
+- DECIDED: The ring geometry's primary function for a new player is spatial confirmation — marking an inside and an outside — not faction information; this is the correct first-session job of the boundary regardless of what faction information is layered on later
+- DECIDED: Static ring geometry must ship before any live faction read variant is scoped; a new player who does not yet understand faction standing cannot read a conditional color shift as threat information; static geometry teaches the threshold before the threshold says anything conditional
+- DECIDED: The flat-poly ring is honest spatial communication in the game's own aesthetic language; it is not a HUD made of polygons provided it does not pretend to be atmosphere or clouds — geometry marking a threshold is what flat-poly does
+- DECIDED: Static ring estimate is 2–3 days: 8–12 flat panels at `ATMOSPHERIC_ENTRY_ALTITUDE`, one authored color, single mesh, authored rotation behavior; this is the only form eligible for scope commitment before Q22 is resolved
+- DECIDED: Live faction read variant — ring querying standing at render time, branching on standing band, expressing faction pressure through color, rotation rate, or panel count — is deferred; it requires a standing read in a geometry context not yet wired, per-faction authored states, and a shader or material swap path that does not exist; minimum estimate is 1–2 weeks and it cannot be scoped before Q22 is resolved
+- DECIDED: Q22 must be resolved before the ring earns scope in live-faction-read form; the starting system decision from Q27 places Confederation patrol presence on the galaxy map via Option A, but Q22 resolution status for systems beyond the starting system is the blocking question for ring-as-information-surface
+- DECIDED: If Q22 is confirmed as Option A across all authored systems, the live-faction-read ring is a redundant signal and earns scope only if redundancy is judged to carry its build cost; that judgment cannot be made until Q22 closes
+- DECIDED: If Q22 remains open beyond the starting system, the live-faction-read ring is load-bearing infrastructure; it must be named as such before scoping, not scoped as cosmetic geometry that happens to carry information
+
+---
+
+## Open Questions
+
+- OPEN: Planet sky hue — what color value or palette defines planet-sky below `ATMOSPHERIC_ENTRY_ALTITUDE`; this is the downstream dependency for the dome snap and must be authored before the sky mesh is colored; not resolved in this discussion
+- OPEN: Q22 resolution status beyond the starting system — the starting system's Confederation patrol presence satisfies Option A as decided in Q27, but whether Option A applies to all authored systems or whether some systems require Option B or C is the blocking question for ring-as-information-surface scope; this is Soren's stated agenda question and was not answered
+- OPEN: Whether the static ring earns scope in the Hornet Layer milestone — the 2–3 day estimate is affordable; the milestone placement question is whether spatial confirmation at the boundary is a Hornet Layer build item or deferred to a later milestone when the full entry altitude geometry is authored; not resolved
+- OPEN: Ring panel authored color for static version — one authored color per system or one global color; if global, which color; not specified
+- OPEN: Ring rotation behavior — rotation rate and direction for the static version must be authored as a named config constant, not hardcoded; value unspecified
+- OPEN: Live-faction-read ring full design — what the ring expresses per standing band (color, rotation rate, panel count, or combination), what the authored states look like per faction, and what the standing read path looks like at render time; fully deferred pending Q22 resolution and static ring delivery
+- OPEN: Whether the static ring resolves the Q21 diegetic sky marker question — Max identifies the ring as the answer to diegetic sky markers from Q21; this connection is not formally closed; the Q21 open question (per-marker day estimate for flat-poly orbital reference geometry) may be satisfied by the ring estimate or may require a separate answer depending on whether the ring serves the orbital reference function as designed
+- OPEN: [Carried from Q27] Total system count in the authored galaxy — six to eight systems with full faction content; starting system plus neutral buffer plus contested chokepoint accounts for three; remaining budget unspecified
+- OPEN: [Carried from Q27] Whether one contested chokepoint or two serves sessions 2–3
+- OPEN: [Carried from Q27] What happens to Rebel standing during the starting-system phase — whether passive degradation crosses 40 before the player reaches the neutral buffer
+- OPEN: [Carried from Q27] How many sessions at expected mission pacing until standing tooltip fires at 40 in either direction — requires M5 playtest data
+- OPEN: [Carried from Q27] Whether the neutral buffer system has authored faction presence or is genuinely faction-neutral
+- OPEN: [Carried from Q27] What Rebel standing value the player arrives at the first contested chokepoint under normal play
+- OPEN: [Carried from Q22] Galaxy map threat visibility option for systems beyond the starting system — Option A (repurposable at authoring cost), Option B (requires read path and icon state), or Option C (new system); blocking question for ring-as-information-surface and for all signal architecture
+- OPEN: [Carried from Q22] Galaxy map build cost per option for non-starting systems
+- OPEN: [Carried from Q22] Minimum galaxy-layer signal that creates urgency without enabling spectator behavior
+- OPEN: [Carried from Q22] Whether approach time precision should require atmospheric entry to resolve
+- OPEN: [Carried from Q22] First-raid protection window and approach signal interaction — whether the protection window modifies the fidelity or presentation of the approach signal for pre-first-descent players
+- OPEN: [Carried from Q22] What pulls a new player into the atmospheric layer before they understand why the threat matters
+- OPEN: [Carried from Q21] Canonical exit vector computation rule — heading at threshold crossing, average over final N meters, or other formulation; blocks 3D-to-2D coordinate transform build
+- OPEN: [Carried from Q21] Patrol spawn point architecture — single orbital insertion anchor or distributed across orbital shell; must confirm before positional re-emergence ships
+- OPEN: [Carried from Q21] Positional re-emergence milestone placement
+- OPEN: [Carried from Q21] M6 escort hold contract amendment — escort coverage must be specified for both entry and exit vectors before M6 ships the layer-transition contract
+- OPEN: [Carried from Q21] Oblique and corkscrewing exit edge cases
+- OPEN: [Carried from Q20] `ATMOSPHERIC_ENTRY_ALTITUDE` numeric value — config constant required before Hornet Layer ships; value deferred pending flight model playtest data
+- OPEN: [Carried from Q20] `ATMOSPHERIC_FLOOR_ALTITUDE` numeric value — must satisfy `ATMOSPHERIC_FLOOR_ALTITUDE < BUILDING_ROOFLINE_HEIGHT`; value deferred pending building height authoring decisions
+- OPEN: [Carried from Q20] `BUILDING_ROOFLINE_HEIGHT` as named constant — single authored constant or per-building-type value; must resolve before pad damage model and collision surfaces are built
+- OPEN: [Carried from Q20] Minimum range depth for pacing — vertical separation producing perceivable descent time at Hornet flight speeds; requires Hornet Layer playtest data
+- OPEN: [Carried from Q20] Three feel-state band boundaries — numeric boundaries deferred to post-Hornet-Layer playtest and M8 faction system integration
+- OPEN: [Carried from Q20] LOD transition altitude triggers — deferred pending terrain complexity decisions and Hornet Layer performance profiling
+- OPEN: [Carried from Q19] Attribution path selection — Path A (content change, one conditional branch) vs Path B (new cross-player standing comparison surface); must resolve before M7 or M8 attribution scope is locked
+- OPEN: [Carried from Q19] Exact co-op comms intercept string content for `max()` conditions
+- OPEN: [Carried from Q17–Q19] Whether M5 shipped comms intercept infrastructure as decided in Q10 — blocking dependency for M7 and M8 extension estimates
+- OPEN: [Carried from Q17–Q19] Counter scope for `raids_since_last_docking` — per-faction or aggregate
+- OPEN: [Carried from Q17–Q19] `raids_since_last_docking` reset behavior on docking at non-owned neutral faction port
+- OPEN: [Carried from Q17–Q19] Exact string content for counter output at atmospheric entry
+- OPEN: [Carried from Q14–Q19] Pad destruction and anchor invalidation — Option A (degraded pad remains valid anchor) vs Option B (pad below threshold invalidates anchor with fallback chain)
+- OPEN: [Carried from Q14–Q19] Standing re-check at respawn time vs docking write time
+- OPEN: [Carried from Q13–Q19] Tier regression rebuild cost mechanism — resource quantity, time, or step-count reduction, and named config constant
+- OPEN: [Carried from Q13–Q19] Which in-world surface carries the rebuild gate explanation — comms intercept string or Bar cold dialogue at moment of regression
+- OPEN: [Carried from Q13–Q19] Scaffolding third geometry state asset estimate — per-building-type day count required; floor is 2–4 days per type
+- OPEN: [Carried from Q12–Q19] Defense emplacement milestone placement — blocking for any scope estimate including the emplacement
+- OPEN: [Carried from Q12–Q19] Power-emplacement dependency raid AI design — query path architecture for rational targeting unspecified
+- OPEN: [Carried from Q12–Q19] Power node degraded state visual signal — what communicates "systems affected" at 500 meters in flat-poly; must resolve before degraded model is built
+- OPEN: [Carried from Q12–Q19] `SETTLEMENT_REGRESSION_THRESHOLD` numeric value — deferred pending M7 building type count and structural damage accumulation rates
+- OPEN: [Carried from Q12–Q19] Building type count at Settlement, Colony, and City tiers — required for M8 visual regression asset estimate; Outpost floor confirmed at three
+- OPEN: [Carried from Q12–Q19] Tier regression milestone placement — stat-only regression could ship earlier; geometry regression requires asset pass acknowledgment first
+- OPEN: [Carried from Q11–Q19] Assault-scale split-vector spawn bearing offsets for M7 solo — two approach bearings must be named config constants
+- OPEN: [Carried from Q11–Q19] First-raid protection window co-op edge case — whether `player_has_had_clean_atmospheric_view` requires both players or only the triggering player
+- OPEN: [Carried from Q3–Q27] Per-faction rivalry heat values — config architecture must support per-faction overrides from day one; no authored values for any milestone
+- OPEN: [Carried from Q3–Q27] Defection multiplier post-commitment — whether `FACTION_STANDING_LOSS_MULTIPLIER` increases after commitment NPC trigger; deferred, applies post-commitment only
+- OPEN: [Carried from Q5–Q27] Hostile floor numeric value — named config constant required; value deferred pending M5 playtest data
+- OPEN: [Carried from Q5–Q27] Authored Hostile recovery trigger form — intermediary NPC, specific mission string, or faction-unique narrative unlock
+- OPEN: [Carried from Q5–Q27] Mission pool sparsity definition in Degraded band — probability filter, reduced count, or mission type subset
+- OPEN: [Carried from Q3–Q27] Commitment NPC dialogue content and content system — exact dialogue across settlement tier contexts; content system for reading settlement tier and raid history variables not yet designed
+- OPEN: [Carried from Q3–Q27] Standing floor behavior post-commitment — whether standing can fall below a threshold with an allied faction after commitment
+- OPEN: [Carried from Q3–Q27] Standing tooltip direction — whether tooltip fires at crossing 40 in both directions or only upward; threshold decided, directional trigger open
+- OPEN: [Carried from Q4–Q27] Joint action delta magnitude for co-op — full or fractional standing consequence per participating player; must resolve before M8 mission resolution code ships
+- OPEN: [Carried from Q4–Q27] Standing change cause attribution for co-op — notification surface for attributing triggering action and player role; deferred to M8; coupled to Path A / Path B selection
+- OPEN: [Carried from Q3–Q27] Contested airspace spawn geometry — two-spawn-axis design for opposing faction intercepts in split-commitment co-op settlement; deferred to M8
+- OPEN: [Carried from Q6–Q27] Passive decay milestone — at which milestone refusal-tracking decay earns scope; requires M5 event-only playtest data
+- OPEN: [Carried from Q6–Q27] Refusal-tracking attribution rule — distinguishing deliberate decline from absence from never having reached a faction Bar
+- OPEN: [Carried from Q6–Q27] `DECAY_FLOOR` numeric value — named config constant required, set above `HOSTILE_THRESHOLD`; value deferred pending M5 playtest data
+- OPEN: [Carried from Q9–Q27] Hull capture standing delta magnitude per faction — named config constants required; numeric values deferred pending M5 playtest data
+- OPEN: [Carried from Q9–Q27] Relative magnitude of hull capture versus mission failure standing consequence — unspecified
+- OPEN: [Carried from Q10–Q27] Comms intercept string content per faction — one line per faction contact; exact wording is content design out of scope
+- OPEN: [Carried from Q10–Q27] Patrol vector modifier numeric values — spawn timing offset and approach angle adjustment must be named config constants; values deferred pending M5 playtesting
+- OPEN: [Carried from Q9–Q27] Bribe path design — fully deferred pending Bar rumor/informant surface and deferred-state store for hull provenance
+- OPEN: [Carried from Q9–Q27] Salvage flag path design — fully deferred pending faction-specific grievance tracking
+- OPEN: [Carried from Q7–Q27] M6 scope capacity — full committed M6 scope list required to determine whether galaxy-layer formation AI and threat-aware hold state both fit M6 or push to M7
+- OPEN: [Carried from Q7–Q27] Build cost of threat-aware hold state — estimate gates M6 vs M7 placement
+- OPEN: [Carried from Q7–Q27] Escort hold visual treatment — circular orbit, stationary hover, or trailing vector; UX decision required before M6 ships the layer-transition contract
+- OPEN: [Carried from Q8–Q27] Mechanical resolution when a raid spawns during escort hold — escort engagement rules, destruction possibility, and player surface state unspecified
+- OPEN: [Carried from Q7–Q27] Terrain avoidance timing — deferred alongside full atmospheric escort follow to M8
+- OPEN: [Carried from Q11–Q27] `RAID_HARASSMENT_THRESHOLD` numeric value — named config constant required; value deferred pending M5 playtest data
+- OPEN: [Carried from Q11–Q27] `RAID_ASSAULT_THRESHOLD` numeric value — named config constant required; value deferred pending M5 playtest data
+- OPEN: [Carried from Q16–Q27] Registration delta calibration — whether standing cost at hot-hull registration is large enough to produce readable atmospheric pressure on Shuttle approach; cannot be answered before M5 playtest data; named config constants required from day one
+- OPEN: [Carried from Q25–Q27] Patrol-tier audio dependency — whether raid composition tier is readable at breach combat spawn point at M7 build time
+- OPEN: [Carried from Q25–Q27] Exact alarm audio asset — one asset or two (harassment vs. assault); must be authored before M7 ships breach combat surface
+- OPEN: [Carried from Q25–Q27] `HIT_DESATURATION_DURATION` numeric value — named config constant required; value deferred pending M7 breach combat playtest
+- OPEN: [Carried from Q25–Q27] `HIT_DESATURATION_INTENSITY` numeric value — named config constant required; value deferred pending M7 breach combat playtest
+- OPEN: [Carried from Q25–Q27] Damage-state desaturation depth modulation milestone — at which milestone building damage model exposes live state query at render time
+- OPEN: [Carried from Q23–Q27] M7 on-foot combat milestone placement — minimum viable breach combat in M7 or M8
+- OPEN: [Carried from Q23–Q27] Comms line exact wording at breach — one line communicating the aerial alternative that was unavailable
+- OPEN: [Carried from Q23–Q27] Enemy pathfinding scope inside building geometry — full pathfinding versus converging-vector movement toward player position
+- OPEN: [Carried from Q23–Q27] Death/fail state for on-foot breach — connection to Q14/Q15 respawn anchor and Shuttle assignment flow
+- OPEN: [Carried from Q23–Q27] Supply chain integration milestone — when faction-sourced ammo or standing-gated sidearm acquisition earns scope
+- OPEN: [Carried from Q24–Q27] Building interior dimensions for shelter, power node, and storage unit — blocking for `ENEMY_ALERT_RANGE` and `ENEMY_ATTACK_RANGE` authoring
+- OPEN: [Carried from Q24–Q27] Whether interior dimensions vary by tier or use a single authored value per type
+- OPEN: [Carried from Q24–Q27] `ENEMY_ALERT_RANGE` numeric value — deferred pending Outpost interior dimension authoring and playable atmospheric intercept baseline
+- OPEN: [Carried from Q24–Q27] `ENEMY_ATTACK_RANGE` numeric value — deferred pending Outpost interior dimension authoring and playable atmospheric intercept baseline
+- OPEN: [Carried from Q23–Q27] Sidearm effective range numeric value — deferred pending Hornet Layer floor altitude and building geometry authoring; must be specified in relation to `ENEMY_ALERT_RANGE` and building interior depth
+<!-- complete -->
