@@ -1,0 +1,42 @@
+## Project Context: AgentTeamDiscussions
+
+You are helping design AgentTeamDiscussions -- an autonomous multi-agent discussion
+system that converts product ideas into implementation-ready specs overnight without
+continuous human involvement. Built for a solo builder who submits an idea at 10 PM
+and wakes up to a Morning Brief with prioritized findings, unresolved disagreements,
+and draft specs.
+
+Architecture:
+- Two separate agent teams, each in their own Claude context window, communicating
+  ONLY through an MCP server message broker (never sharing context)
+- Python orchestrator spawns stateless `claude -p` CLI processes (Claude Max OAuth)
+- Teams are YAML-configurable: each agent has personality traits (8 dimensions on
+  0-1 scales), a stakeholder position (Customer, Investor, Builder, Skeptic, etc.),
+  and a creativity technique (SCAMPER, Five Whys, Analogical Thinking, etc.)
+- 4 discussion phases: Brainstorm (diverge) -> Refine (challenge) -> Specify (pin
+  down) -> Review (adversarial validation)
+- 10 anti-slop mechanisms prevent LLM consensus drift: agreement tax, convergence
+  suppression, devil's advocate duty, novelty scoring, perspective enforcement,
+  uncomfortable idea quotas, domain pivots, surprise audits, silence-as-signal,
+  post-hoc diversity checks
+- 7 BackgroundAgent types operate on full history: Curator, Oracle, Specter
+  (circuit breaker), Director (interventions), Weaver (cross-session synthesis),
+  TieBreakerGhost, Custom
+- File-per-message storage for context efficiency; teams read summaries, pull full
+  bodies on demand
+- Morning Brief output: tiered (FYI / needs input / needs decision / needs
+  tiebreaker), highlights, draft specs, decision log with confidence scores
+
+Key constraints:
+- Must survive 8+ hours of autonomous overnight operation on Windows
+- Context windows fill up -- need briefing-based resets at phase transitions
+- Each claude CLI call is stateless; all history must be reconstructed from files
+- This is ideation and requirements scope only -- agents discuss WHAT to build and
+  WHY, not HOW to code it
+- All thresholds, traits, and mechanisms must be observable and tunable via YAML
+
+What's decided: entity model (21 types), personality dimensions, position types,
+phase structure, anti-slop mechanism list, BackgroundAgent types, file-based storage.
+What's NOT decided: message contract between teams, agent turn mechanics, orchestrator
+state machine, how traits become prompts, how anti-slop is enforced at runtime, phase
+transition triggers, context management strategy, AgentMind schema.

@@ -47,4 +47,13 @@ display:
   separator_width: 60     # Width of ===== separators in CLI output
   slug_max_length: 60     # Max chars for slugified filenames
 
+paths:
+  sessions_dir: output/sessions    # Relative to base dir
+  output_dir: output/design-docs   # For no-session mode
+  default_team: beta-agents        # Team used when none specified
+
+session:
+  run_eval: false                  # Run evaluation after session
+  live_port: 8899                  # SSE server port for --live
+
 completion_marker: "\n<!-- complete -->\n"

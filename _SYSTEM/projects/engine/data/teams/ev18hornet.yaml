@@ -1,0 +1,40 @@
+# Team: EV18Hornet Design Panel
+
+name: EV18Hornet Design Panel
+description: 'Game design brainstorming team for EV18Hornet — a 3D space opera combining
+  Escape Velocity, FA-18 Hornet 2.0 atmospheric flight, and SimCopter settlement watching.
+  Five agents with genuine intellectual friction: an EV systems historian, an atmospheric
+  flight advocate, a solo dev scope realist, a new-player experience advocate, and
+  an emergence systems theorist.'
+default_mode: default
+
+agents:
+- agent_id: b2d4f6a8-e0c2-4b3d-9e7f-1a3c5e7f9b1d
+  agent_key: flight_dreamer
+  name: Max
+  file: ev18hornet__flight_dreamer.yaml
+- agent_id: e5a7c9e1-b3d5-4e7f-c0a1-4d6f8b0d2f4a
+  agent_key: emergence_theorist
+  name: Ren
+  file: ev18hornet__emergence_theorist.yaml
+- agent_id: a1c3e5b7-d9f1-4a2b-8c6e-0d2f4a6b8c0e
+  agent_key: ev_purist
+  name: Vera
+  file: ev18hornet__ev_purist.yaml
+- agent_id: d4f6b8d0-a2c4-4d6e-bf90-3c5e7f9b1d3f
+  agent_key: player_advocate
+  name: Nadia
+  file: ev18hornet__player_advocate.yaml
+- agent_id: c3e5a7c9-f1b3-4c5d-ae8f-2b4d6f8a0c2e
+  agent_key: scope_warden
+  name: Soren
+  file: ev18hornet__scope_warden.yaml
+
+modes:
+  default:
+    description: "Flight dreamer + emergence theorist proposing, EV purist + player advocate critiquing, scope warden evaluating"
+    groups:
+      propose: [flight_dreamer, emergence_theorist]
+      critique: [ev_purist, player_advocate]
+      evaluate: [scope_warden]
+    agent_roles: {}

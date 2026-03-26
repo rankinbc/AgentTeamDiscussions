@@ -1,106 +1,186 @@
-# Engine
+# EngineStandalone
 
-Primary discussion application. Structured multi-round sessions, live conversation, and evaluation.
+C# .NET 8 multi-agent discussion engine. Agents discuss questions in structured rounds (propose, critique, evaluate), then a synthesis step merges responses into design docs. Sessions persist to disk with crash recovery.
 
-## Entry Points
+## Running the Engine
 
-### session_runner.py — Structured brief-based discussions
-
-Briefs live in `_SYSTEM/data/briefs/`. Output goes to `output/` at the repo root.
+Prerequisites: .NET 8 SDK, `claude` CLI on PATH and authenticated.
 
 ```bash
-python session_runner.py _SYSTEM/data/briefs/my-brief.md          # full overnight session
-python session_runner.py brief.md --mode compete                   # specific experiment mode
-python session_runner.py brief.md --no-session                     # design docs → output/design-docs/
-python session_runner.py brief.md --live                           # with live web dashboard
-python session_runner.py brief.md --resume 2026-03-18_0553         # resume interrupted session
-python session_runner.py brief.md --eval                           # run evaluation after session
+cd _SYSTEM/projects/engine_standalone
+dotnet build
 ```
 
-**Output locations:**
-- Full sessions → `output/sessions/{YYYY-MM-DD_HHMM}_{brief-slug}/`
-- `--no-session` design docs → `output/design-docs/`
-- Brainstorm panel runs → `output/panel-runs/`
-
-| Flag | Default | Description |
-|---|---|---|
-| `--mode` | `compete` | `default`, `counter`, `lean`, `compete`, `bigsmall`, `angles`, `ideas`, `ideas_compete` |
-| `--timeout` | `120` | Seconds per LLM call |
-| `--no-session` | off | Skip session management; writes docs to `--output-dir` |
-| `--live` | off | Enable web dashboard on port 8899 |
-| `--resume` | none | Resume session by folder name |
-| `--eval` | off | Run evaluation scoring after session |
-
-### live_conversation.py — Interactive real-time agent chat
+### Commands
 
 ```bash
-python live_conversation.py "How should we handle error recovery?"
-python live_conversation.py "A music tool for producers" --mode spec
-python live_conversation.py "topic" --agents cognitive_architect,adversarial_critic --turns 20
+# Run from a brief markdown file
+dotnet run --project src/EngineStandalone -- input/my-brief.md
+
+# Interactive session creation (prompts for topic, team, agents, mode)
+dotnet run --project src/EngineStandalone -- new
+
+# Quick session from CLI (non-interactive)
+dotnet run --project src/EngineStandalone -- new --topic "Design the auth system"
+dotnet run --project src/EngineStandalone -- new --topic "How should we handle errors?" --team beta-agents --agents cognitive_architect,adversarial_critic
+
+# Resume a crashed/interrupted session
+dotnet run --project src/EngineStandalone -- --resume 2026-03-26_1430_my-brief
+
+# With live SSE dashboard
+dotnet run --project src/EngineStandalone -- new --topic "Auth design" --live
+
+# Evaluate experiment output
+dotnet run --project src/EngineStandalone -- eval output/sessions/2026-03-26_my-session/questions
+
+# List teams and their available modes
+dotnet run --project src/EngineStandalone -- list-teams
+```
+
+### CLI Flags
+
+| Command | Flag | Description |
+|---------|------|-------------|
+| root | `<brief>` | Brief markdown file (auto-discovers from `input/` if omitted) |
+| root | `--resume` `-r` | Resume session by folder name |
+| root | `--live` | Start SSE dashboard |
+| root | `--eval` `-e` | Run evaluation after session |
+| `new` | `--topic` `-t` | Topic to discuss (skip interactive prompt) |
+| `new` | `--team` | Team name (skip team selection) |
+| `new` | `--agents` | Comma-separated agent keys to include |
+| `new` | `--live` | Start SSE dashboard |
+| `new` | `--eval` | Run evaluation after session |
+
+All other settings (timeouts, truncation, ports, paths) come from `config/defaults.yaml`.
+
+## Brief File Format
+
+Place in `input/` directory:
+
+```markdown
+# Topic Title
+
+Optional intro paragraph.
+
+## What's Already Decided
+
+- Decision 1
+- Decision 2
+
+## Open Questions
+
+1. **Question Title** Question body with context.
+2. **Another Question** More context here.
+```
+
+## Session Output
+
+```
+output/sessions/{timestamp}_{slug}/
+  session.json              <- unified manifest (config + runtime state)
+  session_status.json       <- legacy compat
+  decisions_ledger.md       <- append-only decisions
+  summary.md                <- Morning Brief
+  questions/
+    01-{slug}.md            <- design doc
+    01-{slug}-transcript.md <- full agent transcript
+    01-{slug}-propose.md    <- round responses
+    01-{slug}-critique.md
+    01-{slug}-evaluate.md
+```
+
+## session.json
+
+The session manifest — single source of truth for a session:
+
+```json
+{
+  "version": 1,
+  "title": "Auth System Design",
+  "decided": ["Using JWT tokens", "Session duration 24h"],
+  "questions": [{"number": 1, "title": "How should tokens work?", "body": "..."}],
+  "team": "beta-agents",
+  "agents": ["cognitive_architect", "adversarial_critic", "flow_orchestrator"],
+  "mode": "compete",
+  "timeout": 120,
+  "state": { "status": "complete", "session_complete": true, "questions": {...} }
+}
+```
+
+When `agents` is null, all team agents participate. When set, only listed agents are used and mode round groups are filtered accordingly.
+
+## Teams and Modes
+
+Teams are in `data/teams/*.yaml`. Each team defines its own modes (round structures):
+
+| Team | Agents | Default Mode |
+|------|--------|-------------|
+| beta-agents | 7 (architect, pragmatist, critic, oracle, orchestrator, surgeon, merchant) | compete |
+| ev18hornet | 5 (flight dreamer, emergence theorist, EV purist, player advocate, scope warden) | default |
+
+Modes define which agents go in which round and what behavioral overlays they get. Modes are part of the team YAML, not a separate config. Available modes for beta-agents: default, counter, lean, compete, bigsmall, angles, ideas, ideas_compete.
+
+## Configuration
+
+All in `config/`:
+
+| File | Controls |
+|------|----------|
+| `defaults.yaml` | Timeouts, truncation limits, health checks, paths, ports |
+| `agent_display.yaml` | Display names and colors for agents |
+| `role_overlays.yaml` | Behavioral overlays (competitive, minimalist, contrarian, etc.) |
+
+## Architecture
+
+```
+Program.cs                  <- CLI entry + DI container
+Abstractions/               <- Interfaces (IClaudeRunner, IConfigLoader, IAgentLoader, etc.)
+Types/Enums.cs              <- SessionRunStatus, QuestionRunStatus, RoundRunStatus
+Session/
+  SessionConfig.cs          <- Unified session manifest model
+  SessionPreparer.cs        <- Interactive + programmatic session creation
+  SessionRunner.cs          <- Session orchestrator (cascade error handling, ledger, Morning Brief)
+  SessionPersistence.cs     <- Crash-safe file I/O with completion markers
+  DecisionsLedger.cs        <- Append-only decisions ledger
+Discussion/
+  DiscussionEngine.cs       <- Round orchestration + synthesis
+  RoundRunner.cs            <- Single-round agent execution with speaking order
+Agents/
+  AgentConfig.cs            <- 6-layer agent model (personality, position, technique, anti-slop, voice, output)
+  AgentLoader.cs            <- YAML agent/team deserialization
+  PromptBuilder.cs          <- 3-layer prompt assembly (identity, situation, task)
+Config/
+  ConfigLoader.cs           <- YAML config loading with caching
+  AppSettings.cs            <- Settings classes
+Runner/
+  ClaudeRunner.cs           <- Claude CLI subprocess wrapper with retry
+Synthesis/
+  MorningBriefGenerator.cs  <- LLM-based executive summary from ledger
+Evaluation/
+  Evaluator.cs              <- Post-session LLM scoring
+Live/
+  LiveServer.cs             <- ASP.NET SSE server
+  SseSessionEmitter.cs      <- Lock-free event distribution
+  ISessionEventEmitter.cs   <- Event types
 ```
 
 ## Hard Rules
 
-**NEVER** use `config/teams/` as agent source of truth — use `_SYSTEM/data/teams/` and `_SYSTEM/data/discussionAgents/`.
+**DO NOT** modify agent YAML files during a session — they are loaded at session start and cached.
 
-**DO NOT** import from `run_discussion` — that module was renamed to `discussion/engine.py`.
+**DO NOT** edit files in `output/` — they are write-only runtime artifacts.
 
-**DO NOT** import from `lib.*` — `lib/` has been deleted. Import from `agentteam.*` directly.
+**DO NOT** delete `<!-- complete -->` markers from session files — they are the crash recovery mechanism.
 
-## Configuration
+**Use** `config/defaults.yaml` to change timeouts, truncation, thresholds — not C# code.
 
-All behavior is config-driven. Edit YAML, not Python:
+**Use** `data/teams/*.yaml` to add modes — modes are a team-level concern.
 
-| What to change | File |
-|---|---|
-| Timeouts, truncation limits, health thresholds | `config/defaults.yaml` |
-| Discussion modes (agent groupings) | `config/experiment_modes.yaml` |
-| Agent display names and colors | `config/agent_display.yaml` |
-| Per-role instruction overlays | `config/role_overlays.yaml` |
-| Prompt templates | `templates/prompts/*.md.j2` |
+## Tests
 
-**Adding a new experiment mode:** add entry to `config/experiment_modes.yaml`. No Python changes required.
-**Adding a new prompt template:** add `templates/prompts/{name}.md.j2`, load via `config_loader.load_prompt_raw()`.
-
-## Project Structure
-
-```
-discussion/engine.py      → Round orchestration, synthesis, transcript formatting
-session/runner.py         → Session lifecycle, crash recovery, ledger, Morning Brief
-live/server.py            → SSE-based HTTP server for live dashboard
-conversation/             → state.py, modes.py, interactive.py
-brainstorm/               → Panel queries and analysis pipeline
-bmad/                     → BMAD workflow parser
-evaluation/evaluator.py   → LLM-based quality scoring
-config/                   → All tunable YAML config
-templates/                → Jinja2 prompt templates and HTML dashboard
+```bash
+cd _SYSTEM/projects/engine_standalone
+dotnet test
 ```
 
-## Brief File Format
-
-```markdown
-## What's Already Decided
-- Decision 1
-
-## Open Questions
-1. **Question Title** Question body with context.
-```
-
-## Experiment Modes
-
-| Mode | Description |
-|---|---|
-| `default` | Original 6-agent, 3-round structure |
-| `counter` | 2nd proposer must counter-propose the 1st |
-| `lean` | 4 agents only |
-| `compete` | Competitive vs Minimalist proposers |
-| `bigsmall` | Maximalist vs Minimalist proposers |
-| `angles` | Contrarian vs Operator proposers |
-| `ideas` | Idea Merchant + Architect proposing |
-| `ideas_compete` | Idea Merchant vs Minimalist |
-
-## Reference
-
-Read `_SYSTEM/docs/concepts/` before modifying conversation engine or discussion rounds.
-Read `_SYSTEM/docs/v1/` before changing session lifecycle, ledger, or Morning Brief.
-Read `config/defaults.yaml` for all tunable thresholds — change config, not Python.
+78 tests covering: agent loading, brief parsing, config loading, decisions ledger, session persistence, session config serialization, session preparation.

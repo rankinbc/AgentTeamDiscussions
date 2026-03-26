@@ -1,0 +1,111 @@
+# Team: Beta Agents
+
+name: Beta Agents
+description: 'Agent team: beta-agents'
+default_mode: compete
+
+agents:
+- agent_id: 27d28cfd-7609-4aa2-aaa1-597985406444
+  agent_key: cognitive_architect
+  name: The Cognitive Architect
+  file: beta-agents__cognitive_architect.yaml
+- agent_id: da1ac296-0f67-425d-8266-e80fb3471015
+  agent_key: systems_pragmatist
+  name: The Systems Pragmatist
+  file: beta-agents__systems_pragmatist.yaml
+- agent_id: e06411b3-ed29-4c59-befd-a5368760f2b9
+  agent_key: product_oracle
+  name: The Product Oracle
+  file: beta-agents__product_oracle.yaml
+- agent_id: ed6e29a4-6ab2-4559-9e45-e06c82285f8e
+  agent_key: flow_orchestrator
+  name: The Flow Orchestrator
+  file: beta-agents__flow_orchestrator.yaml
+- agent_id: 9c7b971f-4d4c-4016-b0fe-d67520cf6a8d
+  agent_key: context_surgeon
+  name: The Context Surgeon
+  file: beta-agents__context_surgeon.yaml
+- agent_id: 504b37e6-07f3-4013-9327-6873d5dc5648
+  agent_key: idea_merchant
+  name: The Idea Merchant
+  file: beta-agents__idea_merchant.yaml
+- agent_id: b3b092c5-7040-4365-bb7b-81eb7de96abb
+  agent_key: adversarial_critic
+  name: The Adversarial Critic
+  file: beta-agents__adversarial_critic.yaml
+
+modes:
+  default:
+    description: "Original 6-agent, 3-round structure (no role overlays)"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles: {}
+
+  counter:
+    description: "1st proposer solo, 2nd must counter-propose"
+    groups:
+      propose: [cognitive_architect]
+      counter: [flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles: {}
+
+  lean:
+    description: "4 agents: drop Cognitive Architect + Product Oracle"
+    groups:
+      propose: [flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [context_surgeon]
+    agent_roles: {}
+
+  compete:
+    description: "Competitive vs Minimalist proposers"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      cognitive_architect: competitive
+      flow_orchestrator: minimalist
+      adversarial_critic: contrarian
+      product_oracle: user_first
+
+  bigsmall:
+    description: "Maximalist vs Minimalist proposers"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      cognitive_architect: maximalist
+      flow_orchestrator: minimalist
+
+  angles:
+    description: "Contrarian vs Operator proposers, User-first evaluator"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      cognitive_architect: contrarian
+      flow_orchestrator: operator
+      product_oracle: user_first
+
+  ideas:
+    description: "Idea Merchant generates, Architect refines"
+    groups:
+      propose: [idea_merchant, cognitive_architect]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles: {}
+
+  ideas_compete:
+    description: "Idea Merchant (wild) vs Flow Orchestrator (minimalist)"
+    groups:
+      propose: [idea_merchant, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      flow_orchestrator: minimalist

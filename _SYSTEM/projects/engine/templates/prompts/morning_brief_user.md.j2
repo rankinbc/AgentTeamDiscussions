@@ -1,10 +1,15 @@
-INPUT: A decisions ledger containing extracted decisions and open questions
+INPUT: A decisions ledger containing extracted decisions, contested items, and open questions
 from each discussion round.
 
 OUTPUT: Morning Brief in exactly this format:
 
 ## Decisions Made
 Numbered list. One line each. Group by question topic.
+
+## Contested Items
+Items where the team split and no winner emerged. State both sides.
+These need a human tiebreaker before implementation can proceed.
+Only include items marked CONTESTED in the ledger. If none, omit this section.
 
 ## Risk Flags
 Decisions where critic concerns were acknowledged but not fully resolved.

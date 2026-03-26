@@ -37,6 +37,11 @@ _bmad-output/
 
 # Session output (large, generated)
 sessions/
+output/
+
+# .NET build artifacts
+bin/
+obj/
 
 # Temp files
 temp/

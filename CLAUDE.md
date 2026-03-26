@@ -1,6 +1,6 @@
 # AgentTeamDiscussions
 
-Multi-agent AI orchestration platform. Two AI teams communicate through an MCP message broker, deliberating internally and producing specs/PRDs overnight.
+Multi-agent AI orchestration platform. AI agent teams discuss open questions through structured rounds, producing design documents and executive summaries.
 
 **Last Updated:** 2026-03-26
 
@@ -10,34 +10,30 @@ Multi-agent AI orchestration platform. Two AI teams communicate through an MCP m
 
 **NEVER** modify `_bmad/` — external tooling updated via BMAD upgrades only.
 
-**NEVER** edit files in `output/` — write-only runtime artifacts (sessions, design-docs, panel-runs).
-
-**NEVER** move or rename protected files (`CLAUDE.md`, `.gitignore`, `pyproject.toml`, `.env.*`) without explicit permission.
+**NEVER** edit files in `output/` — write-only runtime artifacts.
 
 **DO NOT** reorganize files during normal work. Only when explicitly asked.
 
 ---
 
-## Data vs Session Output Rule
-
-- **User-configured, reusable data** (briefs, agent YAML, team YAML) → `_SYSTEM/data/`
-- **Runtime session output** (transcripts, Morning Briefs, design docs, panel runs) → `output/`
-
 ## Project Map
 
 ```
-_SYSTEM/                  → All active code, docs, config, data (see _SYSTEM/CLAUDE.md)
-  agentteam/              → Installable Python library (see _SYSTEM/agentteam/CLAUDE.md)
-  projects/engine/        → Primary discussion app (see _SYSTEM/projects/engine/CLAUDE.md)
-  data/                   → Agent/team YAML + reusable briefs (see _SYSTEM/data/CLAUDE.md)
-_bmad/                    → BMAD framework — do not modify
-_bmad-output/             → BMAD planning artifacts — reference only
-design-artifacts/         → WDS design pipeline output (A–G) — reference only
-output/                   → All runtime output — write-only
-  sessions/               → Full session runs (Morning Brief, transcripts, ledger)
-  design-docs/            → Design docs from --no-session runs
-  panel-runs/             → Brainstorm panel analysis output
-temp/                     → Scratch — not committed, delete freely
+_SYSTEM/
+  projects/engine/          → C# .NET 8 discussion engine (see _SYSTEM/projects/engine/CLAUDE.md)
+    src/EngineStandalone/   → Main application
+    ui/                     → React + Vite live dashboard
+    config/                 → YAML configuration (defaults, display, overlays)
+    data/                   → Agent/team YAML definitions
+    templates/              → Prompt templates (Scriban/Jinja2)
+    input/                  → Place brief files here
+    output/                 → Runtime session output
+  data/                     → Shared data (agent YAML, team YAML, briefs)
+  docs/                     → Design documentation
+_bmad/                      → BMAD framework — do not modify
+_bmad-output/               → BMAD planning artifacts — reference only
+design-artifacts/           → WDS design pipeline output — reference only
+output/                     → All runtime output — write-only
 ```
 
 ---
@@ -46,13 +42,33 @@ temp/                     → Scratch — not committed, delete freely
 
 | Working on... | Read... |
 |---|---|
-| agentteam package, types, prompts, runner, session I/O | `_SYSTEM/agentteam/CLAUDE.md` |
-| Discussion engine, session runner, evaluation, live chat | `_SYSTEM/projects/engine/CLAUDE.md` |
-| Agent personas, team definitions, briefs (YAML/MD) | `_SYSTEM/data/CLAUDE.md` |
-| Anything in `_SYSTEM/` | `_SYSTEM/CLAUDE.md` |
+| Discussion engine, sessions, agents, evaluation | `_SYSTEM/projects/engine/CLAUDE.md` |
+| Agent personas, team definitions, briefs | `_SYSTEM/data/CLAUDE.md` |
 
 ---
 
-## Reference
+## Tech Stack
 
-Read `design-artifacts/` for WDS design pipeline context — committed reference, do not regenerate.
+- **Engine:** C# .NET 8 (ASP.NET Web SDK)
+- **UI:** React 19 + TypeScript + Vite + Tailwind CSS
+- **LLM:** Claude CLI (`claude -p` subprocess calls)
+- **Config:** YAML (YamlDotNet) + Scriban templates
+- **Tests:** xUnit
+
+## Quick Start
+
+```bash
+cd _SYSTEM/projects/engine
+dotnet build
+dotnet run --project src/EngineStandalone -- new
+```
+
+With live dashboard:
+```bash
+# Terminal 1: engine with SSE
+dotnet run --project src/EngineStandalone -- new --live
+
+# Terminal 2: UI dev server
+cd ui && npm run dev
+# Open http://localhost:5173
+```
