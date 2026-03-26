@@ -1,0 +1,50 @@
+# defaults.yaml — All tunable thresholds and parameters in one place.
+# Change behavior here, not in Python code.
+
+timeouts:
+  default: 120            # Default per-LLM-call timeout (claude_runner.py)
+  discussion: 420         # Structured discussion rounds (run_discussion.py, session_runner.py)
+  evaluation: 300         # Evaluation scoring calls (evaluate_experiment.py)
+  batch_question: 600     # Bulk question runner (run_all_questions.py)
+  live_turn: 60           # Per-agent turn in live conversation (live_conversation.py)
+  synthesis_rolling: 30   # Rolling synthesis snapshot (live_synthesizer.py)
+  panel: 360              # Panel query timeout (ask_panel.py)
+  brainstorm: 420         # Brainstorm analysis (brainstorm_to_panel.py)
+
+truncation:
+  prior_specs: 6000       # Max chars of prior specs to chain as context
+  design_doc_chain: 3000  # Max chars per design doc chained forward
+  brainstorm_input: 8000  # Max chars from brainstorm file
+  agent_eval_input: 8000  # Max chars of agent responses for evaluation
+  doc_eval_input: 12000   # Max chars for doc/transcript evaluation
+  round_analysis: 1500    # Max chars per agent response for interaction analysis
+  spec_gen_context: 2000  # Truncation for spec generation prior context
+  low_patience_context: 2500  # Chars kept for low-patience agents
+  live_context: 5000      # Context window truncation for live conversation
+
+conversation:
+  history_keep_first: 2       # Keep first N messages in truncated history
+  history_keep_last: 10       # Keep last N messages
+  history_truncation_threshold: 14  # Truncation kicks in after this many messages
+  multi_history_keep_first: 3
+  multi_history_keep_last: 15
+  multi_history_truncation_threshold: 20
+  max_word_count: 250         # Default max words per agent turn
+  live_sentence_limit: "2-4"  # Sentence limit for live conversation turns
+
+health_checks:
+  min_response_length: 20       # Minimum chars for a healthy response
+  min_synthesis_length: 50      # Minimum chars for acceptable synthesis
+  hallucination_ratio_max: 4.0  # Ledger vs doc decision count max ratio
+  hallucination_ratio_min: 0.2  # Ledger vs doc decision count min ratio
+  circuit_breaker_threshold: 3  # Consecutive failures before stopping
+
+synthesis:
+  interval_turns: 10       # Turns between rolling synthesis snapshots
+  max_ledger_words: 50    # Max words per ledger entry
+
+display:
+  separator_width: 60     # Width of ===== separators in CLI output
+  slug_max_length: 60     # Max chars for slugified filenames
+
+completion_marker: "\n<!-- complete -->\n"

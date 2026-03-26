@@ -1,0 +1,21 @@
+INPUT: A decisions ledger containing extracted decisions and open questions
+from each discussion round.
+
+OUTPUT: Morning Brief in exactly this format:
+
+## Decisions Made
+Numbered list. One line each. Group by question topic.
+
+## Risk Flags
+Decisions where critic concerns were acknowledged but not fully resolved.
+State the concern, not just the decision.
+
+## Open Questions Requiring Human Input
+Unresolved items that block downstream work or require judgment calls.
+
+## Recommended Reading Order
+Which design docs to read first if the reader wants to go deeper.
+Order by importance to near-term decisions, not by session order.
+
+No prose paragraphs. No executive summary. Every line must be scannable.
+If any questions failed or produced partial output, add a Session Gaps section.

@@ -1,0 +1,25 @@
+# Team: Spec Builders
+
+name: Spec Builders
+description: 'Agent team: spec-builders'
+agents:
+- agent_id: eb7d1886-c4ef-4a29-9af5-623d837d3b37
+  agent_key: game_designer
+  name: Kai
+  file: spec-builders__game_designer.yaml
+- agent_id: cf672ec5-31c9-421a-ad46-00b6bc78cb95
+  agent_key: tech_lead
+  name: Reva
+  file: spec-builders__tech_lead.yaml
+- agent_id: b8470063-caee-4a44-a421-10118c0b640e
+  agent_key: player_advocate
+  name: Tomás
+  file: spec-builders__player_advocate.yaml
+- agent_id: fa4fe4e7-b60a-4fc2-bda7-8ee63ed82ed1
+  agent_key: creative_director
+  name: Zoe
+  file: spec-builders__creative_director.yaml
+- agent_id: 5a5b921c-8f40-4001-acbf-d140b80965d4
+  agent_key: scope_wrangler
+  name: Dev
+  file: spec-builders__scope_wrangler.yaml

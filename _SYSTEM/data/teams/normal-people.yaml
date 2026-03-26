@@ -1,0 +1,29 @@
+# Team: Normal People
+
+name: Normal People
+description: 'Agent team: normal-people'
+agents:
+- agent_id: 60945bc7-541f-4ac3-ab64-1bd9f6e36e14
+  agent_key: marcus
+  name: Marcus
+  file: normal-people__marcus.yaml
+- agent_id: 8e83eded-498b-4dbd-a20d-1b1b4f61bb61
+  agent_key: diana
+  name: Diana
+  file: normal-people__diana.yaml
+- agent_id: 4a303ff3-c523-4f06-b4e3-54a5a4530583
+  agent_key: tony
+  name: Tony
+  file: normal-people__tony.yaml
+- agent_id: 2fee39aa-a130-4724-ad27-f641c3d8d78f
+  agent_key: keiko
+  name: Keiko
+  file: normal-people__keiko.yaml
+- agent_id: 022f1bfa-63c3-4556-9a9b-13a5d9b1c9e0
+  agent_key: raj
+  name: Raj
+  file: normal-people__raj.yaml
+- agent_id: 7fe67a77-d1d1-4e46-88b5-e93bb434bdec
+  agent_key: zara
+  name: Zara
+  file: normal-people__zara.yaml

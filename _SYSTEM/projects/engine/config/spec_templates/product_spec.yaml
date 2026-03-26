@@ -1,0 +1,70 @@
+# product_spec.yaml — 7-section product spec template for live conversation spec-building mode.
+
+name: "Product Spec"
+default_turns_per_section: 5
+
+sections:
+  - name: "Problem Statement"
+    prompt: >
+      Write a one-paragraph problem statement for this product. What specific problem
+      does it solve, for whom, and why do existing solutions fail? Debate the framing --
+      argue about what the REAL problem is, not just the obvious one. The group must
+      converge on ONE paragraph.
+    extract: >
+      Write a single, tight problem statement paragraph based on what the agents agreed on.
+      If they disagreed on framing, pick the strongest one and note the dissent in parentheses.
+      Output ONLY the paragraph.
+
+  - name: "Target User"
+    prompt: >
+      Who is the PRIMARY target user? Pick ONE specific persona -- not 'music producers'
+      but a specific type with specific needs. Argue about who would actually PAY for this
+      vs who would just think it's cool. The group must pick ONE primary user.
+    extract: >
+      Write a 2-3 sentence target user description based on the agents' discussion. Name
+      the persona, their context, and why they specifically need this product. Output ONLY
+      the description.
+
+  - name: "Core Value Proposition"
+    prompt: >
+      Given the problem and target user, what's the ONE sentence that explains why someone
+      pays for this? Not a tagline -- a value proposition. What does the user get that they
+      can't get anywhere else? Argue about what makes this genuinely different.
+    extract: >
+      Write a single value proposition sentence based on the discussion. Output ONLY the sentence.
+
+  - name: "MVP Features"
+    prompt: >
+      List exactly 5 features for the MVP, ranked by importance. For each: what it does in
+      one line, and why it matters. Argue about what to CUT -- the goal is the MINIMUM that
+      tests the core value prop. Every feature someone proposes, someone else should ask
+      'do we really need this in v1?'
+    extract: >
+      Write a numbered list of exactly 5 MVP features based on what survived the debate.
+      Each gets a name, one-line description, and why it matters. Output ONLY the list.
+
+  - name: "Pricing and Business Model"
+    prompt: >
+      How does this make money? Subscription, one-time, freemium? What's the price point?
+      What's free vs paid? Argue with real numbers -- would the target user actually pay that?
+      Compare to what they currently spend on similar tools.
+    extract: >
+      Write a 3-4 sentence pricing model based on the discussion. Include: model type, price
+      point, what's free, what's paid. Output ONLY the pricing description.
+
+  - name: "Key Risks"
+    prompt: >
+      What are the top 3 things that could kill this product? Not generic risks -- specific
+      risks for THIS product with THIS target user. For each risk, what's the mitigation?
+      Be brutally honest.
+    extract: >
+      Write a numbered list of exactly 3 key risks with mitigations based on the discussion.
+      Output ONLY the list.
+
+  - name: "What We're NOT Building"
+    prompt: >
+      What features or directions should we explicitly AVOID in v1? What's the biggest trap
+      or scope creep risk? What will people ask for that we should say no to? This is as
+      important as what we build.
+    extract: >
+      Write a bullet list of things explicitly excluded from v1 and why. Output ONLY the list.

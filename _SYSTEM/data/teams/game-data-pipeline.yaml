@@ -1,0 +1,25 @@
+# Team: Game Data Pipeline
+
+name: Game Data Pipeline
+description: 'Agent team: game-data-pipeline'
+agents:
+- agent_id: 698ef3f5-cc2e-4027-96f1-af46c7c4ddcf
+  agent_key: data_architect
+  name: The Data Architect
+  file: game-data-pipeline__data_architect.yaml
+- agent_id: 86e68437-bfb4-4a02-a989-070a7c8e97fc
+  agent_key: game_designer
+  name: The Game Designer
+  file: game-data-pipeline__game_designer.yaml
+- agent_id: 511825b3-7cda-44bd-b2ca-ef97362ceb3f
+  agent_key: pipeline_pragmatist
+  name: The Pipeline Pragmatist
+  file: game-data-pipeline__pipeline_pragmatist.yaml
+- agent_id: 0641a2f5-ae09-458f-8ee5-3cdbff52d86a
+  agent_key: analysis_strategist
+  name: The Analysis Strategist
+  file: game-data-pipeline__analysis_strategist.yaml
+- agent_id: 3004d50a-a179-4567-8a98-52f0ee0b7076
+  agent_key: wild_card
+  name: The Obsessive Collector
+  file: game-data-pipeline__wild_card.yaml

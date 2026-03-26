@@ -1,0 +1,38 @@
+# You are {{ name }}
+
+{{ description }}
+
+## Your Role: {{ role }}
+{% if drives %}
+
+What drives you:
+{% for d in drives %}
+- {{ d }}
+{% endfor %}
+{% endif %}
+{% if pushback_on %}
+
+You actively push back on:
+{% for p in pushback_on %}
+- {{ p }}
+{% endfor %}
+{% endif %}
+
+{{ intensity_line }}
+
+## Your Personality
+
+{{ personality_text }}
+
+## Your Thinking Technique: {{ technique_name }}
+{% if style_description %}
+
+{{ style_description }}
+{% endif %}
+{% if behaviors %}
+
+Behavioral rules:
+{% for b in behaviors %}
+- {{ b }}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,30 @@
+# claude-project-architect configuration
+
+integrations:
+  codebase_analysis:
+    source: installed
+    plugin: gsd:map-codebase
+    output_path: .planning/codebase/
+    bundled_path: ../bundled/codebase-mapper/mapper-agent.md
+  claude_md_audit:
+    source: installed
+    plugin: claude-md-improver
+    plugin_path: C:/Users/badmin/.claude/plugins/cache/claude-plugins-official/claude-md-management/1.0.0/skills/claude-md-improver/
+    bundled_path: ../bundled/claude-md-auditor/auditor-skill.md
+  project_context:
+    source: installed
+    plugin: bmad-generate-project-context
+    plugin_path: C:/Users/badmin/.claude/skills/bmad-generate-project-context/
+    bundled_path: ../bundled/project-context-generator/workflow.md
+
+last_session: 2026-03-25T1400
+structure_convention: adopted
+depth_limit: 3
+
+token_limits:
+  root_claude_md: 3072
+  zone_claude_md: 4096
+  hard_rules: 2048
+  project_yaml: 4096
+
+configured_at: 2026-03-25T14:00:00Z

@@ -1,0 +1,38 @@
+# agent_display.yaml — Agent display names, colors, and visual mapping.
+# Single source of truth — eliminates 3 duplicate definitions.
+
+display_names:
+  cognitive_architect: "The Cognitive Architect (creativity engine designer)"
+  flow_orchestrator: "The Flow Orchestrator (mechanical flow designer)"
+  systems_pragmatist: "The Systems Pragmatist (infrastructure realist)"
+  adversarial_critic: "The Adversarial Critic (adversarial reviewer)"
+  product_oracle: "The Product Oracle (user advocate)"
+  context_surgeon: "The Context Surgeon (context efficiency evaluator)"
+  idea_merchant: "The Idea Merchant (idea generator)"
+  flight_dreamer: "Max (atmospheric flight advocate)"
+  emergence_theorist: "Ren (emergence systems theorist)"
+  ev_purist: "Vera (EV systems historian)"
+  player_advocate: "Nadia (new-player experience advocate)"
+  scope_warden: "Soren (solo dev scope warden)"
+
+colors_hex:
+  cognitive_architect: "#6366f1"
+  flow_orchestrator: "#06b6d4"
+  systems_pragmatist: "#f97316"
+  adversarial_critic: "#ef4444"
+  product_oracle: "#22c55e"
+  context_surgeon: "#a855f7"
+  idea_merchant: "#eab308"
+  flight_dreamer: "#06b6d4"
+  emergence_theorist: "#a855f7"
+  ev_purist: "#ef4444"
+  player_advocate: "#22c55e"
+  scope_warden: "#f97316"
+
+colors_ansi_cycle:
+  - cyan
+  - magenta
+  - green
+  - yellow
+  - blue
+  - red

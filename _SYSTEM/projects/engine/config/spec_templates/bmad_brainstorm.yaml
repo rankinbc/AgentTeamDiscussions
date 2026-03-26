@@ -1,0 +1,63 @@
+# bmad_brainstorm.yaml — 4-section BMAD brainstorm template (game-focused).
+
+name: "Brainstorming"
+template_key: "brainstorm"
+default_turns_per_section: [3, 6, 4, 5]
+
+sections:
+  - name: "What Makes This Game Special"
+    bmad_step: 1
+    prompt: >
+      We're building a browser-based multiplayer version of this game.
+      What are the 3-5 things that made the original game magical that we MUST preserve?
+      And what are 3-5 new opportunities that multiplayer and the browser platform open up
+      that the original never had? Be specific -- name concrete mechanics, moments, and feelings.
+      Each person: name ONE thing to preserve and ONE new opportunity.
+    extract: >
+      Write two lists: 1) PRESERVE -- the core elements that must survive (with why each matters).
+      2) NEW OPPORTUNITIES -- what multiplayer and browser add that the original couldn't do.
+      Output ONLY these two lists.
+    output_section: "## Core Identity"
+
+  - name: "Multiplayer Design"
+    bmad_step: 2
+    prompt: >
+      How does multiplayer actually work in this game? Shared persistent universe,
+      instanced sessions, or something else? How many players in one space?
+      What happens when a trader meets a pirate player? Can players form factions?
+      How do we handle the economy when real humans are trading?
+      Each person: propose ONE specific multiplayer interaction that would be amazing.
+    extract: >
+      Write: 1) Multiplayer model (persistent/instanced/hybrid and why).
+      2) Player count and world structure.
+      3) Key multiplayer interactions (PvP, trading, factions, cooperation).
+      4) Economy approach with real players. Output ONLY these sections.
+    output_section: "## Multiplayer Design"
+
+  - name: "Core Loop & Progression"
+    bmad_step: 3
+    prompt: >
+      What does a player DO in their first session? Their tenth? Their hundredth?
+      Walk through the fly-fight-trade-upgrade loop for this multiplayer version.
+      How does ship progression work when other players have endgame ships?
+      What keeps someone coming back -- what's the daily hook?
+      Each person: describe ONE specific gameplay moment that would hook a player.
+    extract: >
+      Write: 1) First session experience (step by step).
+      2) Core gameplay loop.
+      3) Progression system (ships, equipment, reputation).
+      4) Retention hooks (what brings players back). Output ONLY these sections.
+    output_section: "## Core Loop & Progression"
+
+  - name: "V1 Scope"
+    bmad_step: 4
+    prompt: >
+      What's in the FIRST PLAYABLE version? Not the dream game -- the smallest
+      version that's fun and tests the core idea. How many ships, how many systems,
+      what combat, what trading? What do we explicitly cut from v1?
+      The group must agree on a concrete feature list for v1 and a NOT-in-v1 list.
+    extract: >
+      Write: 1) V1 feature list (specific: number of ships, systems, mechanics included).
+      2) NOT in V1 (features saved for later, with brief reason).
+      3) The one-sentence pitch for what V1 proves. Output ONLY these sections.
+    output_section: "## V1 Scope"

@@ -1,0 +1,84 @@
+# experiment_modes.yaml — Discussion mode configurations.
+# Each mode defines which agents participate in which round and any role overlays.
+
+modes:
+  default:
+    description: "Original 6-agent, 3-round structure (no role overlays)"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles: {}
+
+  counter:
+    description: "1st proposer solo, 2nd proposer sees 1st and must counter-propose"
+    groups:
+      propose: [cognitive_architect]
+      counter: [flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles: {}
+
+  lean:
+    description: "4 agents: drop Cognitive Architect + Product Oracle"
+    groups:
+      propose: [flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [context_surgeon]
+    agent_roles: {}
+
+  compete:
+    description: "Competitive vs Minimalist proposers"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      cognitive_architect: competitive
+      flow_orchestrator: minimalist
+
+  bigsmall:
+    description: "Maximalist vs Minimalist proposers"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      cognitive_architect: maximalist
+      flow_orchestrator: minimalist
+
+  angles:
+    description: "Contrarian vs Operator proposers, User-first evaluator"
+    groups:
+      propose: [cognitive_architect, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      cognitive_architect: contrarian
+      flow_orchestrator: operator
+      product_oracle: user_first
+
+  ideas:
+    description: "Idea Merchant generates, Architect refines, critics + evaluators as normal"
+    groups:
+      propose: [idea_merchant, cognitive_architect]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles: {}
+
+  ideas_compete:
+    description: "Idea Merchant (wild) vs Flow Orchestrator (minimalist), then critiqued and evaluated"
+    groups:
+      propose: [idea_merchant, flow_orchestrator]
+      critique: [systems_pragmatist, adversarial_critic]
+      evaluate: [product_oracle, context_surgeon]
+    agent_roles:
+      flow_orchestrator: minimalist
+
+  ev18hornet:
+    description: "EV18Hornet game design panel — flight dreamer + emergence theorist proposing, EV purist + player advocate critiquing, scope warden evaluating"
+    groups:
+      propose: [flight_dreamer, emergence_theorist]
+      critique: [ev_purist, player_advocate]
+      evaluate: [scope_warden]
+    agent_roles: {}
