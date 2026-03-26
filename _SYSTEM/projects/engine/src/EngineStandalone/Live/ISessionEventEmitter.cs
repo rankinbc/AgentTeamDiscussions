@@ -34,6 +34,7 @@ public interface ISessionEventEmitter
 [JsonDerivedType(typeof(BriefStartEvent))]
 [JsonDerivedType(typeof(BriefDoneEvent))]
 [JsonDerivedType(typeof(ModeratorMessageEvent))]
+[JsonDerivedType(typeof(SessionStoppedEvent))]
 public abstract record SessionEvent
 {
     [JsonPropertyName("type")]
@@ -298,4 +299,9 @@ public record ModeratorMessageEvent : SessionEvent
 
     [JsonPropertyName("text")]
     public string Text { get; init; } = "";
+}
+
+public record SessionStoppedEvent : SessionEvent
+{
+    public override string Type => "session_stopped";
 }

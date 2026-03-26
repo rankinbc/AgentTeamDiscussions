@@ -59,7 +59,7 @@ class Program
 
             try
             {
-                var (emitter, webApp) = StartLiveServer(live, defaults.Session.LivePort, provider);
+                var (emitter, webApp, _) = StartLiveServer(live, defaults.Session.LivePort, provider, baseDir);
                 var runner = CreateRunner(baseDir, provider, emitter);
                 var preparer = new SessionPreparer(
                     provider.GetRequiredService<IAgentLoader>(),
@@ -116,7 +116,7 @@ class Program
                     ? preparer.Prepare()
                     : preparer.PrepareFromArgs(topic, teamName, agents: agentsList);
 
-                var (emitter, webApp) = StartLiveServer(live, defaults.Session.LivePort, provider);
+                var (emitter, webApp, _) = StartLiveServer(live, defaults.Session.LivePort, provider, baseDir);
                 var runner = CreateRunner(baseDir, provider, emitter);
                 await runner.RunFromConfigAsync(config, runEval: eval);
 
@@ -258,16 +258,18 @@ class Program
             emitter);
     }
 
-    private static (SseSessionEmitter? Emitter, WebApplication? App) StartLiveServer(
-        bool live, int port, ServiceProvider provider)
+    private static (SseSessionEmitter? Emitter, WebApplication? App, SessionManager? Manager) StartLiveServer(
+        bool live, int port, ServiceProvider provider, string baseDir)
     {
-        if (!live) return (null, null);
+        if (!live) return (null, null, null);
 
         var emitter = new SseSessionEmitter();
-        var webApp = LiveServer.Build(emitter, port);
+        var manager = new SessionManager(baseDir, provider);
+        var agentLoader = provider.GetRequiredService<IAgentLoader>();
+        var webApp = LiveServer.Build(emitter, manager, agentLoader, baseDir, port);
         _ = webApp.StartAsync();
         Console.WriteLine($"Live SSE dashboard: http://localhost:{port}");
-        return (emitter, webApp);
+        return (emitter, webApp, manager);
     }
 
     private static async Task WaitForLiveServer(WebApplication? webApp, System.CommandLine.Invocation.InvocationContext context)
