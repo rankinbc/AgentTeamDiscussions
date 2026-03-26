@@ -218,6 +218,25 @@ class Program
         });
         rootCommand.AddCommand(listTeamsCommand);
 
+        // --- Subcommand: serve — start live server only (for UI-driven sessions) ---
+        var serveCommand = new Command("serve", "Start the live server without a session (UI launches sessions via API)");
+        serveCommand.SetHandler(async (context) =>
+        {
+            try
+            {
+                var (_, webApp, _) = StartLiveServer(true, defaults.Session.LivePort, provider, baseDir);
+                Console.WriteLine("Server ready. Open the UI to configure and start a discussion.");
+                await Task.Delay(Timeout.Infinite, context.GetCancellationToken());
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                PrintError(ex);
+                context.ExitCode = 1;
+            }
+        });
+        rootCommand.AddCommand(serveCommand);
+
         return await rootCommand.InvokeAsync(args);
     }
 
