@@ -1,9 +1,10 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Markdown from 'react-markdown';
 import { DashboardProvider, useDashboard } from './store/DashboardContext';
 import { useSSE } from './hooks/useSSE';
 import { agentColor } from './lib/colors';
-import { sendModerator, addQuestion, fetchLedger } from './lib/api';
+import { sendModerator, addQuestion, fetchLedger, stopSession } from './lib/api';
 import { MOD_ACTIONS } from './constants/theme';
 import type { ChatItem } from './types/state';
 
@@ -48,6 +49,13 @@ function Dashboard() {
   const modRef = useRef<HTMLInputElement>(null);
   const qRef = useRef<HTMLInputElement>(null);
   const [inspTab, setInspTab] = useState<'response' | 'payload' | 'system'>('response');
+  const navigate = useNavigate();
+  const doStop = async () => {
+    try {
+      await stopSession();
+      navigate('/');
+    } catch {}
+  };
 
   // Auto-scroll
   const handleScroll = useCallback(() => {
@@ -194,6 +202,9 @@ function Dashboard() {
             <span>speaker: <span className="val">{orch.speaker}</span></span>
             <span>challenges: <span className="val" style={{ color: orch.challenges > 0 ? 'var(--red)' : undefined }}>{orch.challenges}</span></span>
             <button className="hdr-btn" onClick={() => dispatch({ type: 'UI_TOGGLE_LEDGER' })}>Ledger</button>
+            {conn === 'live' && (
+              <button className="hdr-btn danger" onClick={doStop}>Stop</button>
+            )}
           </div>
         </header>
 
@@ -383,10 +394,4 @@ function Dashboard() {
   );
 }
 
-export default function App() {
-  return (
-    <DashboardProvider>
-      <Dashboard />
-    </DashboardProvider>
-  );
-}
+export { Dashboard };
