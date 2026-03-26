@@ -68,6 +68,9 @@ public class SessionManager
         if (!IsRunning) return false;
         _cts?.Cancel();
         _emitter?.Emit(new SessionStoppedEvent());
+        // Clear the task reference so a new session can start immediately.
+        // The old task will finish in the background when its subprocess completes.
+        _runningTask = null;
         return true;
     }
 }
