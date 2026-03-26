@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchBriefs, fetchAgents, startSession } from '../lib/api';
-import type { BriefInfo, AgentInfo } from '../lib/api';
+import { fetchBriefs, fetchAgents, fetchTeams, startSession } from '../lib/api';
+import type { BriefInfo, AgentInfo, TeamInfo } from '../lib/api';
 
 export default function SetupPage() {
   const navigate = useNavigate();
   const [topic, setTopic] = useState('');
   const [briefs, setBriefs] = useState<BriefInfo[]>([]);
-  const [agents, setAgents] = useState<AgentInfo[]>([]);
+  const [allAgents, setAllAgents] = useState<AgentInfo[]>([]);
+  const [teams, setTeams] = useState<TeamInfo[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [selectedBrief, setSelectedBrief] = useState<string | null>(null);
   const [selectedAgents, setSelectedAgents] = useState<Set<string>>(new Set());
   const [launching, setLaunching] = useState(false);
@@ -15,11 +17,36 @@ export default function SetupPage() {
 
   useEffect(() => {
     fetchBriefs().then(setBriefs).catch(() => {});
-    fetchAgents().then(a => {
-      setAgents(a);
-      setSelectedAgents(new Set(a.map(ag => ag.key)));
+    fetchAgents().then(setAllAgents).catch(() => {});
+    fetchTeams().then(t => {
+      setTeams(t);
+      // Select first team by default
+      if (t.length > 0) {
+        setSelectedTeam(t[0].name);
+        setSelectedAgents(new Set(t[0].agents));
+      }
     }).catch(() => {});
   }, []);
+
+  // Agents visible based on team selection (or all if "custom")
+  const visibleAgents = selectedTeam === '_custom'
+    ? allAgents
+    : allAgents.filter(a => {
+        const team = teams.find(t => t.name === selectedTeam);
+        return team ? team.agents.includes(a.key) : true;
+      });
+
+  const selectTeam = (teamName: string) => {
+    setSelectedTeam(teamName);
+    if (teamName === '_custom') {
+      // Keep current selection when switching to custom
+      return;
+    }
+    const team = teams.find(t => t.name === teamName);
+    if (team) {
+      setSelectedAgents(new Set(team.agents));
+    }
+  };
 
   const selectBrief = (b: BriefInfo) => {
     if (selectedBrief === b.filename) {
@@ -37,6 +64,7 @@ export default function SetupPage() {
   };
 
   const toggleAgent = (key: string) => {
+    setSelectedTeam('_custom');
     setSelectedAgents(prev => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
@@ -52,7 +80,8 @@ export default function SetupPage() {
     setLaunching(true);
     setError('');
     try {
-      await startSession(topic, Array.from(selectedAgents));
+      const team = selectedTeam !== '_custom' ? selectedTeam ?? undefined : undefined;
+      await startSession(topic, Array.from(selectedAgents), team);
       navigate('/session');
     } catch (e: any) {
       setError(e.message || 'Failed to start session');
@@ -97,11 +126,43 @@ export default function SetupPage() {
           </section>
         )}
 
+        {/* Team selector */}
+        {teams.length > 0 && (
+          <section className="setup-section">
+            <h2 className="setup-label">Team</h2>
+            <div className="brief-row">
+              {teams.map(t => (
+                <button
+                  key={t.name}
+                  className={`brief-card ${selectedTeam === t.name ? 'selected' : ''}`}
+                  onClick={() => selectTeam(t.name)}
+                >
+                  {t.displayName} <span className="team-count">({t.agentCount})</span>
+                </button>
+              ))}
+              <button
+                className={`brief-card ${selectedTeam === '_custom' ? 'selected' : ''}`}
+                onClick={() => selectTeam('_custom')}
+              >
+                Custom mix
+              </button>
+            </div>
+          </section>
+        )}
+
         {/* Agents */}
         <section className="setup-section">
-          <h2 className="setup-label">Select agents</h2>
+          <h2 className="setup-label">
+            Agents
+            {selectedTeam && selectedTeam !== '_custom' && (
+              <span className="setup-label-hint"> — {selectedAgents.size} selected</span>
+            )}
+            {selectedTeam === '_custom' && (
+              <span className="setup-label-hint"> — {selectedAgents.size} selected from all teams</span>
+            )}
+          </h2>
           <div className="agent-grid">
-            {agents.map(a => {
+            {visibleAgents.map(a => {
               const on = selectedAgents.has(a.key);
               return (
                 <div

@@ -38,16 +38,30 @@ export async function fetchBriefs(): Promise<BriefInfo[]> {
   return res.json();
 }
 
+export interface TeamInfo {
+  name: string;
+  displayName: string;
+  agentCount: number;
+  agents: string[];
+  modes: string[];
+  defaultMode: string;
+}
+
 export async function fetchAgents(): Promise<AgentInfo[]> {
   const res = await fetch('/api/agents');
   return res.json();
 }
 
-export async function startSession(topic: string, agentKeys: string[]): Promise<{ status: string; title: string }> {
+export async function fetchTeams(): Promise<TeamInfo[]> {
+  const res = await fetch('/api/teams');
+  return res.json();
+}
+
+export async function startSession(topic: string, agentKeys: string[], team?: string): Promise<{ status: string; title: string }> {
   const res = await fetch('/api/session/start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ topic, agentKeys }),
+    body: JSON.stringify({ topic, agentKeys, team }),
   });
   if (!res.ok) {
     const err = await res.json();
