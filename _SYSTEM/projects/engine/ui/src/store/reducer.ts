@@ -1,6 +1,6 @@
 import type { DashboardState, ChatItem, ConnectionStatus } from '../types/state';
 import type { SSEEvent, AgentProfileEvent } from '../types/events';
-import type { AgentProfile, MsgStoreEntry, SynthStoreEntry } from '../types/agent';
+import type { AgentProfile, MsgStoreEntry, SynthStoreEntry, ContextStatsEntry } from '../types/agent';
 
 // ── Action types ──────────────────────────────────────────────
 
@@ -219,12 +219,33 @@ function handleSSEEvent(state: DashboardState, ev: SSEEvent): DashboardState {
       };
     }
 
+    case 'agent_context_stats': {
+      const ck = `${ev.agent}::${ev.question}::${ev.round}`;
+      const entry: ContextStatsEntry = {
+        totalTokens: ev.total_tokens,
+        budgetTokens: ev.budget_tokens,
+        budgetPct: ev.budget_pct,
+        sections: ev.sections.map(s => ({
+          name: s.name,
+          chars: s.chars,
+          tokens: s.tokens,
+          isProtected: s.is_protected,
+        })),
+        rescueActions: ev.rescue_actions || [],
+      };
+      return {
+        ...state,
+        ctxStatsStore: { ...state.ctxStatsStore, [ck]: entry },
+      };
+    }
+
     case 'agent_response': {
       // Remove thinking row
       const filtered = state.chatItems.filter(c => c.id !== `think-${ev.agent}`);
       const mid = `m${state.msgIdCounter}`;
       const ck = `${ev.agent}::${ev.question}::${ev.round}`;
       const ctx = state.ctxStore[ck] || { systemPrompt: '', payload: '' };
+      const stats = state.ctxStatsStore[ck];
       const msgEntry: MsgStoreEntry = {
         agent: ev.agent,
         displayName: ev.display_name || ev.agent,
@@ -235,14 +256,16 @@ function handleSSEEvent(state: DashboardState, ev: SSEEvent): DashboardState {
         payload: ctx.payload,
         response: ev.response || '',
         elapsed: ev.elapsed,
+        contextStatsKey: ck,
       };
+      const tokenMeta = stats ? ` \u00B7 ${stats.totalTokens}tok` : '';
       const chatItem: ChatItem = {
         id: mid,
         itemType: 'message',
         agentKey: ev.agent,
         displayName: ev.display_name,
         time: ev.time || '',
-        meta: `${ev.elapsed}s \u00B7 Q${ev.question || '?'} ${ev.round || ''}`,
+        meta: `${ev.elapsed}s \u00B7 Q${ev.question || '?'} ${ev.round || ''}${tokenMeta}`,
         body: ev.response || '[empty]',
         clickable: true,
       };
