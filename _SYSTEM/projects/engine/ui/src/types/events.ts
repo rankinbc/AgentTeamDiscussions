@@ -69,6 +69,26 @@ export interface AgentContextEvent {
   payload: string;
 }
 
+export interface ContextSectionStatEvent {
+  name: string;
+  chars: number;
+  tokens: number;
+  is_protected: boolean;
+}
+
+export interface AgentContextStatsEvent {
+  type: 'agent_context_stats';
+  time: string;
+  agent: string;
+  round: string;
+  question: number;
+  total_tokens: number;
+  budget_tokens: number;
+  budget_pct: number;
+  sections: ContextSectionStatEvent[];
+  rescue_actions: string[];
+}
+
 export interface AgentResponseEvent {
   type: 'agent_response';
   time: string;
@@ -234,6 +254,7 @@ export type SSEEvent =
   | RoundStartEvent
   | AgentThinkingEvent
   | AgentContextEvent
+  | AgentContextStatsEvent
   | AgentResponseEvent
   | SynthesisStartEvent
   | SynthesisDoneEvent

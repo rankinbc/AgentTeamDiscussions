@@ -1,4 +1,4 @@
-import type { AgentProfile, AgentMessageEntry, MsgStoreEntry, SynthStoreEntry } from './agent';
+import type { AgentProfile, AgentMessageEntry, MsgStoreEntry, SynthStoreEntry, ContextStatsEntry } from './agent';
 
 export type ConnectionStatus = 'connecting' | 'live' | 'disconnected';
 
@@ -50,6 +50,7 @@ export interface DashboardState {
   chatItems: ChatItem[];
   msgStore: Record<string, MsgStoreEntry>;
   ctxStore: Record<string, { systemPrompt: string; payload: string }>;
+  ctxStatsStore: Record<string, ContextStatsEntry>;
   synthStore: Record<string, SynthStoreEntry>;
   totalMessages: number;
   orchestrator: OrchestratorState;
@@ -81,6 +82,7 @@ export const initialState: DashboardState = {
   chatItems: [],
   msgStore: {},
   ctxStore: {},
+  ctxStatsStore: {},
   synthStore: {},
   totalMessages: 0,
   orchestrator: { state: 'idle', turn: 0, max: '\u2014', speaker: '\u2014', challenges: 0 },

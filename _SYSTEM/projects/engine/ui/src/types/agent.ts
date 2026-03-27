@@ -39,6 +39,22 @@ export interface MsgStoreEntry {
   payload: string;
   response: string;
   elapsed: number;
+  contextStatsKey?: string;
+}
+
+export interface ContextSectionStat {
+  name: string;
+  chars: number;
+  tokens: number;
+  isProtected: boolean;
+}
+
+export interface ContextStatsEntry {
+  totalTokens: number;
+  budgetTokens: number;
+  budgetPct: number;
+  sections: ContextSectionStat[];
+  rescueActions: string[];
 }
 
 export interface SynthStoreEntry {
