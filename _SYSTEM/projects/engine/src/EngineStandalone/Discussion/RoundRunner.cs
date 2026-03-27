@@ -1,6 +1,7 @@
 // RoundRunner.cs — Executes a single discussion round (propose, critique, or evaluate).
 // Each round runs agents in a computed speaking order. In sequential mode, later speakers
 // see what earlier speakers said, enabling incremental debate within a single round.
+// Context telemetry measures each section's size; budget enforcement trims when over ceiling.
 
 using System.Text;
 using EngineStandalone.Abstractions;
@@ -8,17 +9,20 @@ using EngineStandalone.Agents;
 using EngineStandalone.Brief;
 using EngineStandalone.Config;
 using EngineStandalone.Runner;
+using EngineStandalone.Telemetry;
 
 namespace EngineStandalone.Discussion;
 
 /// <summary>
 /// Event hooks for the live SSE server. OnAgentStart fires when an agent begins,
 /// OnAgentContext delivers the assembled prompt, OnAgentDone fires with the response and timing.
+/// OnAgentContextStats delivers per-section telemetry for the context budget dashboard.
 /// </summary>
 public class RoundCallbacks
 {
     public Action<string>? OnAgentStart { get; set; }
     public Action<string, string, string>? OnAgentContext { get; set; }
+    public Action<string, ContextSnapshot>? OnAgentContextStats { get; set; }
     public Action<string, string, double>? OnAgentDone { get; set; }
 }
 
@@ -30,12 +34,21 @@ public class RoundRunner : IRoundRunner
     private readonly IClaudeRunner _claudeRunner;
     private readonly IPromptBuilder _promptBuilder;
     private readonly IConfigLoader _configLoader;
+    private readonly IContextTelemetry? _telemetry;
+    private readonly IContextBudgetEnforcer? _budgetEnforcer;
 
-    public RoundRunner(IClaudeRunner claudeRunner, IPromptBuilder promptBuilder, IConfigLoader configLoader)
+    public RoundRunner(
+        IClaudeRunner claudeRunner,
+        IPromptBuilder promptBuilder,
+        IConfigLoader configLoader,
+        IContextTelemetry? telemetry = null,
+        IContextBudgetEnforcer? budgetEnforcer = null)
     {
         _claudeRunner = claudeRunner;
         _promptBuilder = promptBuilder;
         _configLoader = configLoader;
+        _telemetry = telemetry;
+        _budgetEnforcer = budgetEnforcer;
     }
 
     /// <summary>
@@ -56,9 +69,7 @@ public class RoundRunner : IRoundRunner
             }
 
             var p = agent.Personality;
-            // Speaking priority: assertiveness * intensity, weighted by stubbornness
             var score = p.Assertiveness * 0.5 + agent.Position.Intensity * 0.3 + p.Stubbornness * 0.2;
-            // Add small random jitter (+-0.1) so it's not perfectly deterministic
             score += random.NextDouble() * 0.2 - 0.1;
             scored.Add((key, score));
         }
@@ -67,11 +78,10 @@ public class RoundRunner : IRoundRunner
     }
 
     /// <summary>
-    /// Assembles the Situation Layer + Task Layer for one agent's prompt. Sections in order:
-    /// perspective reminder, context lens, role overlay, prior decisions, prior design docs,
-    /// open questions, discussion so far, the question, round instruction, speaking position.
+    /// Assembles the Situation Layer + Task Layer as structured sections for measurement
+    /// and budget enforcement. Each section is named and tagged as protected or cuttable.
     /// </summary>
-    public string BuildAgentPayload(
+    public List<ContextSection> BuildAgentSections(
         string agentKey,
         TeamConfig team,
         Dictionary<string, string> systemPrompts,
@@ -89,19 +99,17 @@ public class RoundRunner : IRoundRunner
             throw new ArgumentException($"Agent '{agentKey}' not found in team");
         }
 
-        var sb = new StringBuilder();
+        var sections = new List<ContextSection>();
 
-        // Perspective reminder
+        // Perspective reminder (protected — identity reinforcement)
         var reminder = _promptBuilder.BuildPerspectiveReminder(agent);
-        sb.AppendLine(reminder);
-        sb.AppendLine();
+        sections.Add(new ContextSection { Name = "perspective_reminder", Content = reminder + "\n", IsProtected = true });
 
         // Agent-specific context lens
         var contextLens = _promptBuilder.BuildContextLens(agent);
         if (!string.IsNullOrEmpty(contextLens))
         {
-            sb.AppendLine(contextLens);
-            sb.AppendLine();
+            sections.Add(new ContextSection { Name = "context_lens", Content = contextLens + "\n" });
         }
 
         // Per-agent role overlay
@@ -110,40 +118,42 @@ public class RoundRunner : IRoundRunner
             var roleText = _configLoader.OverlayInstruction(roleKey);
             if (!string.IsNullOrEmpty(roleText))
             {
-                sb.AppendLine("=== Your Approach ===");
-                sb.AppendLine(roleText);
-                sb.AppendLine("=== End Approach ===");
-                sb.AppendLine();
+                sections.Add(new ContextSection
+                {
+                    Name = "role_overlay",
+                    Content = $"=== Your Approach ===\n{roleText}\n=== End Approach ===\n"
+                });
             }
         }
 
         // Decisions from brief
         if (!string.IsNullOrEmpty(decisions))
         {
-            sb.AppendLine("=== What's Already Decided ===");
-            sb.AppendLine(decisions);
-            sb.AppendLine("=== End Decisions ===");
-            sb.AppendLine();
+            sections.Add(new ContextSection
+            {
+                Name = "decisions",
+                Content = $"=== What's Already Decided ===\n{decisions}\n=== End Decisions ===\n"
+            });
         }
 
         // Prior design docs
         if (!string.IsNullOrEmpty(priorSpecs))
         {
-            sb.AppendLine("=== Prior Design Docs (reference, don't contradict) ===");
-            sb.AppendLine(priorSpecs);
-            sb.AppendLine("=== End Prior Docs ===");
-            sb.AppendLine();
+            sections.Add(new ContextSection
+            {
+                Name = "prior_specs",
+                Content = $"=== Prior Design Docs (reference, don't contradict) ===\n{priorSpecs}\n=== End Prior Docs ===\n"
+            });
         }
 
         // Unresolved open questions
         if (!string.IsNullOrEmpty(openQuestions))
         {
-            sb.AppendLine("=== Unresolved Open Questions from Prior Docs ===");
-            sb.AppendLine(openQuestions);
-            sb.AppendLine("=== End Open Questions ===");
-            sb.AppendLine();
-            sb.AppendLine("If this question can resolve any of the above, do so.");
-            sb.AppendLine();
+            sections.Add(new ContextSection
+            {
+                Name = "open_questions",
+                Content = $"=== Unresolved Open Questions from Prior Docs ===\n{openQuestions}\n=== End Open Questions ===\n\nIf this question can resolve any of the above, do so.\n"
+            });
         }
 
         // Context: prior rounds + what's been said THIS round so far
@@ -159,39 +169,122 @@ public class RoundRunner : IRoundRunner
         }
         if (!string.IsNullOrEmpty(combinedContext))
         {
-            sb.AppendLine("=== Discussion So Far (this question) ===");
-            sb.AppendLine(combinedContext);
-            sb.AppendLine("=== End Discussion ===");
-            sb.AppendLine();
+            sections.Add(new ContextSection
+            {
+                Name = "prior_rounds",
+                Content = $"=== Discussion So Far (this question) ===\n{combinedContext}\n=== End Discussion ===\n"
+            });
         }
 
-        // The question itself
-        sb.AppendLine($"## Question: {question.Title}");
-        sb.AppendLine();
-        sb.AppendLine(question.Body);
-        sb.AppendLine();
+        // The question itself (protected — the core task)
+        sections.Add(new ContextSection
+        {
+            Name = "question",
+            Content = $"## Question: {question.Title}\n\n{question.Body}\n",
+            IsProtected = true
+        });
 
-        // Round instruction
+        // Round instruction (protected)
         if (!string.IsNullOrEmpty(roundInstruction))
         {
-            sb.AppendLine(roundInstruction);
-            sb.AppendLine();
+            sections.Add(new ContextSection
+            {
+                Name = "round_instruction",
+                Content = roundInstruction + "\n",
+                IsProtected = true
+            });
         }
 
-        // Speaking order context
-        if (!string.IsNullOrEmpty(thisRoundSoFar))
+        // Speaking order context (protected)
+        var speakingText = !string.IsNullOrEmpty(thisRoundSoFar)
+            ? "Other agents have already spoken this round. Respond to their points directly -- disagree where you see a flaw, and be specific about why. Do not agree unless you have genuinely new evidence. 250 words max (excluding Position Summary)."
+            : "You are speaking first this round. Set the agenda. 250 words max (excluding Position Summary).";
+        sections.Add(new ContextSection { Name = "speaking_position", Content = speakingText, IsProtected = true });
+
+        // Position summary format (protected)
+        sections.Add(new ContextSection
         {
-            sb.Append("Other agents have already spoken this round. Respond to their points directly -- disagree where you see a flaw, and be specific about why. Do not agree unless you have genuinely new evidence. 250 words max (excluding Position Summary).");
-        }
-        else
+            Name = "position_summary_format",
+            Content = "\nIMPORTANT: End your response with exactly this format:\n## Position Summary\n[3 sentences: what you advocate, what you reject, and why.]",
+            IsProtected = true
+        });
+
+        return sections;
+    }
+
+    /// <summary>
+    /// Assembles the Situation Layer + Task Layer for one agent's prompt.
+    /// Builds structured sections, applies budget enforcement, records telemetry,
+    /// then concatenates into the final payload string.
+    /// </summary>
+    public string BuildAgentPayload(
+        string agentKey,
+        TeamConfig team,
+        Dictionary<string, string> systemPrompts,
+        Question question,
+        string decisions,
+        string priorRounds,
+        string priorSpecs,
+        string openQuestions,
+        string roundInstruction,
+        Dictionary<string, string>? agentRoles,
+        string thisRoundSoFar = "")
+    {
+        var sections = BuildAgentSections(
+            agentKey, team, systemPrompts, question, decisions,
+            priorRounds, priorSpecs, openQuestions, roundInstruction,
+            agentRoles, thisRoundSoFar);
+
+        // Budget enforcement (auto-rescue)
+        var budget = _configLoader.Defaults().ContextBudget;
+        if (_budgetEnforcer != null && budget.EnableAutoRescue)
         {
-            sb.Append("You are speaking first this round. Set the agenda. 250 words max (excluding Position Summary).");
+            sections = _budgetEnforcer.Enforce(sections, budget);
         }
 
-        sb.AppendLine();
-        sb.AppendLine();
-        sb.Append("IMPORTANT: End your response with exactly this format:\n## Position Summary\n[3 sentences: what you advocate, what you reject, and why.]");
+        // Build snapshot for telemetry
+        var systemPrompt = systemPrompts.TryGetValue(agentKey, out var sp) ? sp : "";
+        var snapshot = new ContextSnapshot
+        {
+            AgentKey = agentKey,
+            Round = roundInstruction.Length > 20 ? "round" : "",
+            QuestionNumber = question.Number,
+            Sections = sections,
+            SystemPromptChars = systemPrompt.Length,
+            SystemPromptEstimatedTokens = ContextSection.EstimateTokens(systemPrompt),
+            BudgetTokens = budget.MaxPayloadTokens
+        };
 
+        if (budget.EnableTelemetry && _telemetry != null)
+        {
+            _telemetry.Record(snapshot);
+            _telemetry.LogToConsole(snapshot);
+        }
+
+        // Store snapshot for callback retrieval
+        _lastSnapshot = snapshot;
+
+        return ConcatenateSections(sections);
+    }
+
+    // Thread-local would be needed for parallel mode; for sequential this is fine.
+    // The callback fires immediately after BuildAgentPayload in RunRoundAsync.
+    private ContextSnapshot? _lastSnapshot;
+
+    /// <summary>
+    /// Returns the last recorded ContextSnapshot from BuildAgentPayload.
+    /// </summary>
+    public ContextSnapshot? LastSnapshot => _lastSnapshot;
+
+    private static string ConcatenateSections(List<ContextSection> sections)
+    {
+        var sb = new StringBuilder();
+        foreach (var section in sections)
+        {
+            if (string.IsNullOrEmpty(section.Content)) continue;
+            if (sb.Length > 0) sb.AppendLine();
+            sb.Append(section.Content);
+        }
         return sb.ToString();
     }
 
@@ -251,6 +344,7 @@ public class RoundRunner : IRoundRunner
                 agentRoles, thisRoundSoFar);
 
             callbacks?.OnAgentContext?.Invoke(agentKey, systemPrompts[agentKey], payload);
+            callbacks?.OnAgentContextStats?.Invoke(agentKey, _lastSnapshot!);
 
             var response = await _claudeRunner.RunAsync(systemPrompts[agentKey], payload, timeout);
             var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;

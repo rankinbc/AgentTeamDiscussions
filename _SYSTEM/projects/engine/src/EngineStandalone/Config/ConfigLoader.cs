@@ -141,6 +141,27 @@ public class ConfigLoader : IConfigLoader
             };
         }
 
+        if (raw.TryGetValue("context_budget", out var budgetObj) && budgetObj is Dictionary<object, object> budget)
+        {
+            settings.ContextBudget = new ContextBudgetSettings
+            {
+                MaxPayloadTokens = GetInt(budget, "max_payload_tokens", 4000),
+                ImbalanceThreshold = GetDouble(budget, "imbalance_threshold", 0.6),
+                MinPayloadTokens = GetInt(budget, "min_payload_tokens", 500),
+                EnableAutoRescue = GetBool(budget, "enable_auto_rescue", true),
+                EnableTelemetry = GetBool(budget, "enable_telemetry", true),
+                MaxPriorRoundsChars = GetInt(budget, "max_prior_rounds_chars", 6000),
+                MaxPriorSpecsChars = GetInt(budget, "max_prior_specs_chars", 4000),
+                MaxDecisionsChars = GetInt(budget, "max_decisions_chars", 3000),
+                MaxThisRoundSoFarChars = GetInt(budget, "max_this_round_so_far_chars", 5000)
+            };
+
+            if (budget.TryGetValue("cut_priority", out var cutObj) && cutObj is List<object> cutList)
+            {
+                settings.ContextBudget.CutPriority = cutList.Select(c => c.ToString()!).ToList();
+            }
+        }
+
         if (raw.TryGetValue("completion_marker", out var marker))
         {
             settings.CompletionMarker = marker?.ToString() ?? "\n<!-- complete -->\n";

@@ -1,6 +1,7 @@
 using EngineStandalone.Agents;
 using EngineStandalone.Brief;
 using EngineStandalone.Discussion;
+using EngineStandalone.Telemetry;
 
 namespace EngineStandalone.Abstractions;
 
@@ -10,6 +11,19 @@ namespace EngineStandalone.Abstractions;
 public interface IRoundRunner
 {
     List<string> ComputeSpeakingOrder(List<string> agents, TeamConfig team);
+
+    List<ContextSection> BuildAgentSections(
+        string agentKey,
+        TeamConfig team,
+        Dictionary<string, string> systemPrompts,
+        Question question,
+        string decisions,
+        string priorRounds,
+        string priorSpecs,
+        string openQuestions,
+        string roundInstruction,
+        Dictionary<string, string>? agentRoles,
+        string thisRoundSoFar = "");
 
     string BuildAgentPayload(
         string agentKey,

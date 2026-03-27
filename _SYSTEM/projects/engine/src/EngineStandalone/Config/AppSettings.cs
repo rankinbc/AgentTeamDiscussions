@@ -103,6 +103,33 @@ public class SessionSettings
 }
 
 /// <summary>
+/// Context budget enforcement and telemetry. Controls token ceiling, auto-rescue
+/// thresholds, and per-section limits for the context assembly pipeline.
+/// </summary>
+public class ContextBudgetSettings
+{
+    public int MaxPayloadTokens { get; set; } = 4000;
+    public double ImbalanceThreshold { get; set; } = 0.6;
+    public int MinPayloadTokens { get; set; } = 500;
+    public bool EnableAutoRescue { get; set; } = true;
+    public bool EnableTelemetry { get; set; } = true;
+    public int MaxPriorRoundsChars { get; set; } = 6000;
+    public int MaxPriorSpecsChars { get; set; } = 4000;
+    public int MaxDecisionsChars { get; set; } = 3000;
+    public int MaxThisRoundSoFarChars { get; set; } = 5000;
+    public List<string> CutPriority { get; set; } = new()
+    {
+        "prior_rounds",
+        "prior_specs",
+        "decisions",
+        "open_questions",
+        "this_round_so_far",
+        "context_lens",
+        "role_overlay"
+    };
+}
+
+/// <summary>
 /// Root application settings combining all config sections.
 /// </summary>
 public class AppSettings
@@ -115,6 +142,7 @@ public class AppSettings
     public DisplaySettings Display { get; set; } = new();
     public PathSettings Paths { get; set; } = new();
     public SessionSettings Session { get; set; } = new();
+    public ContextBudgetSettings ContextBudget { get; set; } = new();
     public string CompletionMarker { get; set; } = "\n<!-- complete -->\n";
 }
 
