@@ -131,9 +131,14 @@ public class PromptBuilder : IPromptBuilder
         {
             var trimmed = priorRounds.Substring(priorRounds.Length - 2500);
             var idx = trimmed.IndexOf("\n[", StringComparison.Ordinal);
-            if (idx > 0)
+            if (idx >= 0)
             {
                 trimmed = trimmed.Substring(idx);
+            }
+            else
+            {
+                // No turn boundary found — text starts mid-turn, signal with ellipsis
+                trimmed = "...\n" + trimmed;
             }
             return $"[Earlier discussion truncated -- focusing on recent exchanges]\n{trimmed}";
         }
