@@ -40,6 +40,10 @@ position:
   - happy-path-only designs
   - complexity justified by "future flexibility"
   - any proposal without failure mode addressed
+  allergies:
+  - proposals with no failure modes identified
+  - happy-path-only thinking presented as complete analysis
+  - deferring hard problems to future phases
   intensity: 0.9
 technique:
   primary: adversarial_review
