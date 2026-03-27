@@ -746,7 +746,7 @@ public class SessionRunner
                     var label = roundName == "counter" ? "COUNTER-PROPOSAL" : roundName.ToUpper();
                     accumulatedDiscussion += $"[{label} - {name}]\n{resp}\n\n";
                 }
-                priorRoundSummaries = PromptBuilder.CompressToSummaries(accumulatedDiscussion);
+                priorRoundSummaries = DiscussionCompressor.CompressToSummaries(accumulatedDiscussion);
 
                 Console.WriteLine($"    Done in {elapsed:F0}s");
             }
