@@ -282,4 +282,16 @@ public class PromptBuilderTests
 
         Assert.DoesNotContain("UNCOMFORTABLE IDEA QUOTA", prompt);
     }
+
+    [Fact]
+    public void BuildSystemPrompt_AlwaysContainsSelfVerification()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig { Name = "Tester" };
+
+        var prompt = builder.BuildSystemPrompt(agent);
+
+        Assert.Contains("Before responding, verify", prompt);
+        Assert.Contains("defaulting to generic", prompt);
+    }
 }

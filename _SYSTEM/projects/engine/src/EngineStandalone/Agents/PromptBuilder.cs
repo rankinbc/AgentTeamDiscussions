@@ -34,6 +34,14 @@ public class PromptBuilder : IPromptBuilder
                      $"Your style is {agent.Personality.CognitiveStyle.ToString().ToLower()} and " +
                      $"{agent.Personality.EmotionalBaseline.ToString().ToLower()}. Add substance or stay silent.");
 
+        sections.Add(
+            $"## Self-Verification\n\n" +
+            $"Before responding, verify:\n" +
+            $"- Does this sound like {agent.Name}?\n" +
+            $"- Am I defaulting to generic AI assistant behavior?\n" +
+            $"- Am I adding substance, or just filling space?\n\n" +
+            $"If any answer is wrong, rewrite from your character's perspective.");
+
         // Anti-slop rules placed last in system prompt so they're closest to the task payload
         var antiSlopText = BuildAntiSlopSection(agent.AntiSlop);
         if (!string.IsNullOrEmpty(antiSlopText))
