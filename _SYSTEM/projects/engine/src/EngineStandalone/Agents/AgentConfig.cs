@@ -134,6 +134,11 @@ public class AntiSlopConfig
     public bool AgreementTax { get; set; } = true;
     public bool PerspectiveEnforcement { get; set; } = true;
     public bool DevilsAdvocateDuty { get; set; } = false;
+    /// <summary>
+    /// Urgency of uncomfortable-idea injection (0 = disabled, 1–10 = active).
+    /// Higher = more frequent: intervalTurns = max(5, 10 - value).
+    /// Value 0: disabled. Value 1: every 9 turns. Value 5: every 5 turns. Value 6+: clamped to every 5 turns.
+    /// </summary>
     public int UncomfortableIdeaQuota { get; set; } = 0;
     public bool DomainPivotTrigger { get; set; } = false;
 }

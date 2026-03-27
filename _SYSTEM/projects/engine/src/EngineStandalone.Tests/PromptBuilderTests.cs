@@ -249,4 +249,37 @@ public class PromptBuilderTests
 
         Assert.Equal(priorRounds, result);
     }
+
+    [Theory]
+    [InlineData(5, 5)]   // urgency 5 → every 5 turns
+    [InlineData(1, 9)]   // urgency 1 → every 9 turns
+    [InlineData(6, 5)]   // above 5 clamped to every 5 turns
+    public void BuildSystemPrompt_UncomfortableIdeaQuota_IntervalMatchesFormula(int quota, int expectedInterval)
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig
+        {
+            Name = "TestAgent",
+            AntiSlop = new AntiSlopConfig { UncomfortableIdeaQuota = quota }
+        };
+
+        var prompt = builder.BuildSystemPrompt(agent);
+
+        Assert.Contains($"Every {expectedInterval} turns", prompt);
+    }
+
+    [Fact]
+    public void BuildSystemPrompt_UncomfortableIdeaQuota_ZeroDisablesRule()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig
+        {
+            Name = "TestAgent",
+            AntiSlop = new AntiSlopConfig { UncomfortableIdeaQuota = 0 }
+        };
+
+        var prompt = builder.BuildSystemPrompt(agent);
+
+        Assert.DoesNotContain("UNCOMFORTABLE IDEA QUOTA", prompt);
+    }
 }

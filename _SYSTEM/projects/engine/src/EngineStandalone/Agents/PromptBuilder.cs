@@ -273,8 +273,12 @@ public class PromptBuilder : IPromptBuilder
 
         if (a.UncomfortableIdeaQuota > 0)
         {
-            var turns = Math.Max(5, 10 - a.UncomfortableIdeaQuota);
-            rules.Add($"UNCOMFORTABLE IDEA QUOTA: Every {turns} turns, introduce at least one idea that challenges comfort zones.");
+            // UncomfortableIdeaQuota is an urgency value (1–10): higher = shorter interval = more frequent.
+            // Formula: intervalTurns = max(5, 10 - quota).
+            //   quota=1 → every 9 turns | quota=5 → every 5 turns | quota>5 → clamped at every 5 turns
+            var intervalTurns = Math.Max(5, 10 - a.UncomfortableIdeaQuota);
+            rules.Add($"UNCOMFORTABLE IDEA QUOTA: Every {intervalTurns} turns, introduce at least one " +
+                      $"idea that challenges comfort zones. This is mandatory, not optional.");
         }
 
         if (a.DomainPivotTrigger)
