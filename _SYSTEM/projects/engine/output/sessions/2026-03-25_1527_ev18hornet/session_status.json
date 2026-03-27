@@ -1,0 +1,131 @@
+{
+  "questions": {
+    "q1": {
+      "status": "complete",
+      "title": "Space Layer: 2D or 3D?",
+      "elapsed_seconds": 160,
+      "file": "01-space-layer-2d-or-3d.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q2": {
+      "status": "complete",
+      "title": "Galaxy Scale and Structure",
+      "elapsed_seconds": 155,
+      "file": "02-galaxy-scale-and-structure.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q3": {
+      "status": "complete",
+      "title": "Layer Transitions: Seamless or Gated?",
+      "elapsed_seconds": 192,
+      "file": "03-layer-transitions-seamless-or-gated.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q4": {
+      "status": "complete",
+      "title": "Settlement Destruction Stakes",
+      "elapsed_seconds": 165,
+      "file": "04-settlement-destruction-stakes.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q5": {
+      "status": "complete",
+      "title": "Fleet Architecture: Hard Cap or Soft Cap?",
+      "elapsed_seconds": 180,
+      "file": "05-fleet-architecture-hard-cap-or-soft-cap.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q6": {
+      "status": "complete",
+      "title": "Co-op State Model",
+      "elapsed_seconds": 189,
+      "file": "06-co-op-state-model.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q7": {
+      "status": "complete",
+      "title": "Faction Commitment: Path Choice or Flexible Standing?",
+      "elapsed_seconds": 179,
+      "file": "07-faction-commitment-path-choice-or-flexible-standing.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q8": {
+      "status": "complete",
+      "title": "On-Foot Combat Depth",
+      "elapsed_seconds": 170,
+      "file": "08-on-foot-combat-depth.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q9": {
+      "status": "complete",
+      "title": "Death and Progression Setback",
+      "elapsed_seconds": 180,
+      "file": "09-death-and-progression-setback.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q10": {
+      "status": "complete",
+      "title": "Scope Target: How Small is the Fun Version?",
+      "elapsed_seconds": 183,
+      "file": "10-scope-target-how-small-is-the-fun-version.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    }
+  },
+  "question_hash": "93c197e5b2f80adc",
+  "mode": "ev18hornet",
+  "brief": "ev18hornet.md",
+  "session_complete": true,
+  "total_elapsed_seconds": 1953,
+  "completed_questions": 10,
+  "failed_questions": 0
+}

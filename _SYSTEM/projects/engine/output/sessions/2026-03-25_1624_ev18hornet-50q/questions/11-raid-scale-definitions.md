@@ -1,0 +1,63 @@
+# Raid Scale Definitions
+
+*Generated: 2026-03-25 17:00 | Question 11 | 193s | Mode: ev18hornet*
+
+## Decisions
+
+**Raid Scale Is Expressed as Two Discrete Compositions, Not a Continuous Formula:** Harassment-scale and assault-scale raids are defined as two authored spawn compositions selected by a standing threshold, not by a continuous formula mapping standing value to ship count. A continuous formula is correct at the input layer (standing depth determines which composition fires) and incorrect at the output layer (players at 500 meters read fleet geometry, not standing values). Discretizing at the output layer preserves the emergence chain — the designer never selects a raid type, the standing system generates it — while keeping the in-flight read legible in the two to three seconds available before intercept commitment.
+
+**Harassment-Scale Raid Definition:** Harassment-scale spawns when faction standing is in the Hostile band but above the assault threshold. Ship count ceiling is 3. Attack geometry is a single converging vector — all ships approach from one bearing. One building may take damage per raid instance. Tier regression is not eligible from harassment-scale raids alone; sustained harassment damage may accumulate toward regression thresholds but no single harassment raid can trigger a tier drop. This composition is designed to be solo-interceptable from the cockpit: the player can engage the full wave, the settlement takes a scar, the engagement reads as Hornet.
+
+**Assault-Scale Raid Definition:** Assault-scale spawns when faction standing falls below the assault threshold. Ship count ceiling is 6. Attack geometry is split-vector — two or more approach bearings, with at minimum one vector the player cannot cover while covering another. Multiple buildings may take damage per raid instance. Tier regression is eligible from assault-scale raids. The design intent is forced triage from altitude: the player cannot intercept everything and must choose what to sacrifice. Split-vector geometry communicates "you are outmatched" in three seconds at 500 meters regardless of ship count because converging vectors on the player's heading is survivable; buildings behind the player are not.
+
+**Standing Thresholds Determine Composition, Not Authorship:** Two named config constants define the standing boundaries: `RAID_HARASSMENT_THRESHOLD` and `RAID_ASSAULT_THRESHOLD`. When faction standing falls below `RAID_HARASSMENT_THRESHOLD` the harassment composition spawns. When faction standing falls below `RAID_ASSAULT_THRESHOLD` the assault composition spawns instead. Both constants are named from day one and require no authored values until M5 playtest data on standing movement rates is available. The designer never specifies raid type per session; the existing faction standing read at spawn time determines composition automatically.
+
+**Building Damage Cap Is Per-Composition, Not Per-Tier:** Harassment raids are capped at one building damaged per raid instance. Assault raids have no hard cap on buildings damaged per instance — damage accumulates from what the player fails to intercept. The cap is a spawn composition property, implemented as a named config constant `RAID_HARASSMENT_DAMAGE_CAP = 1`, so future tuning requires no code change. Assault damage is uncapped by design: the triage scenario requires the player to believe some buildings will be lost, and a cap would undermine that read.
+
+**Tier Regression Eligibility Is Assault-Only:** Tier regression — a Settlement dropping back to Outpost, or any tier dropping to the tier below — is only eligible following assault-scale damage events. Harassment raids cannot trigger tier regression regardless of frequency or accumulation. This is a behavioral contract, not a tuning variable. The rationale: harassment is the standing system saying "we are watching you." Assault is the standing system saying "we are taking this from you." Those are different dramatic registers and must produce different consequences.
+
+**Tier Regression Triggers on Accumulated Structural Damage Crossing a Threshold:** Tier regression fires when accumulated structural damage from assault-scale raids crosses a named threshold constant `SETTLEMENT_REGRESSION_THRESHOLD`. It does not fire on a single assault event. The threshold is a config constant with no authored value until M7 settlement art and building type counts are known. Regression is not time-gated, session-gated, or player-presence-gated — it accumulates from damage events regardless of whether the player was present to intercept.
+
+**Tier Regression Geometry Requirement Is Named but Not Scoped:** Visual tier regression — settlement geometry physically reverting to a lower tier state, legible from 500 meters in flat-poly — is the correct design intent and the payoff Max identifies as the SimCopter moment under pressure. It requires every building type to carry at minimum two geometry states (erected and damaged/absent), and legibility from altitude in the flat-poly aesthetic requires those states to read as distinct silhouettes, not texture changes. This asset scope — number of building types at M7 multiplied by geometry state count — must be costed before M8 scope estimation is final. The geometry requirement is named here as a blocking dependency for M8; it is not assigned a milestone or resolved in this discussion.
+
+**First-Raid Protection Window Is Required:** The first raid a new player receives must not arrive before the player has completed at least one unobstructed atmospheric descent and viewed their settlement from altitude without a combat event in progress. This is a feedback contract, not a difficulty setting: a player who has not yet experienced the SimCopter view has no mental model for what they are defending, and a raid that arrives before that view reads as punishment rather than drama. The first-raid protection window is implemented as a per-player flag `player_has_had_clean_atmospheric_view` set on first unobstructed atmospheric descent. Raid spawns query this flag; if false, raid spawn is suppressed regardless of standing value. Once set, the flag is permanent and raids spawn normally from standing thresholds forward.
+
+**Offline Raid Logic Reads Composition from Standing at Event Time:** For offline raid resolution — raids that execute while the player is not in an active session — the composition determination uses the standing value recorded at raid spawn time, not at session reconnect. The spawn event fires, reads `RAID_HARASSMENT_THRESHOLD` and `RAID_ASSAULT_THRESHOLD` against current standing, determines composition, resolves damage, and writes results to session state. The player reads the outcome on next session entry. This is consistent with the per-player standing read path established in prior decisions: no settlement-scoped aggregation, no session-presence requirement for standing reads.
+
+---
+
+## Open Questions
+
+- **`RAID_HARASSMENT_THRESHOLD` numeric value:** Named config constant required from day one; numeric value deferred pending M5 playtest data on standing movement rates in the Hostile band.
+- **`RAID_ASSAULT_THRESHOLD` numeric value:** Named config constant required from day one; numeric value deferred pending M5 playtest data.
+- **`SETTLEMENT_REGRESSION_THRESHOLD` numeric value:** Named config constant required from day one; numeric value deferred pending M7 building type count and structural damage accumulation rates from playtest.
+- **Building type count at M7 and degraded geometry states:** How many building types ship at M7 Settlement tier? Do each carry a degraded geometry state? This count gates the M8 visual regression asset estimate Soren identifies.
+- **Tier regression milestone placement:** Does visual tier regression — geometry change legible from altitude — ship in M7 or M8? Stat-only regression (tier value drops, no geometry change) could ship earlier; geometry regression requires the asset pass cost acknowledgment first.
+- **Assault-scale split-vector spawn geometry for M7 solo:** What are the two approach bearings for the assault composition in M7 solo play? Bearing offsets must be named config constants. The contested airspace two-spawn-axis geometry for split-commitment co-op remains deferred to M8.
+- **First-raid protection window edge case — co-op:** In a co-op session, does `player_has_had_clean_atmospheric_view` require both players to have completed an unobstructed descent, or only the player who would receive the raid? Per prior decisions, standing is per-player and raid spawn queries each player independently; protection window logic should follow the same per-player read path.
+- **[Carried] Per-faction rivalry heat values:** Config architecture must support per-faction overrides from day one; no authored values for any milestone.
+- **[Carried] Defection multiplier post-commitment:** Whether `FACTION_STANDING_LOSS_MULTIPLIER` increases after a player triggers the commitment NPC and acts for the opposing faction. Deferred; applies post-commitment only.
+- **[Carried] Hostile floor numeric value:** Named config constant required from day one; numeric value deferred pending M5 playtest data.
+- **[Carried] Authored Hostile recovery trigger form:** Intermediary NPC, specific mission string, or faction-unique narrative unlock. Deferred pending playtest data on Hostile band frequency.
+- **[Carried] Mission pool sparsity definition in Degraded band:** Probability filter, reduced count, or mission type subset. Implementation rule not yet specified.
+- **[Carried] Commitment NPC dialogue content and content system:** Exact dialogue across settlement tier contexts; content system for reading settlement tier and raid history variables into NPC dialogue not designed.
+- **[Carried] Standing floor behavior post-commitment:** Whether standing can fall below a threshold with an allied faction after commitment. Undefined for M5.
+- **[Carried] Standing tooltip direction:** Whether the tooltip fires at crossing 40 in both directions or only upward. Threshold of 40 decided; directional trigger open.
+- **[Carried] Joint action delta magnitude for co-op:** Full or fractional standing consequence per participating player. Must resolve before M8 mission resolution code ships.
+- **[Carried] Standing change cause attribution for co-op:** Notification surface for attributing triggering action and player role. Deferred to M8.
+- **[Carried] Contested airspace spawn geometry:** Two-spawn-axis design for opposing faction intercepts in a split-commitment co-op settlement. Deferred to M8.
+- **[Carried] Passive decay milestone:** At which milestone, if any, does refusal-tracking decay earn scope. Requires M5 event-only playtest data.
+- **[Carried] Refusal-tracking attribution rule:** How to distinguish deliberate decline from player absence from never having reached a faction Bar. Unresolved.
+- **[Carried] `DECAY_FLOOR` numeric value:** Named config constant required, set above `HOSTILE_THRESHOLD`. Value deferred pending M5 playtest data.
+- **[Carried] Hull capture standing delta magnitude per faction:** Named config constants required; numeric values deferred pending M5 playtest data.
+- **[Carried] Relative magnitude of hull capture versus mission failure standing consequence:** Whether boarding registers as a heavier standing event than mission failure. Unspecified.
+- **[Carried] Comms intercept string content per faction:** One line per faction contact; exact wording is content design out of scope.
+- **[Carried] Patrol vector modifier numeric values:** Spawn timing offset and approach angle adjustment must be named config constants; values deferred pending M5 playtesting.
+- **[Carried] Bribe path design:** Fully deferred pending Bar rumor/informant surface and deferred-state store for hull provenance.
+- **[Carried] Salvage flag path design:** Fully deferred pending faction-specific grievance tracking.
+- **[Carried] M6 scope capacity:** Full committed M6 scope list required to determine whether galaxy-layer formation AI and threat-aware hold state both fit M6 or push to M7.
+- **[Carried] Build cost of threat-aware hold state:** Estimate gates M6 vs. M7 placement.
+- **[Carried] Escort hold visual treatment:** Circular orbit, stationary hover, or trailing vector. UX decision required before M6 ships the layer-transition contract.
+- **[Carried] Mechanical resolution when a raid spawns during escort hold:** Escort engagement rules, destruction possibility, and player surface state unspecified.
+- **[Carried] Terrain avoidance timing:** Deferred alongside full atmospheric escort follow to M8.
+<!-- complete -->

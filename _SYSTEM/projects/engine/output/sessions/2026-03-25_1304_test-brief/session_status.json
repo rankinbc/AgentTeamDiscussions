@@ -1,0 +1,23 @@
+{
+  "questions": {
+    "q1": {
+      "status": "complete",
+      "title": "How should agent responses be truncated for long discussions?",
+      "elapsed_seconds": 160,
+      "file": "01-how-should-agent-responses-be-truncated-for-long-discussions.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    }
+  },
+  "question_hash": "d921ebd9c6bf32ea",
+  "mode": "compete",
+  "brief": "test-brief.md",
+  "session_complete": true,
+  "total_elapsed_seconds": 191,
+  "completed_questions": 1,
+  "failed_questions": 0
+}

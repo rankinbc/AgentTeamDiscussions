@@ -88,6 +88,8 @@ public class PathSettings
 {
     public string SessionsDir { get; set; } = "output/sessions";
     public string OutputDir { get; set; } = "output/design-docs";
+    public string DataDir { get; set; } = "data";
+    public string InputDir { get; set; } = "input";
     public string DefaultTeam { get; set; } = "beta-agents";
 }
 

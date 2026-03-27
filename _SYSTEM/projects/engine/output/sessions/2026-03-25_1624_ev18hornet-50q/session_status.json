@@ -1,0 +1,520 @@
+{
+  "questions": {
+    "q1": {
+      "status": "complete",
+      "title": "Faction Standing Commitment Threshold",
+      "elapsed_seconds": 166,
+      "file": "01-faction-standing-commitment-threshold.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q2": {
+      "status": "complete",
+      "title": "Faction Standing Inverse Axis Symmetry",
+      "elapsed_seconds": 169,
+      "file": "02-faction-standing-inverse-axis-symmetry.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q3": {
+      "status": "complete",
+      "title": "Co-op Faction Commitment Independence",
+      "elapsed_seconds": 156,
+      "file": "03-co-op-faction-commitment-independence.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q4": {
+      "status": "complete",
+      "title": "Co-op Standing Consequence Propagation",
+      "elapsed_seconds": 164,
+      "file": "04-co-op-standing-consequence-propagation.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q5": {
+      "status": "complete",
+      "title": "Standing Recovery Mechanics",
+      "elapsed_seconds": 188,
+      "file": "05-standing-recovery-mechanics.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q6": {
+      "status": "complete",
+      "title": "Passive Standing Decay",
+      "elapsed_seconds": 174,
+      "file": "06-passive-standing-decay.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q7": {
+      "status": "complete",
+      "title": "Escort Formation AI Milestone",
+      "elapsed_seconds": 199,
+      "file": "07-escort-formation-ai-milestone.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q8": {
+      "status": "complete",
+      "title": "Escort Atmosphere Dive Milestone",
+      "elapsed_seconds": 181,
+      "file": "08-escort-atmosphere-dive-milestone.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q9": {
+      "status": "complete",
+      "title": "Hot Hull Port Registration",
+      "elapsed_seconds": 195,
+      "file": "09-hot-hull-port-registration.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q10": {
+      "status": "complete",
+      "title": "Hot Hull Interdiction Trigger",
+      "elapsed_seconds": 199,
+      "file": "10-hot-hull-interdiction-trigger.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q11": {
+      "status": "complete",
+      "title": "Raid Scale Definitions",
+      "elapsed_seconds": 193,
+      "file": "11-raid-scale-definitions.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q12": {
+      "status": "complete",
+      "title": "Minimum Building Type Count at Outpost",
+      "elapsed_seconds": 237,
+      "file": "12-minimum-building-type-count-at-outpost.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q13": {
+      "status": "complete",
+      "title": "Tier Regression Rebuild Path",
+      "elapsed_seconds": 217,
+      "file": "13-tier-regression-rebuild-path.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q14": {
+      "status": "complete",
+      "title": "Death Respawn Port Definition",
+      "elapsed_seconds": 183,
+      "file": "14-death-respawn-port-definition.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q15": {
+      "status": "complete",
+      "title": "Starter Ship at Respawn",
+      "elapsed_seconds": 217,
+      "file": "15-starter-ship-at-respawn.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q16": {
+      "status": "complete",
+      "title": "Hot Hull Destruction Standing Consequence",
+      "elapsed_seconds": 207,
+      "file": "16-hot-hull-destruction-standing-consequence.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q17": {
+      "status": "complete",
+      "title": "Return Log Milestone",
+      "elapsed_seconds": 222,
+      "file": "17-return-log-milestone.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q18": {
+      "status": "complete",
+      "title": "Offline Session State Model",
+      "elapsed_seconds": 213,
+      "file": "18-offline-session-state-model.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q19": {
+      "status": "complete",
+      "title": "Host Role Assignment",
+      "elapsed_seconds": 211,
+      "file": "19-host-role-assignment.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q20": {
+      "status": "complete",
+      "title": "Minimum Altitude Range",
+      "elapsed_seconds": 225,
+      "file": "20-minimum-altitude-range.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q21": {
+      "status": "complete",
+      "title": "Atmosphere Exit Transition",
+      "elapsed_seconds": 231,
+      "file": "21-atmosphere-exit-transition.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q22": {
+      "status": "complete",
+      "title": "Raid Approach Signaling from Space",
+      "elapsed_seconds": 227,
+      "file": "22-raid-approach-signaling-from-space.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q23": {
+      "status": "complete",
+      "title": "Raid Defense Weapon Type",
+      "elapsed_seconds": 215,
+      "file": "23-raid-defense-weapon-type.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q24": {
+      "status": "complete",
+      "title": "On-Foot AI Range Thresholds",
+      "elapsed_seconds": 205,
+      "file": "24-on-foot-ai-range-thresholds.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q25": {
+      "status": "complete",
+      "title": "Hit Feedback Model",
+      "elapsed_seconds": 220,
+      "file": "25-hit-feedback-model.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q26": {
+      "status": "partial",
+      "title": "Galaxy Map Standing Gate Visualization",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 275,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q27": {
+      "status": "complete",
+      "title": "Starting System Faction and Geography",
+      "elapsed_seconds": 262,
+      "file": "27-starting-system-faction-and-geography.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q28": {
+      "status": "partial",
+      "title": "Settlement Building System Introduction",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 274,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q29": {
+      "status": "complete",
+      "title": "Atmosphere Boundary Visual Signature",
+      "elapsed_seconds": 271,
+      "file": "29-atmosphere-boundary-visual-signature.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q30": {
+      "status": "partial",
+      "title": "Hostile vs. Friendly Atmosphere Signal",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 239,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q31": {
+      "status": "partial",
+      "title": "Core Tradeable Commodities",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 245,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q32": {
+      "status": "complete",
+      "title": "Settlement Tier Advancement Trigger",
+      "elapsed_seconds": 237,
+      "file": "32-settlement-tier-advancement-trigger.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q33": {
+      "status": "partial",
+      "title": "NPC Settler Arrival Model",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 253,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q34": {
+      "status": "complete",
+      "title": "Settlement Income Scaling",
+      "elapsed_seconds": 234,
+      "file": "34-settlement-income-scaling.md",
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "complete"
+      }
+    },
+    "q35": {
+      "status": "partial",
+      "title": "Credit Floor and Failure State",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 244,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q36": {
+      "status": "partial",
+      "title": "NPC Settlement Tribute / Piracy Model",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 254,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q37": {
+      "status": "partial",
+      "title": "Total Faction Count and Alliance Model",
+      "reason": "Synthesis failed: Synthesis produced empty/minimal output (33 chars)",
+      "elapsed_seconds": 249,
+      "rounds": {
+        "propose": "complete",
+        "critique": "complete",
+        "evaluate": "complete",
+        "synthesis": "failed"
+      }
+    },
+    "q38": {
+      "status": "skipped",
+      "title": "Conflict Introduction Mechanism",
+      "reason": "circuit breaker"
+    },
+    "q39": {
+      "status": "skipped",
+      "title": "Mission String Count at Full Scope",
+      "reason": "circuit breaker"
+    },
+    "q40": {
+      "status": "skipped",
+      "title": "Post-Story Galaxy State",
+      "reason": "circuit breaker"
+    },
+    "q41": {
+      "status": "skipped",
+      "title": "Settlement Fate on Faction Commitment",
+      "reason": "circuit breaker"
+    },
+    "q42": {
+      "status": "skipped",
+      "title": "Divergent Co-op Faction Commitment and Settlements",
+      "reason": "circuit breaker"
+    },
+    "q43": {
+      "status": "skipped",
+      "title": "Capital Ship Atmosphere Access",
+      "reason": "circuit breaker"
+    },
+    "q44": {
+      "status": "skipped",
+      "title": "Ship Repair Model",
+      "reason": "circuit breaker"
+    },
+    "q45": {
+      "status": "skipped",
+      "title": "Space Stations as Dockable Structures",
+      "reason": "circuit breaker"
+    },
+    "q46": {
+      "status": "skipped",
+      "title": "Co-op Escort Destruction Budget",
+      "reason": "circuit breaker"
+    },
+    "q47": {
+      "status": "skipped",
+      "title": "Maximum Fleet Size at Full Scope",
+      "reason": "circuit breaker"
+    },
+    "q48": {
+      "status": "skipped",
+      "title": "Win Condition vs. Sandbox",
+      "reason": "circuit breaker"
+    },
+    "q49": {
+      "status": "skipped",
+      "title": "Post-Story Save State",
+      "reason": "circuit breaker"
+    },
+    "q50": {
+      "status": "skipped",
+      "title": "Modding Support as a Long-Term Goal",
+      "reason": "circuit breaker"
+    }
+  },
+  "question_hash": "707ec7b7e2a7d33f",
+  "mode": "ev18hornet",
+  "brief": "ev18hornet-50q.md",
+  "session_complete": true,
+  "total_elapsed_seconds": 8919,
+  "completed_questions": 29,
+  "failed_questions": 21
+}

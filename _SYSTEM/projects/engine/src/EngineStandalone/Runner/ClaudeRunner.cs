@@ -110,11 +110,11 @@ public class ClaudeRunner : IClaudeRunner
         {
             // On Windows, use cmd /c to run the command
             var escapedSystemPrompt = systemPrompt.Replace("\"", "\\\"");
-            startInfo.Arguments = $"/c claude -p --system-prompt \"{escapedSystemPrompt}\" --output-format text";
+            startInfo.Arguments = $"/c claude -p --model claude-sonnet-4-6 --system-prompt \"{escapedSystemPrompt}\" --output-format text";
         }
         else
         {
-            startInfo.Arguments = $"-p --system-prompt \"{EscapeArgument(systemPrompt)}\" --output-format text";
+            startInfo.Arguments = $"-p --model claude-sonnet-4-6 --system-prompt \"{EscapeArgument(systemPrompt)}\" --output-format text";
         }
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeout));

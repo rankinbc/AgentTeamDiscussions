@@ -6,7 +6,9 @@ Authoritative agent persona and team manifest definitions. Loaded at runtime by 
 
 ## Hard Rules
 
-**NEVER** put briefs, team YAMLs, or agent YAMLs inside `projects/engine/` — the authoritative source is here.
+**NEVER** put team YAMLs or agent YAMLs inside `projects/engine/` — the authoritative source is here.
+
+**Briefs** have moved to `_SYSTEM/projects/engine/input/` — they live alongside the engine since briefs are both input and output of the discussion engine.
 
 ---
 
@@ -15,25 +17,6 @@ Authoritative agent persona and team manifest definitions. Loaded at runtime by 
 ```
 discussionAgents/   → One file per agent: {team-name}__{agent_key}.yaml
 teams/              → Team manifests: {team-name}.yaml (lists agent keys + file refs)
-briefs/             → Discussion brief markdown files (user-created, reusable input)
-```
-
-## Brief Files (`briefs/`)
-
-Discussion briefs are the input to a session. Put them here so they are versioned alongside agent definitions, not scattered in project subfolders.
-
-Format:
-```markdown
-## What's Already Decided
-- Decision 1
-
-## Open Questions
-1. **Question Title** Question body with context.
-```
-
-Run a session:
-```bash
-python session_runner.py _SYSTEM/data/briefs/my-brief.md
 ```
 
 ## Adding a New Agent

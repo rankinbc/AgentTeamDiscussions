@@ -1,0 +1,99 @@
+
+
+- DECIDED: `agentteam/` is the canonical library; `_SYSTEM/lib/` is deprecated and will be fully removed
+- DECIDED: No new imports from `lib/` are permitted at any point before or after deletion
+- DECIDED: Deletion executes as a single commit, not a phased migration
+- DECIDED: Acceptance criterion is a completed session (Morning Brief writes and is non-empty), not a clean import graph
+- DECIDED: Gate 1 is a grep pass across `.py`, `.yaml`, `.j2`, `.json`, `.md` files; zero hits outside `lib/` itself is the pass condition
+- DECIDED: Gate 2 checks for `importlib`/`import_module` dynamic references to `lib.*` paths
+- DECIDED: Gate 3 requires explicit resolution of `prompt_definitions.json` before deletion; must confirm `agentteam/config_loader.py` loads from its own package path
+- DECIDED: Gate 4 (type identity check) is conditional — only required if Gate 1 returns external imports from `lib/types/`; skipped if Gate 1 returns zero hits from `lib/types/`
+- DECIDED: Gate 5 smoke test is `python session_runner.py brief.md --no-session`; all five gates must clear before deletion proceeds
+- DECIDED: `speak_to_agent.py` and `prompt_builder.py` are migration targets, not confirmed duplicates; diff against `agentteam/` counterparts only if Gate 1 reveals external callers; if no external callers, delete with the rest of `lib/`
+- DECIDED: Tests in `_SYSTEM/tests/` that import from `lib/` are testing dead code and are deleted alongside the shims
+- DECIDED: Tests that import from `agentteam/` and pass against the live library are preserved
+- DECIDED: `agentteam/` package structure is not modified by this work
+- DECIDED: Engine root-level backward-compat wrappers (`ask_panel.py`, `claude_runner.py`, `models.py`) are out of scope
+- DECIDED: `_SYSTEM/projects/engine/config/teams/` stale duplicate is out of scope
+- DECIDED: No file reorganization outside `lib/` is permitted as part of this change
+
+- DECIDED: `__init__.py` re-export option is rejected as a valid resolution path at any point in this work
+- DECIDED: Four unconfirmed files (`interact.py`, `conversation.py`, `multi_agent.py`, `evaluate_experiment.py`) must be read and classified before any deletion sequence is designed
+- DECIDED: `ask_panel.py`, `claude_runner.py`, and `models.py` are classified as backward-compat wrappers per prior decisions
+- DECIDED: Classification rule — confirmed shim (re-exports only, no logic) enters deletion list; file with unmigrated logic requires migration to canonical submodule first, then deletion
+- DECIDED: Caller scan runs after classification, not before
+- DECIDED: Caller scan covers `.py`, `.yaml`, `.j2`, `.json` across full project scope, not scoped to `_SYSTEM` alone
+- DECIDED: Hits within `_SYSTEM/projects/engine/` itself are excluded from the external caller set
+- DECIDED: If zero external callers, delete all confirmed shims in one commit alongside internal call site updates
+- DECIDED: If external callers exist, re-point each call site to canonical submodule path and delete shims in the same commit — not in separate commits
+- DECIDED: Acceptance criterion is a completed session where the Morning Brief writes and is non-empty
+- DECIDED: Import graph cleanliness is a means to the Morning Brief end, not a goal in itself
+- DECIDED: This cleanup does not proceed ahead of any work that directly affects the Morning Brief pipeline
+- DECIDED: External caller is defined as any call site outside `_SYSTEM/projects/engine/`, including `_SYSTEM/tests/`, `temp/`, `agentteam/`, and any tooling or config outside the engine directory
+- DECIDED: Test files that import from these shims are testing dead code and are deleted alongside the shims they test
+- DECIDED: Scope covers only the seven engine root-level wrapper files; `_SYSTEM/lib/` deletion, `config/teams/` cleanup, and outside-engine-root reorganization are not bundled with this change
+
+- DECIDED: `_SYSTEM/docs/` is the sole canonical location for operational and design documentation; no other layer carries equal authority over the same subject matter
+- DECIDED: CONCERNS.md is an operational artifact (load-bearing by function) and moves to `_SYSTEM/docs/CONCERNS.md` without content modification
+- DECIDED: CONCERNS.md vacates its location at `.planning/codebase/CONCERNS.md`
+- DECIDED: The six remaining `.planning/codebase/` files (ARCHITECTURE.md, CONVENTIONS.md, INTEGRATIONS.md, STACK.md, STRUCTURE.md, TESTING.md) are archived in place with a `generated: 2026-03-25` header and a SNAPSHOT warning block; no files are moved or deleted
+- DECIDED: `/docs/` (project root) is excluded from all automated AI context injection immediately
+- DECIDED: Each file in `/docs/` receives a visible GENERATED SNAPSHOT header dated 2026-03-26 with a pointer to `_SYSTEM/docs/`
+- DECIDED: `/docs/` is not deleted at this time; it may serve as a short-term human reference
+- DECIDED: CLAUDE.md files are the sole injection control plane; "read this before proceeding" instructions live only there
+- DECIDED: Any CLAUDE.md referencing `.planning/codebase/` files (other than the now-moved CONCERNS.md) must be updated to remove or redirect those references
+- DECIDED: Any CLAUDE.md referencing `/docs/` as authoritative must be updated to reference `_SYSTEM/docs/` instead
+- DECIDED: `_SYSTEM/docs/` files are human-maintained with no automated regeneration; update trigger is a deliberate architectural decision changing behavior, structure, or constraints
+- DECIDED: Generated content is never written to `_SYSTEM/docs/` without human review and promotion
+- DECIDED: If codebase analysis tooling runs again, output goes to a timestamped directory (e.g., `.planning/snapshots/2026-03-26/`) and is explicitly excluded from context injection at creation time
+- DECIDED: When subject matter overlaps, the `_SYSTEM/docs/` document is authoritative over archived snapshots and generated files regardless of recency
+- DECIDED: The primary Morning Brief risk mitigation is exclusion of `/docs/` from automated session bootstrap injection
+- DECIDED: No Python changes, no session runner changes, and no package changes are part of this work; scope is documentation and CLAUDE.md pointer surgery only
+- DECIDED: Implementation sequence is: (1) archive headers on six `.planning/codebase/` files, (2) snapshot headers on all `/docs/` files, (3) move CONCERNS.md, (4) update `_SYSTEM/CLAUDE.md` reference, (5) audit all CLAUDE.md files for stale references, (6) grep and remove/redirect any session bootstrap or hook pulling from `/docs/` or `.planning/codebase/`
+- OPEN: Whether `/docs/` should eventually be deleted once its short-term human reference value expires, and what the trigger for that deletion decision should be
+
+- DECIDED: Grep and diff run in parallel before any deletion decision is made
+- DECIDED: Grep pattern is `config/teams` across `*.py`, `*.yaml`, `*.j2`, `*.json` in `_SYSTEM/projects/engine/`
+- DECIDED: Grep scope extends to isolated `"teams"` token in path-construction contexts including dynamic segment assembly
+- DECIDED: Zero grep hits outside comments is required to clear the grep gate
+- DECIDED: Any grep hit outside a comment is a hard stop requiring a loader fix before deletion proceeds
+- DECIDED: An active loader violation is a code fix question, not a deletion question
+- DECIDED: Byte-level diff of `_SYSTEM/projects/engine/config/teams/` against `_SYSTEM/data/teams/` is required
+- DECIDED: The CLAUDE.md label "stale duplicate pending removal" is not a substitute for the diff
+- DECIDED: Deletion is authorized only when both grep returns zero hits outside comments AND diff returns identical content
+- DECIDED: When both operations return clean, deletion executes as a single commit containing only the directory removal and a CLAUDE.md pointer update
+- DECIDED: No other changes are bundled with the deletion commit
+- DECIDED: If diff reveals divergence, stop and surface the diff for human review
+- DECIDED: Divergent content in `config/teams/` may represent persona drift never propagated to `data/teams/`
+- DECIDED: Persona drift silently degrades Morning Brief output quality with no observable failure signal
+- DECIDED: The Morning Brief acceptance criterion (writes and is non-empty) does not catch the persona drift failure mode
+- DECIDED: Any divergent content must be explicitly reviewed and if intentional propagated to `data/teams/` before deletion
+- DECIDED: If grep reveals active loaders, stop and fix the loader to point at `data/teams/` first
+- DECIDED: After fixing a loader, confirm session runner resolves correctly, then re-run both operations to re-establish clean baseline
+- DECIDED: The prior "out of scope" classification from the lib/ deletion work does not protect config/teams/ indefinitely
+- DECIDED: Post-deletion smoke test is a completed `--no-session` run with no import errors or path resolution failures
+- DECIDED: Morning Brief acceptance criterion (full session, writes non-empty) applies if doubt remains after smoke test
+
+- DECIDED: Diff and read both copies before any consolidation decision
+- DECIDED: The single blocking read is `agentteam/conversation/state.py`
+- DECIDED: Two questions must be answered from the library file before any path is chosen: (1) does it contain `should_trigger_uncomfortable_idea()` or equivalent anti-slop quota logic, (2) does its `_truncated_history()` use the same config keys via the same `defaults()["conversation"]` call pattern
+- DECIDED: The engine copy of `conversation/state.py` is not a shim — it contains real logic and delete-and-redirect without reading the library counterpart is unsafe
+- DECIDED: The config coupling is load-bearing — any consolidation redirecting imports to the library must confirm config keys resolve from a compatible source with identical names
+- DECIDED: A config key mismatch produces silent truncation behavior drift not caught by the Morning Brief acceptance criterion
+- DECIDED: `should_trigger_uncomfortable_idea()` is user-facing behavior — if the library copy lacks it, redirecting imports is a feature deletion with no observable failure signal
+- DECIDED: Sessions will complete normally if anti-slop logic is missing; output will silently lose uncomfortable idea injection
+- DECIDED: "Thin subclass" is explicitly rejected as a consolidation option
+- DECIDED: If library has both behaviors with identical config keys → redirect, delete engine copy, single commit
+- DECIDED: If library has both behaviors with different config keys → align config keys first, then redirect and delete
+- DECIDED: If library is missing `should_trigger_uncomfortable_idea()` → migrate anti-slop logic to library before any deletion; engine copy remains until confirmed
+- DECIDED: If library has hardcoded truncation thresholds or no config pull → promote config-driven truncation to library before consolidation
+- DECIDED: If drift with no clear ownership → hard stop, human review before any action
+- DECIDED: Field-level identity is not semantic identity — shared field names are not a consolidation signal
+- DECIDED: Acceptance criterion after any redirect or deletion is a completed `--no-session` run with no import errors, path resolution failures, or config key resolution failures
+- DECIDED: If doubt remains around truncation or anti-slop injection frequency, full session Morning Brief acceptance criterion applies
+- DECIDED: No changes are authorized until the blocking read is complete
+- OPEN: Does `agentteam/conversation/state.py` contain `should_trigger_uncomfortable_idea()` or equivalent anti-slop quota logic?
+- OPEN: Does `agentteam/conversation/state.py` `_truncated_history()` pull from `multi_history_truncation_threshold`, `multi_history_keep_first`, `multi_history_keep_last` via `defaults()["conversation"]`?
+- OPEN: Which consolidation path applies (determined by blocking read results)?
+
+<!-- complete -->

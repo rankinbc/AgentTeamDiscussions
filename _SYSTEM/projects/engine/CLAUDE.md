@@ -170,6 +170,8 @@ Live/
 
 **DO NOT** edit files in `output/` — they are write-only runtime artifacts.
 
+**Briefs** live in `input/` — this is the single location for all brief files. Briefs are both input (questions for the engine to discuss) and output (the engine can generate briefs that feed back in for further discussion).
+
 **DO NOT** delete `<!-- complete -->` markers from session files — they are the crash recovery mechanism.
 
 **Use** `config/defaults.yaml` to change timeouts, truncation, thresholds — not C# code.

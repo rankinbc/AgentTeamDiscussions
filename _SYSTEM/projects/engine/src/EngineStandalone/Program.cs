@@ -51,7 +51,7 @@ class Program
             var live = context.ParseResult.GetValueForOption(liveOption);
             var eval = context.ParseResult.GetValueForOption(evalOption) || defaults.Session.RunEval;
 
-            var briefPath = ResolveBriefPath(brief, baseDir);
+            var briefPath = ResolveBriefPath(brief, baseDir, defaults);
             if (briefPath == null)
             {
                 context.ExitCode = 1;
@@ -247,9 +247,14 @@ class Program
     {
         var services = new ServiceCollection();
         services.AddSingleton<IClaudeRunner>(new ClaudeRunner());
-        services.AddSingleton<IConfigLoader>(new ConfigLoader(
-            Path.Combine(baseDir, "config"), Path.Combine(baseDir, "templates")));
-        services.AddSingleton<IAgentLoader>(new AgentLoader(Path.Combine(baseDir, "data")));
+        var configLoader = new ConfigLoader(
+            Path.Combine(baseDir, "config"), Path.Combine(baseDir, "templates"));
+        services.AddSingleton<IConfigLoader>(configLoader);
+        var defaults = configLoader.Defaults();
+        var dataDir = Path.IsPathRooted(defaults.Paths.DataDir)
+            ? defaults.Paths.DataDir
+            : Path.GetFullPath(Path.Combine(baseDir, defaults.Paths.DataDir));
+        services.AddSingleton<IAgentLoader>(new AgentLoader(dataDir, "discussionAgents"));
         services.AddSingleton<IPromptBuilder>(new PromptBuilder());
         services.AddSingleton<IContextTelemetry>(new ContextTelemetry());
         services.AddSingleton<IContextBudgetEnforcer>(sp =>
@@ -308,7 +313,7 @@ class Program
         await Task.Delay(Timeout.Infinite, context.GetCancellationToken());
     }
 
-    private static string? ResolveBriefPath(FileInfo? brief, string baseDir)
+    private static string? ResolveBriefPath(FileInfo? brief, string baseDir, AppSettings defaults)
     {
         if (brief != null)
         {
@@ -320,7 +325,9 @@ class Program
             return brief.FullName;
         }
 
-        var inputDir = Path.Combine(baseDir, "input");
+        var inputDir = Path.IsPathRooted(defaults.Paths.InputDir)
+            ? defaults.Paths.InputDir
+            : Path.GetFullPath(Path.Combine(baseDir, defaults.Paths.InputDir));
         if (Directory.Exists(inputDir))
         {
             var briefs = Directory.GetFiles(inputDir, "*.md");
@@ -331,7 +338,7 @@ class Program
             }
         }
 
-        Console.WriteLine("ERROR: No brief file specified and none found in input/");
+        Console.WriteLine($"ERROR: No brief file specified and none found in {inputDir}");
         Console.WriteLine("Usage: EngineStandalone <brief.md> or EngineStandalone new");
         return null;
     }
@@ -346,7 +353,9 @@ class Program
     {
         var binDir = AppDomain.CurrentDomain.BaseDirectory;
 
-        // Walk up from bin/Debug/net8.0/ looking for the engine project root
+        // Walk up from bin/Debug/net8.0/ looking for the engine project root.
+        // Skip the bin dir itself (config/ is copied there but it's not the real root).
+        // The real root has config/defaults.yaml AND a src/ directory.
         var candidate = binDir;
         for (int i = 0; i < 6; i++)
         {
@@ -354,9 +363,8 @@ class Program
             if (parent == null) break;
             candidate = parent;
 
-            // Engine root has config/ and data/ as direct children
-            if (Directory.Exists(Path.Combine(candidate, "config")) &&
-                Directory.Exists(Path.Combine(candidate, "data")))
+            if (File.Exists(Path.Combine(candidate, "config", "defaults.yaml")) &&
+                Directory.Exists(Path.Combine(candidate, "src")))
             {
                 return candidate + Path.DirectorySeparatorChar;
             }
