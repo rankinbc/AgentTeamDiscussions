@@ -306,4 +306,95 @@ public class PromptBuilderTests
         Assert.True(filtered.Length < priorRounds.Length);
         Assert.Contains("truncated", filtered.ToLower());
     }
+
+    // FilterPriorRounds: when no \n[ boundary exists in trimmed text,
+    // the truncated string should still start with the header and "..."
+    [Fact]
+    public void FilterPriorRounds_NoBoundaryFound_StartsWithHeaderAndEllipsis()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig
+        {
+            Name = "TestAgent",
+            Personality = new PersonalityConfig
+            {
+                Patience = 0.1,
+                IdeaReceptivity = 0.4
+            }
+        };
+
+        // 4000 chars of text with no \n[ pattern — simulates one massive agent response
+        var priorRounds = new string('x', 4000);
+
+        var result = builder.FilterPriorRounds(priorRounds, agent);
+
+        Assert.StartsWith("[Earlier discussion truncated", result);
+        Assert.Contains("...\n", result);
+    }
+
+    // FilterPriorRounds: when a \n[ boundary is at index 0 of trimmed text,
+    // the seek should succeed (idx >= 0) and content should not be dropped
+    [Fact]
+    public void FilterPriorRounds_BoundaryAtIndexZero_IncludesContent()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig
+        {
+            Name = "TestAgent",
+            Personality = new PersonalityConfig
+            {
+                Patience = 0.1,
+                IdeaReceptivity = 0.4
+            }
+        };
+
+        // Build: long padding (>3000 total) so truncation fires,
+        // with the last 2500 chars starting exactly with \n[
+        var recentContent = "\n[Agent A]\nSome response here\n";
+        var filler = new string('y', 2500 - recentContent.Length);
+        var priorRounds = new string('z', 600) + filler + recentContent;
+
+        var result = builder.FilterPriorRounds(priorRounds, agent);
+
+        Assert.StartsWith("[Earlier discussion truncated", result);
+        Assert.Contains("[Agent A]", result);
+    }
+
+    // FilterPriorRounds: header always present when truncation fires
+    [Fact]
+    public void FilterPriorRounds_Truncated_AlwaysHasHeader()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig
+        {
+            Name = "TestAgent",
+            Personality = new PersonalityConfig
+            {
+                Patience = 0.1,
+                IdeaReceptivity = 0.4
+            }
+        };
+        var priorRounds = "[Agent A]\nFirst response\n\n" + new string('x', 3000);
+
+        var result = builder.FilterPriorRounds(priorRounds, agent);
+
+        Assert.Contains("[Earlier discussion truncated", result);
+    }
+
+    // FilterPriorRounds: high patience + high receptivity agent gets full text unchanged
+    [Fact]
+    public void FilterPriorRounds_HighPatience_ReturnsUnchanged()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig
+        {
+            Name = "HighPatience",
+            Personality = new PersonalityConfig { Patience = 0.9, IdeaReceptivity = 0.8 }
+        };
+        var priorRounds = "Full discussion content here";
+
+        var result = builder.FilterPriorRounds(priorRounds, agent);
+
+        Assert.Equal(priorRounds, result);
+    }
 }
