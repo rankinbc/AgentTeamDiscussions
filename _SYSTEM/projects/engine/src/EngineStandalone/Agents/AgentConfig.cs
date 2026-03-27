@@ -105,6 +105,11 @@ public class PositionConfig
     public string Role { get; set; } = "participant";
     public List<string> Drives { get; set; } = new();
     public List<string> PushbackOn { get; set; } = new();
+    /// <summary>
+    /// Visceral reactions — things this agent finds intolerable and flags every time unprompted.
+    /// Distinct from PushbackOn (intellectual disagreement): these are emotional triggers.
+    /// </summary>
+    public List<string> Allergies { get; set; } = new();
     public double Intensity { get; set; } = 0.5;
 }
 

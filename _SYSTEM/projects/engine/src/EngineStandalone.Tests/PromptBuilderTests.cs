@@ -294,4 +294,35 @@ public class PromptBuilderTests
         Assert.Contains("Before responding, verify", prompt);
         Assert.Contains("defaulting to generic", prompt);
     }
+
+    [Fact]
+    public void BuildSystemPrompt_WithAllergies_RendersAllergySection()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig
+        {
+            Name = "Tester",
+            Position = new PositionConfig
+            {
+                Allergies = new List<string> { "scope creep", "deferred decisions" }
+            }
+        };
+
+        var prompt = builder.BuildSystemPrompt(agent);
+
+        Assert.Contains("scope creep", prompt);
+        Assert.Contains("deferred decisions", prompt);
+        Assert.Contains("allergic", prompt);
+    }
+
+    [Fact]
+    public void BuildSystemPrompt_EmptyAllergies_NoAllergySection()
+    {
+        var builder = new PromptBuilder();
+        var agent = new AgentConfig { Name = "Tester" };
+
+        var prompt = builder.BuildSystemPrompt(agent);
+
+        Assert.DoesNotContain("allergic", prompt);
+    }
 }

@@ -186,6 +186,16 @@ public class PromptBuilder : IPromptBuilder
             }
         }
 
+        if (pos.Allergies.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("You are viscerally allergic to:");
+            foreach (var a in pos.Allergies)
+            {
+                sb.AppendLine($"- {a} — this triggers an immediate, visible reaction. Flag it every time.");
+            }
+        }
+
         sb.AppendLine();
         sb.AppendLine(GetIntensityLine(pos.Intensity));
         sb.AppendLine();
