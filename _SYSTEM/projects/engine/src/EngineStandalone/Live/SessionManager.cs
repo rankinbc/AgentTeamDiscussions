@@ -5,6 +5,7 @@ using EngineStandalone.Discussion;
 using EngineStandalone.Runner;
 using EngineStandalone.Session;
 using EngineStandalone.Synthesis;
+using EngineStandalone.Telemetry;
 
 namespace EngineStandalone.Live;
 
@@ -42,6 +43,7 @@ public class SessionManager
             _provider.GetRequiredService<IClaudeRunner>(),
             _provider.GetRequiredService<IDiscussionEngine>(),
             _provider.GetRequiredService<IMorningBriefGenerator>(),
+            _provider.GetRequiredService<IContextTelemetry>(),
             emitter);
 
         _runningTask = Task.Run(async () =>

@@ -17,6 +17,7 @@ using EngineStandalone.Live;
 using EngineStandalone.Runner;
 using EngineStandalone.Session;
 using EngineStandalone.Synthesis;
+using EngineStandalone.Telemetry;
 
 namespace EngineStandalone;
 
@@ -250,10 +251,18 @@ class Program
             Path.Combine(baseDir, "config"), Path.Combine(baseDir, "templates")));
         services.AddSingleton<IAgentLoader>(new AgentLoader(Path.Combine(baseDir, "data")));
         services.AddSingleton<IPromptBuilder>(new PromptBuilder());
+        services.AddSingleton<IContextTelemetry>(new ContextTelemetry());
+        services.AddSingleton<IContextBudgetEnforcer>(sp =>
+        {
+            var budget = sp.GetRequiredService<IConfigLoader>().Defaults().ContextBudget;
+            return new ContextBudgetEnforcer(budget.MaxPayloadTokens, budget.ImbalanceThreshold);
+        });
         services.AddSingleton<IRoundRunner>(sp =>
             new RoundRunner(sp.GetRequiredService<IClaudeRunner>(),
                 sp.GetRequiredService<IPromptBuilder>(),
-                sp.GetRequiredService<IConfigLoader>()));
+                sp.GetRequiredService<IConfigLoader>(),
+                sp.GetRequiredService<IContextTelemetry>(),
+                sp.GetRequiredService<IContextBudgetEnforcer>()));
         services.AddSingleton<IDiscussionEngine>(sp =>
             new DiscussionEngine(sp.GetRequiredService<IClaudeRunner>(),
                 sp.GetRequiredService<IPromptBuilder>(),
@@ -274,6 +283,7 @@ class Program
             provider.GetRequiredService<IClaudeRunner>(),
             provider.GetRequiredService<IDiscussionEngine>(),
             provider.GetRequiredService<IMorningBriefGenerator>(),
+            provider.GetRequiredService<IContextTelemetry>(),
             emitter);
     }
 

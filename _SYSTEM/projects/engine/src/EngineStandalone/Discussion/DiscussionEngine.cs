@@ -66,12 +66,14 @@ public class DiscussionEngine : IDiscussionEngine
         string roundInstruction = "",
         Dictionary<string, string>? agentRoles = null,
         bool sequential = true,
-        RoundCallbacks? callbacks = null)
+        RoundCallbacks? callbacks = null,
+        string roundName = "",
+        int questionNumber = 0)
     {
         return _roundRunner.RunRoundAsync(
             agents, systemPrompts, team, question, decisions, priorRounds,
             priorSpecs, openQuestions, timeout, roundInstruction, agentRoles,
-            sequential, callbacks);
+            sequential, callbacks, roundName, questionNumber);
     }
 
     /// <summary>
@@ -281,7 +283,9 @@ public class DiscussionEngine : IDiscussionEngine
                 openQuestions: openQuestions,
                 timeout: timeout,
                 roundInstruction: roundInst,
-                agentRoles: agentRoles);
+                agentRoles: agentRoles,
+                roundName: roundName,
+                questionNumber: question.Number);
 
             var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
 

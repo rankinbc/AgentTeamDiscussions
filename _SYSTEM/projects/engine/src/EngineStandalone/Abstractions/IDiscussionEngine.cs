@@ -24,7 +24,9 @@ public interface IDiscussionEngine
         string roundInstruction = "",
         Dictionary<string, string>? agentRoles = null,
         bool sequential = true,
-        RoundCallbacks? callbacks = null);
+        RoundCallbacks? callbacks = null,
+        string roundName = "",
+        int questionNumber = 0);
 
     Task<string> SynthesizeAsync(
         Question question,

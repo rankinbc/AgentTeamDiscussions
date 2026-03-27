@@ -1,6 +1,7 @@
 using EngineStandalone.Agents;
 using EngineStandalone.Brief;
 using EngineStandalone.Discussion;
+using EngineStandalone.Telemetry;
 
 namespace EngineStandalone.Abstractions;
 
@@ -10,6 +11,19 @@ namespace EngineStandalone.Abstractions;
 public interface IRoundRunner
 {
     List<string> ComputeSpeakingOrder(List<string> agents, TeamConfig team);
+
+    List<ContextSection> BuildAgentSections(
+        string agentKey,
+        TeamConfig team,
+        Dictionary<string, string> systemPrompts,
+        Question question,
+        string decisions,
+        string priorRounds,
+        string priorSpecs,
+        string openQuestions,
+        string roundInstruction,
+        Dictionary<string, string>? agentRoles,
+        string thisRoundSoFar = "");
 
     string BuildAgentPayload(
         string agentKey,
@@ -22,7 +36,10 @@ public interface IRoundRunner
         string openQuestions,
         string roundInstruction,
         Dictionary<string, string>? agentRoles,
-        string thisRoundSoFar = "");
+        string thisRoundSoFar = "",
+        string roundName = "",
+        int questionNumber = 0,
+        RoundCallbacks? callbacks = null);
 
     Task<Dictionary<string, string>> RunRoundAsync(
         List<string> agents,
@@ -37,5 +54,7 @@ public interface IRoundRunner
         string roundInstruction = "",
         Dictionary<string, string>? agentRoles = null,
         bool sequential = true,
-        RoundCallbacks? callbacks = null);
+        RoundCallbacks? callbacks = null,
+        string roundName = "",
+        int questionNumber = 0);
 }

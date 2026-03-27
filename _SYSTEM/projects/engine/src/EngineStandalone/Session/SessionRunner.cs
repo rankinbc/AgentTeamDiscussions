@@ -14,6 +14,7 @@ using EngineStandalone.Discussion;
 using EngineStandalone.Live;
 using EngineStandalone.Runner;
 using EngineStandalone.Synthesis;
+using EngineStandalone.Telemetry;
 using EngineStandalone.Types;
 
 namespace EngineStandalone.Session;
@@ -42,6 +43,7 @@ public class SessionRunner
     private readonly IClaudeRunner _claudeRunner;
     private readonly IDiscussionEngine _discussionEngine;
     private readonly IMorningBriefGenerator _morningBriefGenerator;
+    private readonly IContextTelemetry _telemetry;
     private readonly ISessionEventEmitter? _emitter;
 
     public SessionRunner(
@@ -52,6 +54,7 @@ public class SessionRunner
         IClaudeRunner claudeRunner,
         IDiscussionEngine discussionEngine,
         IMorningBriefGenerator morningBriefGenerator,
+        IContextTelemetry telemetry,
         ISessionEventEmitter? emitter = null)
     {
         _baseDir = baseDir;
@@ -61,6 +64,7 @@ public class SessionRunner
         _claudeRunner = claudeRunner;
         _discussionEngine = discussionEngine;
         _morningBriefGenerator = morningBriefGenerator;
+        _telemetry = telemetry;
         _emitter = emitter;
     }
 
@@ -436,6 +440,8 @@ public class SessionRunner
         status.FailedQuestions = failedCount;
         SessionPersistence.WriteSessionStatus(sessionDir, status);
 
+        await _telemetry.WriteSessionStatsAsync(sessionDir);
+
         _emitter?.Emit(new SessionDoneEvent
         {
             Elapsed = $"{totalElapsed:F0}",
@@ -662,6 +668,28 @@ public class SessionRunner
                         Round = roundName,
                         Error = isError ? true : null
                     });
+                },
+                OnAgentContextStats = (snapshot) =>
+                {
+                    _emitter.Emit(new AgentContextStatsEvent
+                    {
+                        Agent = snapshot.AgentKey,
+                        Round = snapshot.RoundName,
+                        Question = snapshot.QuestionNumber,
+                        TotalTokens = snapshot.TotalTokens,
+                        BudgetTokens = snapshot.BudgetTokens,
+                        BudgetPct = Math.Round(snapshot.BudgetPercent * 100, 1),
+                        Sections = snapshot.Sections
+                            .Where(s => s.Chars > 0)
+                            .Select(s => new ContextSectionStat
+                            {
+                                Name = s.Name,
+                                Chars = s.Chars,
+                                Tokens = s.Tokens,
+                                IsProtected = s.IsProtected
+                            }).ToList(),
+                        RescueActions = snapshot.RescueActions
+                    });
                 }
             } : null;
 
@@ -676,7 +704,9 @@ public class SessionRunner
                         : priorSpecs,
                     openQuestions, timeout, roundInst,
                     agentRoles,
-                    callbacks: callbacks);
+                    callbacks: callbacks,
+                    roundName: roundName,
+                    questionNumber: question.Number);
 
                 var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
 
@@ -1230,6 +1260,8 @@ public class SessionRunner
         config.State.CompletedQuestions = completedCount;
         config.State.FailedQuestions = failedCount;
         SessionPersistence.WriteSessionConfig(sessionDir, config);
+
+        await _telemetry.WriteSessionStatsAsync(sessionDir);
 
         Console.WriteLine();
         Console.WriteLine(new string('=', 60));

@@ -2,7 +2,7 @@
 # Change behavior here, not in Python code.
 
 timeouts:
-  default: 120            # Default per-LLM-call timeout (claude_runner.py)
+  default: 300            # Default per-LLM-call timeout (claude_runner.py)
   discussion: 420         # Structured discussion rounds (run_discussion.py, session_runner.py)
   evaluation: 300         # Evaluation scoring calls (evaluate_experiment.py)
   batch_question: 600     # Bulk question runner (run_all_questions.py)
@@ -55,5 +55,10 @@ paths:
 session:
   run_eval: false                  # Run evaluation after session
   live_port: 8899                  # SSE server port for --live
+
+context_budget:
+  enabled: true
+  max_payload_tokens: 4000
+  imbalance_threshold: 0.60
 
 completion_marker: "\n<!-- complete -->\n"

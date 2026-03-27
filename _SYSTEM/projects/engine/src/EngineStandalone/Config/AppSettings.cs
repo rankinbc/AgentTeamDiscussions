@@ -101,6 +101,17 @@ public class SessionSettings
 }
 
 /// <summary>
+/// Context budget settings. MaxPayloadTokens is used for % display in telemetry.
+/// Enabled=true activates the budget enforcer to auto-trim over-budget payloads.
+/// </summary>
+public class ContextBudgetSettings
+{
+    public bool Enabled { get; set; } = false;
+    public int MaxPayloadTokens { get; set; } = 4000;
+    public double ImbalanceThreshold { get; set; } = 0.60;
+}
+
+/// <summary>
 /// Root application settings combining all config sections.
 /// </summary>
 public class AppSettings
@@ -113,6 +124,7 @@ public class AppSettings
     public DisplaySettings Display { get; set; } = new();
     public PathSettings Paths { get; set; } = new();
     public SessionSettings Session { get; set; } = new();
+    public ContextBudgetSettings ContextBudget { get; set; } = new();
     public string CompletionMarker { get; set; } = "\n<!-- complete -->\n";
 }
 

@@ -120,6 +120,16 @@ public class ConfigLoader : IConfigLoader
             };
         }
 
+        if (raw.TryGetValue("context_budget", out var budgetObj) && budgetObj is Dictionary<object, object> budget)
+        {
+            settings.ContextBudget = new ContextBudgetSettings
+            {
+                Enabled = GetBool(budget, "enabled", false),
+                MaxPayloadTokens = GetInt(budget, "max_payload_tokens", 4000),
+                ImbalanceThreshold = GetDouble(budget, "imbalance_threshold", 0.60)
+            };
+        }
+
         if (raw.TryGetValue("completion_marker", out var marker))
         {
             settings.CompletionMarker = marker?.ToString() ?? "\n<!-- complete -->\n";
@@ -286,6 +296,16 @@ public class ConfigLoader : IConfigLoader
         if (dict.TryGetValue(key, out var value))
         {
             return value?.ToString() ?? defaultValue;
+        }
+        return defaultValue;
+    }
+
+    private static bool GetBool(Dictionary<object, object> dict, string key, bool defaultValue)
+    {
+        if (dict.TryGetValue(key, out var value))
+        {
+            if (value is bool b) return b;
+            if (bool.TryParse(value?.ToString(), out var parsed)) return parsed;
         }
         return defaultValue;
     }

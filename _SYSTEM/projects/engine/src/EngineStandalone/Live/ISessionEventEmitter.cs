@@ -26,6 +26,7 @@ public interface ISessionEventEmitter
 [JsonDerivedType(typeof(RoundStartEvent))]
 [JsonDerivedType(typeof(AgentThinkingEvent))]
 [JsonDerivedType(typeof(AgentContextEvent))]
+[JsonDerivedType(typeof(AgentContextStatsEvent))]
 [JsonDerivedType(typeof(AgentResponseEvent))]
 [JsonDerivedType(typeof(SynthesisStartEvent))]
 [JsonDerivedType(typeof(SynthesisDoneEvent))]
@@ -190,6 +191,50 @@ public record AgentContextEvent : SessionEvent
 
     [JsonPropertyName("payload")]
     public string Payload { get; init; } = "";
+}
+
+public record AgentContextStatsEvent : SessionEvent
+{
+    public override string Type => "agent_context_stats";
+
+    [JsonPropertyName("agent")]
+    public string Agent { get; init; } = "";
+
+    [JsonPropertyName("round")]
+    public string Round { get; init; } = "";
+
+    [JsonPropertyName("question")]
+    public int Question { get; init; }
+
+    [JsonPropertyName("total_tokens")]
+    public int TotalTokens { get; init; }
+
+    [JsonPropertyName("budget_tokens")]
+    public int BudgetTokens { get; init; }
+
+    [JsonPropertyName("budget_pct")]
+    public double BudgetPct { get; init; }
+
+    [JsonPropertyName("sections")]
+    public List<ContextSectionStat> Sections { get; init; } = new();
+
+    [JsonPropertyName("rescue_actions")]
+    public List<string> RescueActions { get; init; } = new();
+}
+
+public record ContextSectionStat
+{
+    [JsonPropertyName("name")]
+    public string Name { get; init; } = "";
+
+    [JsonPropertyName("chars")]
+    public int Chars { get; init; }
+
+    [JsonPropertyName("tokens")]
+    public int Tokens { get; init; }
+
+    [JsonPropertyName("is_protected")]
+    public bool IsProtected { get; init; }
 }
 
 public record AgentResponseEvent : SessionEvent
