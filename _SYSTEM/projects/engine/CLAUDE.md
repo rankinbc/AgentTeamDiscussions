@@ -7,7 +7,7 @@ C# .NET 8 multi-agent discussion engine. Agents discuss questions in structured 
 Prerequisites: .NET 8 SDK, `claude` CLI on PATH and authenticated.
 
 ```bash
-cd _SYSTEM/projects/engine_standalone
+cd _SYSTEM/projects/engine
 dotnet build
 ```
 
@@ -181,8 +181,8 @@ Live/
 ## Tests
 
 ```bash
-cd _SYSTEM/projects/engine_standalone
+cd _SYSTEM/projects/engine
 dotnet test
 ```
 
-78 tests covering: agent loading, brief parsing, config loading, decisions ledger, session persistence, session config serialization, session preparation.
+105 tests covering: agent loading, brief parsing, config loading, prompt building, context telemetry, context budget enforcement, discussion compression, decisions ledger, session persistence, session config serialization, and session preparation.

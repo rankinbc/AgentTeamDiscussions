@@ -23,7 +23,7 @@ Each question produces a design doc, a full transcript, and extracted decisions.
 ### Build and Run
 
 ```bash
-cd _SYSTEM/projects/engine_standalone
+cd _SYSTEM/projects/engine
 dotnet build
 
 # Interactive — prompts for topic, team, agents, mode
@@ -258,7 +258,7 @@ Role overlays (behavioral modifiers) are in `config/role_overlays.yaml`: competi
 ## Project Structure
 
 ```
-engine_standalone/
+engine/
   src/
     EngineStandalone/           # Main application
       Abstractions/             # Service interfaces (DI)
@@ -272,7 +272,7 @@ engine_standalone/
       Runner/                   # ClaudeRunner (subprocess wrapper)
       Session/                  # SessionRunner, SessionConfig, SessionPreparer, persistence
       Synthesis/                # MorningBriefGenerator
-    EngineStandalone.Tests/     # xUnit tests (78 tests)
+    EngineStandalone.Tests/     # xUnit tests (105 tests)
   config/                       # YAML configuration
   data/
     agents/                     # Individual agent YAML files
@@ -299,4 +299,4 @@ engine_standalone/
 dotnet test
 ```
 
-78 tests covering agent loading, brief parsing, config loading, decisions ledger, session persistence, session config serialization (with enum round-tripping), and session preparation (topic parsing, title extraction).
+105 tests covering agent loading, brief parsing, config loading, prompt building (including history-windowing edge cases), context telemetry, context budget enforcement, discussion compression, decisions ledger, session persistence, session config serialization (with enum round-tripping), and session preparation (topic parsing, title extraction).

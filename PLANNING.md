@@ -38,7 +38,7 @@ AgentTeamDiscussions is a multi-agent AI orchestration platform where agent team
 | UI | React 19, TypeScript, Vite 8, Tailwind CSS 4 |
 | LLM | Claude CLI (`claude -p` subprocess) |
 | Config | YAML (YamlDotNet), Scriban templates |
-| Tests | xUnit (78 tests: agent loading, brief parsing, config, sessions, persistence) |
+| Tests | xUnit (105 tests: agent loading, brief parsing, config, prompt building, context telemetry/budget, compression, ledger, sessions, persistence) |
 | CLI | System.CommandLine 2.0.0-beta4 |
 
 ## Style & Conventions
@@ -66,10 +66,15 @@ AgentTeamDiscussions is a multi-agent AI orchestration platform where agent team
 
 ## Current Goals / Roadmap
 
-<!-- Fill in your current goals and priorities here -->
+Build order from `docs/v2/ROADMAP.md` (see that file for rationale and the full idea index):
 
-- [ ] _Example: Add new discussion mode for brainstorming_
-- [ ] _Example: Improve evaluation scoring rubric_
+- [ ] **Blind proposals** — suppress prior context in the propose round so proposers reason independently
+- [ ] **Manifest versioning** — schema evolution for `session.json`, co-delivered with blind proposals
+- [ ] **Phase system** — Brainstorm -> Refine -> Specify -> Review with phase-specific prompts and transitions
+- [ ] **Key takeaways** — extraction at phase boundaries
+- [ ] **Stale detection** — flag repetition across phase boundaries
+- [ ] **Anti-sycophancy detection** — measure blind vs. revealed position drift
+- [ ] **Multiple artifact types** — PRD, architecture doc, user stories
 
 ## Constraints
 
