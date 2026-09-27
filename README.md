@@ -372,4 +372,4 @@ Planned next steps, from `docs/v2/ROADMAP.md`, prioritized by the agent team's o
 
 ## Status
 
-Active personal project and working prototype. The engine runs end to end, has produced the sessions in `output/sessions/`, and has a passing test suite. The APIs and data formats are still changing.
+Experimental research prototype exploring whether structured personas and anti-convergence mechanisms produce genuinely diverse multi-agent discussion. The engine runs end to end, has produced the sessions in `output/sessions/`, and has a passing test suite; APIs and data formats are still evolving.
