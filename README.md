@@ -6,6 +6,8 @@ You hand it a brief with a list of open design questions. A team of AI agents wo
 
 Built in C# / .NET 8 with a React 19 live dashboard. It calls Claude through the Claude CLI.
 
+> **Status:** experimental research prototype. It works end to end and is tested, but it exists to explore an open question: can structured personas and anti-convergence mechanisms make multi-agent AI discussion genuinely diverse? See [Status](#status).
+
 ---
 
 ## Why This Exists
