@@ -1,5 +1,7 @@
 # AgentTeamDiscussions
 
+[![CI](https://github.com/rankinbc/AgentTeamDiscussions/actions/workflows/ci.yml/badge.svg)](https://github.com/rankinbc/AgentTeamDiscussions/actions/workflows/ci.yml)
+
 **A multi-agent AI discussion engine that turns a product idea into a planning package by running structured debates between AI agents with distinct personalities, and doing it unattended.**
 
 You hand it a brief with a list of open design questions. A team of AI agents works through each question in rounds: some propose, others critique, others evaluate. A neutral moderator then writes up a design document for each question. Decisions go into an append-only ledger that later questions build on, and the session ends with a "Morning Brief", an executive summary you can read in about 90 seconds.
@@ -7,6 +9,8 @@ You hand it a brief with a list of open design questions. A team of AI agents wo
 Built in C# / .NET 8 with a React 19 live dashboard. It calls Claude through the Claude CLI.
 
 > **Status:** experimental research prototype. It works end to end and is tested, but it exists to explore an open question: can structured personas and anti-convergence mechanisms make multi-agent AI discussion genuinely diverse? See [Status](#status).
+
+![Dashboard setup page: pick a brief, a team and agents, each shown with its personality trait bars and drives](docs/images/dashboard-setup.png)
 
 ---
 
@@ -197,7 +201,7 @@ Evaluation/             Evaluator (LLM-as-judge scoring)
 Live/                   LiveServer (SSE + REST), SessionManager, SseSessionEmitter
 ```
 
-All services sit behind interfaces and are wired through dependency injection. Behavior is **configuration-driven**: timeouts, truncation limits, health-check thresholds and context budgets live in `config/defaults.yaml`, prompts are Scriban templates in `templates/`, and teams, agents and modes are YAML in `_SYSTEM/data/`.
+All services sit behind interfaces and are wired through dependency injection. Behavior is **configuration-driven**: timeouts, truncation limits, health-check thresholds and context budgets live in `config/defaults.yaml`, prompts are template files in `templates/`, and teams, agents and modes are YAML in `_SYSTEM/data/`.
 
 ---
 
@@ -209,7 +213,7 @@ All services sit behind interfaces and are wired through dependency injection. B
 | CLI | System.CommandLine |
 | LLM | Claude via the Claude CLI (`claude -p` subprocess) |
 | Config and data | YAML (YamlDotNet) |
-| Prompt templates | Scriban (Jinja2-compatible) |
+| Prompt templates | Markdown template files (`.md.j2`); Scriban available for rendering |
 | Dashboard | React 19, TypeScript, Vite, Tailwind CSS 4, React Router |
 | Streaming | Server-Sent Events |
 | Tests | xUnit, **105 tests passing** |
@@ -331,7 +335,7 @@ _SYSTEM/
     src/EngineStandalone.Tests/   xUnit tests
     ui/                           React live dashboard
     config/                       defaults, display, role overlays
-    templates/                    Scriban prompt + evaluation templates
+    templates/                    Prompt + evaluation templates
     input/                        Briefs
     output/sessions/              Real session output (kept for reference)
 docs/
