@@ -6,7 +6,7 @@ You hand it a brief with a list of open design questions. A team of AI agents wo
 
 Built in C# / .NET 8 with a React 19 live dashboard. It calls Claude through the Claude CLI.
 
-> **Status:** experimental research prototype. It works end to end and is tested, but it exists to explore an open question: can structured personas and anti-convergence mechanisms make multi-agent AI discussion genuinely diverse? See [Status](#status).
+> **Status:** mostly an experiment. This is a research prototype that works end to end and is tested, but it exists to explore an open question: can structured personas and anti-convergence mechanisms make multi-agent AI discussion genuinely diverse? See [Status](#status-mostly-an-experiment).
 
 ---
 
@@ -372,6 +372,18 @@ Planned next steps, from `docs/v2/ROADMAP.md`, prioritized by the agent team's o
 
 ---
 
-## Status
+## Status: Mostly an Experiment
 
-Experimental research prototype exploring whether structured personas and anti-convergence mechanisms produce genuinely diverse multi-agent discussion. The engine runs end to end, has produced the sessions in `output/sessions/`, and has a passing test suite; APIs and data formats are still evolving.
+This project is best read as an experimental research prototype, not a finished product. It was built to test one question: **can structured personas and anti-convergence mechanisms make multi-agent AI discussion genuinely diverse, instead of six agents producing six versions of the same safe answer?**
+
+### What makes it an experiment
+
+- **The core idea is a hypothesis.** The personality model, positional framing and anti-slop rules are all bets on how to stop LLM convergence. The product brief records them being checked across 14 experiment runs.
+- **The code is built for comparison.** The discussion modes (`compete`, `counter`, `bigsmall`, `angles` and others, originally kept in `config/experiment_modes.yaml`) are alternative round structures meant to be run against each other, and the `eval` command scores experiment output with an LLM judge.
+- **The sessions are trial runs.** Many of the sessions in `output/sessions/` repeat the same brief to compare results: `v1-spec-gaps` ran four times and `test-brief` five times.
+- **It changed fast.** Most of the work happened in about a week, including a full rewrite from a Python prototype to C# / .NET 8.
+- **It isn't stabilized.** There are no releases or versioning, data formats are still changing, and the engine calls Claude through the CLI as a subprocess instead of the API.
+
+### What it isn't
+
+It isn't a throwaway, either. The experiment is built on production-style engineering: 105 passing tests, crash recovery from on-disk artifacts, a circuit breaker, context budget enforcement with per-turn telemetry, dependency injection behind interfaces, and a live dashboard. The engine runs end to end and produced every session in `output/sessions/`.
