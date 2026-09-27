@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Markdown from 'react-markdown';
-import { DashboardProvider, useDashboard } from './store/DashboardContext';
+import { useDashboard } from './store/DashboardContext';
 import { useSSE } from './hooks/useSSE';
 import { agentColor } from './lib/colors';
 import { sendModerator, addQuestion, fetchLedger, stopSession } from './lib/api';
