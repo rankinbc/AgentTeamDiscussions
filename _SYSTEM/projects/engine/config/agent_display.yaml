@@ -14,6 +14,11 @@ display_names:
   ev_purist: "Vera (EV systems historian)"
   player_advocate: "Nadia (new-player experience advocate)"
   scope_warden: "Soren (solo dev scope warden)"
+  hiring_manager: "Priya (AI-forward hiring manager)"
+  tech_recruiter: "Dana (technical recruiter)"
+  staff_ai_engineer: "Theo (staff AI engineer)"
+  bar_raiser: "Ingrid (bar-raiser interviewer)"
+  career_strategist: "Sam (career strategist)"
 
 colors_hex:
   cognitive_architect: "#6366f1"
@@ -28,6 +33,11 @@ colors_hex:
   ev_purist: "#ef4444"
   player_advocate: "#22c55e"
   scope_warden: "#f97316"
+  hiring_manager: "#6366f1"
+  tech_recruiter: "#06b6d4"
+  staff_ai_engineer: "#ef4444"
+  bar_raiser: "#f97316"
+  career_strategist: "#22c55e"
 
 colors_ansi_cycle:
   - cyan

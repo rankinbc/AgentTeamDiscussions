@@ -1,6 +1,8 @@
 // Parses a markdown discussion brief (the user's input) into structured data.
 // Brief format: product description + "What's Already Decided" (constraints every agent sees)
+// + optional "Context" (reference material every agent sees in full, e.g. a resume)
 // + numbered "Open Questions" (e.g. `1. **Feature Ranking**`).
+// Sections end at the next level-2 heading, so use ### or deeper inside them.
 // Slugify converts question titles to filesystem-safe names for output files.
 
 using System.Text.RegularExpressions;
@@ -44,9 +46,29 @@ public class BriefParser
     /// Parse a discussion brief. Returns (decisions_text, questions_list).
     /// </summary>
     public (string Decisions, List<Question> Questions) ParseBrief(string path)
-    {
-        var text = File.ReadAllText(path);
+        => ParseBriefText(File.ReadAllText(path));
 
+    /// <summary>
+    /// True when the text has an "## Open Questions" section, i.e. it is a full brief
+    /// rather than a free-form topic.
+    /// </summary>
+    public static bool LooksLikeBrief(string text)
+        => Regex.IsMatch(text, @"^## Open Questions", RegexOptions.Multiline);
+
+    /// <summary>
+    /// Extract the "## Context" section verbatim (empty string when absent).
+    /// </summary>
+    public static string ExtractContext(string text)
+    {
+        var match = Regex.Match(text, @"^## Context[^\n]*\n(.*?)(?=\n## |\Z)", RegexOptions.Multiline | RegexOptions.Singleline);
+        return match.Success ? match.Groups[1].Value.Trim() : "";
+    }
+
+    /// <summary>
+    /// Parse brief markdown text. Returns (decisions_text, questions_list).
+    /// </summary>
+    public (string Decisions, List<Question> Questions) ParseBriefText(string text)
+    {
         // "What's Already Decided" becomes the decisions context that every agent sees.
         var decisionsMatch = Regex.Match(text, @"## What's Already Decided\s*\n(.*?)(?=\n## |\Z)", RegexOptions.Singleline);
         var decisions = decisionsMatch.Success ? decisionsMatch.Groups[1].Value.Trim() : "";

@@ -60,7 +60,7 @@ session:
 
 context_budget:
   enabled: true
-  max_payload_tokens: 4000
+  max_payload_tokens: 10000  # Room for a protected ## Context section (e.g. a resume) plus discussion history
   imbalance_threshold: 0.60
 
 completion_marker: "\n<!-- complete -->\n"

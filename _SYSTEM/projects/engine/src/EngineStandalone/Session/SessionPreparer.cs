@@ -89,8 +89,19 @@ public class SessionPreparer
         int timeout = 120,
         List<string>? agents = null)
     {
-        var questions = ParseTopicIntoQuestions(topic);
         var teamName = team ?? "beta-agents";
+
+        // A pasted/selected brief (has "## Open Questions") keeps its decisions and context;
+        // anything else is treated as a free-form topic.
+        if (Brief.BriefParser.LooksLikeBrief(topic))
+        {
+            var briefConfig = BuildFromBriefText(topic, "api", teamName,
+                mode ?? _agentLoader.LoadTeamByName(teamName).DefaultMode, timeout);
+            briefConfig.Agents = agents;
+            return briefConfig;
+        }
+
+        var questions = ParseTopicIntoQuestions(topic);
 
         // If no mode specified, use team's default
         if (mode == null)
@@ -123,13 +134,28 @@ public class SessionPreparer
     /// </summary>
     public SessionConfig PrepareFromBrief(string briefPath, string? team = null, string? mode = null, int timeout = 120)
     {
+        // An explicit team uses its own default mode; otherwise keep the historical compete default
+        var resolvedMode = mode ?? (team != null ? _agentLoader.LoadTeamByName(team).DefaultMode : "compete");
+        var config = BuildFromBriefText(File.ReadAllText(briefPath), briefPath, team ?? "beta-agents", resolvedMode, timeout);
+        config.Title = Path.GetFileNameWithoutExtension(briefPath);
+        return config;
+    }
+
+    /// <summary>
+    /// Build a SessionConfig from brief markdown text (decisions, context, questions).
+    /// Title comes from the H1 heading when present, else the first question.
+    /// </summary>
+    private static SessionConfig BuildFromBriefText(string text, string source, string team, string mode, int timeout)
+    {
         var parser = new Brief.BriefParser();
-        var (decisions, questions) = parser.ParseBrief(briefPath);
+        var (decisions, questions) = parser.ParseBriefText(text);
+        var h1 = System.Text.RegularExpressions.Regex.Match(text, @"^#\s+(.+)$", System.Text.RegularExpressions.RegexOptions.Multiline);
 
         var config = new SessionConfig
         {
-            Source = briefPath,
-            Title = Path.GetFileNameWithoutExtension(briefPath),
+            Source = source,
+            Title = h1.Success ? h1.Groups[1].Value.Trim() : questions[0].Title,
+            Context = Brief.BriefParser.ExtractContext(text),
             Decided = decisions.Split('\n', StringSplitOptions.RemoveEmptyEntries)
                 .Select(d => d.TrimStart('-', '*', ' ').Trim())
                 .Where(d => !string.IsNullOrWhiteSpace(d))
@@ -140,8 +166,8 @@ public class SessionPreparer
                 Title = q.Title,
                 Body = q.Body,
             }).ToList(),
-            Team = team ?? "beta-agents",
-            Mode = mode ?? "compete",
+            Team = team,
+            Mode = mode,
             Timeout = timeout,
         };
 

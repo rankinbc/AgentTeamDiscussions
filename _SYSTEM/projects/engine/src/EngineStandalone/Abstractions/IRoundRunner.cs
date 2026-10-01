@@ -23,7 +23,8 @@ public interface IRoundRunner
         string openQuestions,
         string roundInstruction,
         Dictionary<string, string>? agentRoles,
-        string thisRoundSoFar = "");
+        string thisRoundSoFar = "",
+        string context = "");
 
     string BuildAgentPayload(
         string agentKey,
@@ -39,7 +40,8 @@ public interface IRoundRunner
         string thisRoundSoFar = "",
         string roundName = "",
         int questionNumber = 0,
-        RoundCallbacks? callbacks = null);
+        RoundCallbacks? callbacks = null,
+        string context = "");
 
     Task<Dictionary<string, string>> RunRoundAsync(
         List<string> agents,
@@ -56,5 +58,6 @@ public interface IRoundRunner
         bool sequential = true,
         RoundCallbacks? callbacks = null,
         string roundName = "",
-        int questionNumber = 0);
+        int questionNumber = 0,
+        string context = "");
 }

@@ -28,6 +28,12 @@ public class SessionConfig
     /// <summary>Things already decided — context every agent sees.</summary>
     public List<string> Decided { get; set; } = new();
 
+    /// <summary>
+    /// Reference material from the brief's "## Context" section (e.g. a resume or spec).
+    /// Every agent and the synthesizer see it in full — it is never trimmed by the context budget.
+    /// </summary>
+    public string Context { get; set; } = "";
+
     /// <summary>Questions to discuss.</summary>
     public List<SessionQuestion> Questions { get; set; } = new();
 

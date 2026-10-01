@@ -26,7 +26,8 @@ public interface IDiscussionEngine
         bool sequential = true,
         RoundCallbacks? callbacks = null,
         string roundName = "",
-        int questionNumber = 0);
+        int questionNumber = 0,
+        string context = "");
 
     Task<string> SynthesizeAsync(
         Question question,
@@ -35,7 +36,8 @@ public interface IDiscussionEngine
         string decisions,
         string priorSpecs,
         string openQuestions,
-        int timeout);
+        int timeout,
+        string context = "");
 
     string FormatTranscript(Question question, Dictionary<string, Dictionary<string, string>> roundResponses);
     List<string> ExtractOpenQuestions(string designDoc);

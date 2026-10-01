@@ -93,7 +93,8 @@ public class RoundRunner : IRoundRunner
         string openQuestions,
         string roundInstruction,
         Dictionary<string, string>? agentRoles,
-        string thisRoundSoFar = "")
+        string thisRoundSoFar = "",
+        string context = "")
     {
         if (!team.Agents.TryGetValue(agentKey, out var agent))
         {
@@ -120,6 +121,14 @@ public class RoundRunner : IRoundRunner
                 var roleContent = $"=== Your Approach ===\n{roleText}\n=== End Approach ===";
                 sections.Add(new ContextSection("role_overlay", roleContent));
             }
+        }
+
+        // Reference material from the brief's ## Context section (protected — every agent
+        // must see all of it, so the budget enforcer never trims it)
+        if (!string.IsNullOrWhiteSpace(context))
+        {
+            var contextContent = $"=== Context (reference material for this discussion) ===\n{context}\n=== End Context ===";
+            sections.Add(new ContextSection("context", contextContent, IsProtected: true));
         }
 
         // Decisions from brief
@@ -192,12 +201,13 @@ public class RoundRunner : IRoundRunner
         string thisRoundSoFar = "",
         string roundName = "",
         int questionNumber = 0,
-        RoundCallbacks? callbacks = null)
+        RoundCallbacks? callbacks = null,
+        string context = "")
     {
         var sections = BuildAgentSections(
             agentKey, team, systemPrompts, question, decisions,
             priorRounds, priorSpecs, openQuestions, roundInstruction,
-            agentRoles, thisRoundSoFar);
+            agentRoles, thisRoundSoFar, context);
 
         var budgetSettings = _configLoader.Defaults().ContextBudget;
         var rescueActions = new List<string>();
@@ -258,6 +268,7 @@ public class RoundRunner : IRoundRunner
         Append("perspective_reminder");
         Append("context_lens");
         Append("role_overlay");
+        Append("context");
         Append("decisions");
         Append("prior_specs");
         Append("open_questions");
@@ -320,7 +331,8 @@ public class RoundRunner : IRoundRunner
         bool sequential = true,
         RoundCallbacks? callbacks = null,
         string roundName = "",
-        int questionNumber = 0)
+        int questionNumber = 0,
+        string context = "")
     {
         var displayNames = _configLoader.DisplayNames();
 
@@ -333,7 +345,7 @@ public class RoundRunner : IRoundRunner
                     agentKey, team, systemPrompts, question, decisions,
                     priorRounds, priorSpecs, openQuestions, roundInstruction,
                     agentRoles, roundName: roundName, questionNumber: questionNumber,
-                    callbacks: callbacks);
+                    callbacks: callbacks, context: context);
 
                 var response = await _claudeRunner.RunAsync(systemPrompts[agentKey], payload, timeout);
                 return (agentKey, response);
@@ -356,7 +368,7 @@ public class RoundRunner : IRoundRunner
             var payload = BuildAgentPayload(
                 agentKey, team, systemPrompts, question, decisions,
                 priorRounds, priorSpecs, openQuestions, roundInstruction,
-                agentRoles, thisRoundSoFar, roundName, questionNumber, callbacks);
+                agentRoles, thisRoundSoFar, roundName, questionNumber, callbacks, context);
 
             callbacks?.OnAgentContext?.Invoke(agentKey, systemPrompts[agentKey], payload);
 

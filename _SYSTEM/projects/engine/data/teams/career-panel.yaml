@@ -1,0 +1,47 @@
+# Team: Career Panel
+# Resume and positioning review for AI-heavy software and AI engineer roles.
+# Hiring side proposes, technical depth critiques, strategist decides.
+
+name: Career Panel
+description: 'Agent team: career-panel — resume review for AI engineering roles'
+default_mode: default
+
+agents:
+- agent_id: 5c1f0a7e-3b2d-4e8a-9f61-2a7d4c9e1b01
+  agent_key: hiring_manager
+  name: Priya
+  file: career-panel__hiring_manager.yaml
+- agent_id: 8e2b6d41-7c09-4f3a-b5d8-0c4a91e6f702
+  agent_key: tech_recruiter
+  name: Dana
+  file: career-panel__tech_recruiter.yaml
+- agent_id: 3a9d7f20-6e14-4b8c-a2f5-91c0e8d3b703
+  agent_key: staff_ai_engineer
+  name: Theo
+  file: career-panel__staff_ai_engineer.yaml
+- agent_id: c47e1b92-0d5a-4f6e-8b3c-6f2a9d1e0804
+  agent_key: bar_raiser
+  name: Ingrid
+  file: career-panel__bar_raiser.yaml
+- agent_id: f1d83c56-9a27-4e0b-bc49-7e5a2f3d6805
+  agent_key: career_strategist
+  name: Sam
+  file: career-panel__career_strategist.yaml
+
+modes:
+  default:
+    description: "Hiring manager + recruiter propose, AI engineer + bar-raiser critique, strategist decides"
+    groups:
+      propose: [hiring_manager, tech_recruiter]
+      critique: [staff_ai_engineer, bar_raiser]
+      evaluate: [career_strategist]
+    agent_roles: {}
+
+  counter:
+    description: "Hiring manager proposes, recruiter must counter-propose, then critique and decide"
+    groups:
+      propose: [hiring_manager]
+      counter: [tech_recruiter]
+      critique: [staff_ai_engineer, bar_raiser]
+      evaluate: [career_strategist]
+    agent_roles: {}

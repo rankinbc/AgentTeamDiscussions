@@ -50,3 +50,7 @@ temp/
 
 # Git worktrees
 .worktrees/
+
+# Personal briefs (resume reviews) and their session output — never publish
+_SYSTEM/projects/engine/input/resume-*.md
+_SYSTEM/projects/engine/output/sessions/*resume*/

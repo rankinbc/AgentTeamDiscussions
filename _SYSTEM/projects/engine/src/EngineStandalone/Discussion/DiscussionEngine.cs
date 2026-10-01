@@ -68,12 +68,13 @@ public class DiscussionEngine : IDiscussionEngine
         bool sequential = true,
         RoundCallbacks? callbacks = null,
         string roundName = "",
-        int questionNumber = 0)
+        int questionNumber = 0,
+        string context = "")
     {
         return _roundRunner.RunRoundAsync(
             agents, systemPrompts, team, question, decisions, priorRounds,
             priorSpecs, openQuestions, timeout, roundInstruction, agentRoles,
-            sequential, callbacks, roundName, questionNumber);
+            sequential, callbacks, roundName, questionNumber, context);
     }
 
     /// <summary>
@@ -88,7 +89,8 @@ public class DiscussionEngine : IDiscussionEngine
         string decisions,
         string priorSpecs,
         string openQuestions,
-        int timeout)
+        int timeout,
+        string context = "")
     {
         var displayNames = _configLoader.DisplayNames();
         var sb = new StringBuilder();
@@ -99,6 +101,14 @@ public class DiscussionEngine : IDiscussionEngine
         sb.AppendLine();
         sb.AppendLine(question.Body);
         sb.AppendLine();
+
+        if (!string.IsNullOrWhiteSpace(context))
+        {
+            sb.AppendLine("## Context (reference material from brief)");
+            sb.AppendLine();
+            sb.AppendLine(context);
+            sb.AppendLine();
+        }
 
         if (!string.IsNullOrEmpty(decisions))
         {

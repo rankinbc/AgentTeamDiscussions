@@ -38,11 +38,13 @@ class Program
         var liveOption = new Option<bool>("--live", "Start live SSE dashboard");
         var evalOption = new Option<bool>("--eval", "Run evaluation after session completes");
         evalOption.AddAlias("-e");
+        var briefTeamOption = new Option<string?>("--team", "Team name (default: beta-agents)");
 
         rootCommand.AddArgument(briefArg);
         rootCommand.AddOption(resumeOption);
         rootCommand.AddOption(liveOption);
         rootCommand.AddOption(evalOption);
+        rootCommand.AddOption(briefTeamOption);
 
         rootCommand.SetHandler(async (context) =>
         {
@@ -50,6 +52,7 @@ class Program
             var resume = context.ParseResult.GetValueForOption(resumeOption);
             var live = context.ParseResult.GetValueForOption(liveOption);
             var eval = context.ParseResult.GetValueForOption(evalOption) || defaults.Session.RunEval;
+            var briefTeam = context.ParseResult.GetValueForOption(briefTeamOption);
 
             var briefPath = ResolveBriefPath(brief, baseDir, defaults);
             if (briefPath == null)
@@ -66,7 +69,7 @@ class Program
                     provider.GetRequiredService<IAgentLoader>(),
                     provider.GetRequiredService<IConfigLoader>());
 
-                var config = preparer.PrepareFromBrief(briefPath);
+                var config = preparer.PrepareFromBrief(briefPath, team: briefTeam);
                 await runner.RunFromConfigAsync(config, runEval: eval, resumeSession: resume);
 
                 await WaitForLiveServer(webApp, context);

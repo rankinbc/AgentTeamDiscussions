@@ -573,7 +573,8 @@ public class SessionRunner
         string openQuestions,
         int timeout,
         TeamMode mode,
-        string sessionDir)
+        string sessionDir,
+        string context = "")
     {
         var groups = mode.Groups;
         var roundLabels = groups.Keys.ToList();
@@ -706,7 +707,8 @@ public class SessionRunner
                     agentRoles,
                     callbacks: callbacks,
                     roundName: roundName,
-                    questionNumber: question.Number);
+                    questionNumber: question.Number,
+                    context: context);
 
                 var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
 
@@ -793,7 +795,7 @@ public class SessionRunner
         {
             var designDoc = await _discussionEngine.SynthesizeAsync(
                 question, roundResponses, roundLabels, fullDecisions,
-                priorSpecs, openQuestions, timeout);
+                priorSpecs, openQuestions, timeout, context);
 
             var synthElapsed = (DateTime.UtcNow - synthStart).TotalSeconds;
 
@@ -1133,7 +1135,7 @@ public class SessionRunner
                     ? priorSpecs[^defaults.Truncation.PriorSpecs..]
                     : priorSpecs,
                 oqText,
-                config.Timeout, mode, sessionDir);
+                config.Timeout, mode, sessionDir, config.Context);
 
             var qElapsed = (int)(DateTime.UtcNow - qStart).TotalSeconds;
 
