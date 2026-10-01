@@ -24,6 +24,20 @@ The hard technical problem is **LLM convergence**: six "different" agents usuall
 
 ---
 
+## In Action: A Resume Review
+
+The engine isn't limited to software design. In this session, the `career-panel` team reviews my own resume for AI-engineering roles. The resume goes in the brief's `## Context` section, so every agent reads all of it, and four open questions cover positioning, evidence, rewrites and portfolio. A hiring manager and a recruiter propose, a staff AI engineer and a bar-raiser interviewer critique, and a career strategist decides.
+
+![Live dashboard during the propose round: the recruiter ranks resume lines into evidence tiers, the hiring manager disagrees with her by name, and the Prompt Inspector shows the hiring manager's system prompt](docs/images/resume-review-propose.png)
+
+*Propose round.* Dana (recruiter) sorts the resume's AI claims into tiers of evidence. Priya (hiring manager) speaks next and opens by disagreeing with her: reframing the guardrails work as "AI safety" would draw scrutiny, not credit. The Prompt Inspector at the bottom shows the exact system prompt Priya received. The roster on the left and the profile on the right show each agent's personality traits and drives.
+
+![Live dashboard during the critique round: the staff AI engineer challenges an assumption both proposals share, and the bar-raiser interviewer then pushes back on his fix](docs/images/resume-review-critique.png)
+
+*Critique round.* Theo (staff AI engineer) goes after an assumption both proposals share: that describing a multi-agent architecture is evidence that it works. He asks for a benchmark. Ingrid (bar-raiser) then rejects his fix, because a side-project benchmark opens an eval-methodology probe the candidate can't win. Every critic disagrees with someone specific and gives a reason. That is the anti-convergence machinery below doing its job.
+
+---
+
 ## How a Session Works
 
 ```mermaid
@@ -148,7 +162,7 @@ Every agent turn is a **stateless** `claude -p` call, with context rebuilt from 
 | Layer | Size | Contents | Cuttable? |
 |---|---|---|---|
 | **Identity** | ~2K tokens, static | Persona, personality-as-prose, position, technique, anti-slop, voice | No |
-| **Situation** | ~3-5K tokens, dynamic | Decisions ledger, compressed prior rounds, prior design docs, unresolved questions | Yes, in priority order |
+| **Situation** | ~3-5K tokens, dynamic | Brief context (protected), decisions ledger, compressed prior rounds, prior design docs, unresolved questions | Yes, in priority order (except brief context) |
 | **Task** | ~500 tokens | The question, round instruction, perspective reminder | Never |
 
 The order is deliberate: identity frames how the agent reads the situation, and the situation frames the task.
@@ -160,7 +174,7 @@ Prompts are built as named, measured sections rather than one concatenated strin
 - It detects **over-budget** payloads and **imbalanced** ones, where one section takes up most of the context.
 - It trims sections in a fixed cut priority (`prior_rounds` -> `prior_specs` -> `decisions` -> ...), in passes of 50%, then 25%, then removal.
 - It truncates from the *front* at line boundaries to keep the most recent content.
-- It never touches protected sections, such as the perspective reminder.
+- It never touches protected sections, such as the perspective reminder or the brief's `## Context` reference material.
 
 Prior rounds are compressed by `DiscussionCompressor`, which keeps each agent's `## Position Summary` instead of the full response. Each round gets the gist of the last one without bloating the context. Per-turn telemetry is streamed to the dashboard's Inspector tab.
 
@@ -216,7 +230,7 @@ All services sit behind interfaces and are wired through dependency injection. B
 | Prompt templates | Markdown template files (`.md.j2`); Scriban available for rendering |
 | Dashboard | React 19, TypeScript, Vite, Tailwind CSS 4, React Router |
 | Streaming | Server-Sent Events |
-| Tests | xUnit, **105 tests passing** |
+| Tests | xUnit, **110 tests passing** |
 
 The test suite covers agent loading, brief parsing, config loading, prompt building (including history-windowing edge cases), context telemetry, budget enforcement, discussion compression, the decisions ledger, crash-safe persistence and session configuration.
 
@@ -260,6 +274,9 @@ dotnet run --project src/EngineStandalone -- new \
 # From a brief file, with post-session evaluation
 dotnet run --project src/EngineStandalone -- input/my-brief.md --eval
 
+# From a brief file with a specific team, watching live
+dotnet run --project src/EngineStandalone -- input/my-brief.md --team career-panel --live
+
 # Resume an interrupted session
 dotnet run --project src/EngineStandalone -- --resume 2026-03-26_1430_my-brief
 
@@ -288,11 +305,20 @@ cd ui && npm install && npm run dev
 - Using JWT tokens
 - Session duration is 24h
 
+## Context
+
+### Current auth middleware
+(Optional reference material: a spec, a resume, a code excerpt. Every agent
+and the moderator see it in full, and the context budget never trims it.
+Use ### or deeper headings inside it.)
+
 ## Open Questions
 
 1. **Token storage** Where do tokens live on the client, and how are they rotated?
 2. **Revocation** How do we revoke a compromised token before it expires?
 ```
+
+A brief picked or pasted in the dashboard keeps its decisions and context, just like a brief file run from the CLI.
 
 ### Session Output
 
@@ -320,6 +346,7 @@ output/sessions/{timestamp}_{slug}/
 | `spec-builders` | 5: Creative Director, Game Designer, Player Advocate, Scope Wrangler, Tech Lead | Turning game concepts into specs |
 | `game-data-pipeline` | 5: Data Architect, Game Designer, Pipeline Pragmatist, Analysis Strategist, Wild Card | Data pipeline design for game analysis |
 | `normal-people` | 6 non-expert personas | Gut-check ideas against regular users rather than specialists |
+| `career-panel` | 5: Hiring Manager, Technical Recruiter, Staff AI Engineer, Bar-Raiser Interviewer, Career Strategist | Resume and positioning review for AI-engineering roles (see [In Action](#in-action-a-resume-review)) |
 
 To add a team, create `{team}__{agent}.yaml` files and a `teams/{team}.yaml` manifest with modes. No code changes are needed.
 
