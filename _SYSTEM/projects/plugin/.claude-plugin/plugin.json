@@ -1,0 +1,9 @@
+{
+  "name": "agent-discuss",
+  "version": "0.1.0",
+  "description": "AgentTeamDiscussions as a Claude Code plugin: persona subagents debate a brief in structured rounds and produce design docs, a decisions ledger and a Morning Brief.",
+  "author": {
+    "name": "AgentTeamDiscussions"
+  },
+  "keywords": ["multi-agent", "discussion", "design-docs", "brainstorming"]
+}
