@@ -1,0 +1,17 @@
+1. **The moderator channel gets built, used twice, and ignored, because the only user who exists runs sessions occasionally, unattended, and wants a Morning Brief.** The brief says a solo builder has the idea at 10 PM and wakes up to the output. Live HTTP steering assumes someone is watching a dashboard mid-run. The engine facts say sessions are occasional and there is no moderator channel today. From the user's perspective, the moment that matters is the Morning Brief, and nobody is awake to steer. The retention question is whether anyone would notice if this feature vanished. Probably not.
+
+2. **The "boundary" question is answered by building both features, when the real fix is to defer one.** The ROADMAP's own critical path says blind proposals first, because they change what the user reads. Phases are called "invisible infrastructure". Moderator input is not on the critical path at all. A plan that settles who wins before either exists is designing conflict resolution for a system with zero users of it. Three months on, you have an arbitration rule and no evidence it fires.
+
+3. **The moderator spec was written for a different system and does not map onto the C# engine.** moderator-input.md describes a Python `live_conversation.py` with a shared history list and a loop that checks a queue between turns. The current engine shells out to `claude -p` per turn, runs fixed rounds, and between rounds agents see only 3-sentence Position Summary blocks. A moderator message injected mid-round is seen in full by later speakers but compressed to a summary or dropped by the next round. The budget enforcer may also trim it. Steering that evaporates at the round boundary teaches the user it does not work.
+
+4. **Phase auto-transitions rest on signals the engine cannot produce, so they will fire on round count and silently override the human.** The exit gates in phase-dynamics.md need idea counts, a disagreement queue, a validation gate and an agreement score. The engine has none of these. The decisions ledger had never been rendered until 2026-10-05, and Evaluator scores are never read back. The ROADMAP leaves the trigger undecided (time, convergence or round count). With only round count available, a moderator saying "stay on this" loses to a clock the user cannot see or understand. That is the "cannot understand why the agents said what they said" failure.
+
+5. **Moderator authority and phase communication modes contradict each other in the prompt.** The moderator spec says to treat the message as a priority directive and address it first. Brainstorm mode says YES-AND and never critique. If the moderator asks "what's wrong with this?" in Brainstorm, the agents get two incompatible instructions. The spec's own line that agents can disagree with the moderator makes the outcome nondeterministic.
+
+6. **The first-run config becomes unreadable.** Each phase carries nine dimensions plus bench rotation, so the YAML for someone's first run is enormous. Add moderator override flags and the user cannot tune it.
+
+**Undecided, and only the author can answer:**
+- Is live steering for watched sessions or overnight runs? That decides whether the feature exists.
+- What does a moderator message do to a phase gate: pause it, skip it, or reset it?
+- Does a human message count as convergence evidence or as a disruption?
+- Is the moderator always the final authority, as the spec implies, or can a phase hold its position?

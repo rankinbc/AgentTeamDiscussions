@@ -1,0 +1,52 @@
+{
+ "s1-phase-triggers": {
+  "opus": {
+   "X": "single",
+   "Y": "team"
+  },
+  "sonnet": {
+   "X": "single",
+   "Y": "team"
+  }
+ },
+ "s2-eval-feedback": {
+  "opus": {
+   "X": "single",
+   "Y": "team"
+  },
+  "sonnet": {
+   "X": "team",
+   "Y": "single"
+  }
+ },
+ "s3-moderator-vs-phases": {
+  "opus": {
+   "X": "team",
+   "Y": "single"
+  },
+  "sonnet": {
+   "X": "team",
+   "Y": "single"
+  }
+ },
+ "s4-research-integration": {
+  "opus": {
+   "X": "team",
+   "Y": "single"
+  },
+  "sonnet": {
+   "X": "team",
+   "Y": "single"
+  }
+ },
+ "s5-critical-path": {
+  "opus": {
+   "X": "single",
+   "Y": "team"
+  },
+  "sonnet": {
+   "X": "single",
+   "Y": "team"
+  }
+ }
+}
