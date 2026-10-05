@@ -406,3 +406,5 @@ Planned next steps, from `docs/v2/ROADMAP.md`, prioritized by the agent team's o
 ## Status
 
 Experimental research prototype exploring whether structured personas and anti-convergence mechanisms produce genuinely diverse multi-agent discussion. The engine runs end to end, has produced the sessions in `output/sessions/`, and has a passing test suite; APIs and data formats are still evolving.
+
+Whether the engine actually beats simpler approaches is being tested in [`_SYSTEM/projects/benchmark/`](_SYSTEM/projects/benchmark/README.md): its design docs are judged blind against a single Claude call, a self-critique prompt, and the same round structure without personas.

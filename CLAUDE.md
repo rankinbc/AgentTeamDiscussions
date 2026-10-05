@@ -28,6 +28,7 @@ _SYSTEM/
     templates/              → Prompt templates (Scriban/Jinja2)
     input/                  → Briefs — input to engine, also output destination for generated briefs
     output/                 → ALL runtime session output (sessions, design-docs)
+  projects/benchmark/       → Python harness: engine vs baseline conditions, blind judging (see its README)
   data/                     → Shared data (agent YAML, team YAML) [AUTHORITATIVE]
 docs/                       → ALL project documentation
   v1/                       → V1 specs: PRD, product brief, system overviews, engine specs
