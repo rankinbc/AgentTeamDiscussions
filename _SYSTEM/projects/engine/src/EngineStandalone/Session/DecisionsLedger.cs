@@ -67,6 +67,10 @@ public static class DecisionsLedger
     /// </summary>
     public static bool HallucinationCheck(string designDoc, string ledgerSection, double ratioMax = 4.0, double ratioMin = 0.2)
     {
+        // The doc's own ## Ledger section would otherwise count its "### Q{n}:" header as a
+        // decision (and nothing else), making every well-formed doc look hallucinated.
+        designDoc = Regex.Replace(designDoc, @"## Ledger\s*\n.*?(?=\n## |\Z)", "", RegexOptions.Singleline);
+
         // Count decisions in design doc (various patterns)
         var docDecisions = Regex.Matches(designDoc, @"(?:^### D\d|^### [A-Z]|\d+\.\s+\*\*)", RegexOptions.Multiline).Count;
         if (docDecisions == 0)

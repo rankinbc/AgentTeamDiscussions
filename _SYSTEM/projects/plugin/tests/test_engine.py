@@ -66,6 +66,13 @@ class LedgerTests(unittest.TestCase):
         section = persist.extract_ledger_section(persist.read_without_marker(q2))
         self.assertIn("- DECIDED: 1. The Organizer Agent Is Eliminated", section)
 
+    def test_hallucination_check_ignores_docs_own_ledger_header(self):
+        ledger = "## Ledger\n\n### Q1: T\n" + "\n".join(f"- DECIDED: {i}" for i in range(8))
+        bold_doc = "## Decisions\n\n**A.** text\n\n**B.** text\n\n" + ledger
+        self.assertTrue(persist.hallucination_check(bold_doc, ledger))
+        inflated = "## Decisions\n\n### 1. Only\n\n" + ledger
+        self.assertFalse(persist.hallucination_check(inflated, ledger))
+
     def test_append_is_idempotent_and_adds_header(self):
         with tempfile.TemporaryDirectory() as d:
             sd = Path(d)

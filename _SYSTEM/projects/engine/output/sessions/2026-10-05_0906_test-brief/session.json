@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "created": "2026-10-05T09:06:23.038305+00:00",
+  "title": "test-brief",
+  "decided": [
+    "The system runs multi-agent discussions using the Claude CLI",
+    "Sessions are stored as markdown files with completion markers",
+    "Agents are configured via YAML files"
+  ],
+  "context": "",
+  "questions": [
+    {
+      "number": 1,
+      "title": "How should agent responses be truncated for long discussions?",
+      "body": "As discussions grow, context windows fill up. What's the right strategy for deciding what history each agent sees — full history, sliding window, or smart summarization?"
+    }
+  ],
+  "team": "beta-agents",
+  "mode": "compete",
+  "timeout": 120,
+  "source": "/home/user/AgentTeamDiscussions/_SYSTEM/projects/engine/input/test-brief.md",
+  "question_hash": "9b9418308dbf502f",
+  "state": {
+    "status": "complete",
+    "session_complete": true,
+    "total_elapsed_seconds": 0,
+    "completed_questions": 1,
+    "failed_questions": 0,
+    "questions": {
+      "q1": {
+        "status": "complete",
+        "title": "How should agent responses be truncated for long discussions?",
+        "elapsed_seconds": 167,
+        "file": "01-how-should-agent-responses-be-truncated-for-long-discussions.md",
+        "rounds": {
+          "propose": "complete",
+          "critique": "complete",
+          "evaluate": "complete",
+          "synthesis": "complete"
+        }
+      }
+    }
+  },
+  "plugin": {
+    "orders": {
+      "q1": {
+        "propose": [
+          "cognitive_architect",
+          "flow_orchestrator"
+        ],
+        "critique": [
+          "adversarial_critic",
+          "systems_pragmatist"
+        ],
+        "evaluate": [
+          "product_oracle",
+          "context_surgeon"
+        ]
+      }
+    },
+    "pending": null,
+    "started": null,
+    "question_started": {
+      "q1": "2026-10-05T09:06:23.265904"
+    },
+    "warnings": [
+      "q1: ledger extraction looks suspicious"
+    ]
+  }
+}

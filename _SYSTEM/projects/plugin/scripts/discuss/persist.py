@@ -145,6 +145,8 @@ def fallback_ledger_entry(number: int, title: str) -> str:
 
 
 def hallucination_check(design_doc: str, ledger_section: str, ratio_max=4.0, ratio_min=0.2) -> bool:
+    # The doc's own ## Ledger header ("### Q{n}:") must not count as a doc decision.
+    design_doc = re.sub(r"## Ledger\s*\n.*?(?=\n## |\Z)", "", design_doc, flags=re.S)
     doc_decisions = len(re.findall(r"(?:^### D\d|^### [A-Z]|\d+\.\s+\*\*)", design_doc, re.M))
     if doc_decisions == 0:
         doc_decisions = len(re.findall(r"^### ", design_doc, re.M))

@@ -187,7 +187,8 @@ def _next_for_question(config, session_dir, team, mode, q: Question):
     qkey = f"q{q.number}"
     plugin = config["plugin"]
     plugin.setdefault("question_started", {}).setdefault(qkey, datetime.now().isoformat())
-    plugin.setdefault("started", datetime.now().isoformat())
+    if not plugin.get("started"):  # init writes the key as null, so setdefault would keep it
+        plugin["started"] = datetime.now().isoformat()
     orders = plugin.setdefault("orders", {}).setdefault(qkey, {})
 
     decisions = _decisions_text(config, session_dir)

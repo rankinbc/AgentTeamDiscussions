@@ -185,4 +185,4 @@ cd _SYSTEM/projects/engine
 dotnet test
 ```
 
-118 tests covering: agent loading, brief parsing, config loading, prompt building, context telemetry, context budget enforcement, discussion compression, synthesis template filling, decisions ledger, session persistence (including resume counting), session config serialization, and session preparation.
+121 tests covering: agent loading, brief parsing, config loading, prompt building, context telemetry, context budget enforcement, discussion compression, synthesis template filling, decisions ledger, session persistence (including resume counting), session config serialization, and session preparation.
