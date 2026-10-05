@@ -140,14 +140,54 @@ public class SessionPersistenceTests : IDisposable
         SessionPersistence.WriteWithMarker(
             Path.Combine(questionsDir, "01-feature-ranking.md"), "doc");
 
-        // Transcript (complete but should be ignored — ends with -transcript.md)
+        // Transcript, round files and eval report are complete too, but are not design docs
         SessionPersistence.WriteWithMarker(
             Path.Combine(questionsDir, "01-feature-ranking-transcript.md"), "transcript");
+        SessionPersistence.WriteWithMarker(
+            Path.Combine(questionsDir, "01-feature-ranking-propose.md"), "### Agent\n\nproposal");
+        SessionPersistence.WriteWithMarker(
+            Path.Combine(questionsDir, "01-feature-ranking-critique.md"), "### Agent\n\ncritique");
+        SessionPersistence.WriteWithMarker(
+            Path.Combine(questionsDir, "01-feature-ranking-evaluate.md"), "### Agent\n\nverdict");
+        SessionPersistence.WriteWithMarker(
+            Path.Combine(questionsDir, "eval-questions.md"), "# Evaluation");
 
-        // Note: round files (-propose.md, -critique.md) are NOT filtered by
-        // CountCompletedQuestions — only -transcript.md files are excluded.
-        // This test verifies the transcript exclusion specifically.
         Assert.Equal(1, SessionPersistence.CountCompletedQuestions(sessionDir));
+    }
+
+    // --- CountCompletedQuestions(questions) counts the leading run of finished design docs ---
+
+    [Fact]
+    public void CountCompletedQuestions_WithQuestionList_StopsAtFirstUnfinished()
+    {
+        var sessionDir = Path.Combine(_tempDir, "session3");
+        var questionsDir = Path.Combine(sessionDir, "questions");
+        Directory.CreateDirectory(questionsDir);
+
+        var questions = new List<(int, string)>
+        {
+            (1, "Feature Ranking"),
+            (2, "Architecture"),
+            (3, "Auth Flow"),
+        };
+
+        // Q1 done (plus its round files), Q2 only has round files, Q3 done — Q3 must not count
+        SessionPersistence.WriteWithMarker(Path.Combine(questionsDir, "01-feature-ranking.md"), "doc 1");
+        SessionPersistence.WriteWithMarker(Path.Combine(questionsDir, "01-feature-ranking-propose.md"), "p");
+        SessionPersistence.WriteWithMarker(Path.Combine(questionsDir, "01-feature-ranking-transcript.md"), "t");
+        SessionPersistence.WriteWithMarker(Path.Combine(questionsDir, "02-architecture-propose.md"), "p");
+        File.WriteAllText(Path.Combine(questionsDir, "02-architecture.md"), "crashed mid-write");
+        SessionPersistence.WriteWithMarker(Path.Combine(questionsDir, "03-auth-flow.md"), "doc 3");
+
+        Assert.Equal(1, SessionPersistence.CountCompletedQuestions(sessionDir, questions));
+    }
+
+    [Fact]
+    public void CountCompletedQuestions_WithQuestionList_ZeroForMissingDir()
+    {
+        var sessionDir = Path.Combine(_tempDir, "no-session3");
+
+        Assert.Equal(0, SessionPersistence.CountCompletedQuestions(sessionDir, new[] { (1, "A") }));
     }
 
     [Fact]

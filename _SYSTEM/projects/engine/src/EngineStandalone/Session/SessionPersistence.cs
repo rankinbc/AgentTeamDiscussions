@@ -99,7 +99,32 @@ public static class SessionPersistence
     }
 
     /// <summary>
-    /// Count completed questions in a session directory.
+    /// Count the leading run of questions whose design doc ({NN}-{slug}.md) is complete.
+    /// This is what resume needs: the runner skips exactly this many questions, so the
+    /// count must stop at the first question that has no finished design doc.
+    /// </summary>
+    public static int CountCompletedQuestions(string sessionDir, IEnumerable<(int Number, string Title)> questions)
+    {
+        var questionsDir = Path.Combine(sessionDir, "questions");
+        if (!Directory.Exists(questionsDir))
+            return 0;
+
+        var completed = 0;
+        foreach (var (number, title) in questions.OrderBy(q => q.Number))
+        {
+            var docPath = Path.Combine(questionsDir, $"{number:D2}-{Brief.BriefParser.Slugify(title)}.md");
+            if (!IsComplete(docPath))
+                break;
+            completed++;
+        }
+        return completed;
+    }
+
+    /// <summary>
+    /// Count completed design docs in a session directory without knowing the question list.
+    /// Round files ({stem}-propose.md …), transcripts ({stem}-transcript.md) and eval reports
+    /// (eval-*.md) are excluded: a file is a per-question artifact, not a design doc, when its
+    /// name extends another file's stem with a "-suffix".
     /// </summary>
     public static int CountCompletedQuestions(string sessionDir)
     {
@@ -107,9 +132,18 @@ public static class SessionPersistence
         if (!Directory.Exists(questionsDir))
             return 0;
 
-        return Directory.GetFiles(questionsDir, "*.md")
-            .Where(f => !f.EndsWith("-transcript.md"))
-            .Count(IsComplete);
+        var files = Directory.GetFiles(questionsDir, "*.md");
+        var stems = files.Select(f => Path.GetFileNameWithoutExtension(f)!).ToHashSet(StringComparer.Ordinal);
+
+        bool IsDesignDoc(string file)
+        {
+            var stem = Path.GetFileNameWithoutExtension(file)!;
+            if (stem.StartsWith("eval-", StringComparison.Ordinal) || stem.EndsWith("-transcript", StringComparison.Ordinal))
+                return false;
+            return !stems.Any(other => other.Length < stem.Length && stem.StartsWith(other + "-", StringComparison.Ordinal));
+        }
+
+        return files.Where(IsDesignDoc).Count(IsComplete);
     }
 
     /// <summary>

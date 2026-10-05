@@ -202,8 +202,8 @@ class Team:
 
 
 def team_file(team_name: str) -> Path:
-    """Modes live in the engine-local team copy; fall back to the shared copy."""
-    for d in (ENGINE_TEAMS_DIR, SHARED_TEAMS_DIR):
+    """The shared copy is authoritative (and carries modes); fall back to the engine-local copy."""
+    for d in (SHARED_TEAMS_DIR, ENGINE_TEAMS_DIR):
         candidate = d / f"{team_name}.yaml"
         if candidate.exists():
             return candidate

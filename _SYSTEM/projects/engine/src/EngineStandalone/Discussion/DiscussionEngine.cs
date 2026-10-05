@@ -31,7 +31,7 @@ public class DiscussionEngine : IDiscussionEngine
     private readonly IPromptBuilder _promptBuilder;
     private readonly IConfigLoader _configLoader;
     private readonly IRoundRunner _roundRunner;
-    private readonly string _synthesisSystemPrompt;
+    private readonly string _synthesisTemplate;
 
     public DiscussionEngine(IClaudeRunner claudeRunner, IPromptBuilder promptBuilder, IConfigLoader configLoader, IRoundRunner roundRunner)
     {
@@ -39,7 +39,22 @@ public class DiscussionEngine : IDiscussionEngine
         _promptBuilder = promptBuilder;
         _configLoader = configLoader;
         _roundRunner = roundRunner;
-        _synthesisSystemPrompt = configLoader.LoadPromptRaw("prompts/synthesis.md.j2");
+        _synthesisTemplate = configLoader.LoadPromptRaw("prompts/synthesis.md.j2");
+    }
+
+    /// <summary>
+    /// Fills the synthesis template's placeholders ({{ question_number }}, {{ topic_tag }},
+    /// {{ max_ledger_words | default(50) }}). The template is loaded raw, so without this the
+    /// model saw the Jinja syntax literally and never produced a usable ## Ledger section.
+    /// The topic tag is the title cut to 60 chars, matching DecisionsLedger's ### Q{n}: header.
+    /// </summary>
+    public static string FillSynthesisTemplate(string template, int questionNumber, string questionTitle, int maxLedgerWords)
+    {
+        var topicTag = questionTitle.Length > 60 ? questionTitle[..60] : questionTitle;
+        var filled = Regex.Replace(template, @"\{\{\s*question_number\s*\}\}", questionNumber.ToString());
+        filled = Regex.Replace(filled, @"\{\{\s*topic_tag\s*\}\}", topicTag.Replace("$", "$$"));
+        filled = Regex.Replace(filled, @"\{\{\s*max_ledger_words(\s*\|\s*default\(\s*\d+\s*\))?\s*\}\}", maxLedgerWords.ToString());
+        return filled;
     }
 
     /// <summary>
@@ -164,7 +179,11 @@ public class DiscussionEngine : IDiscussionEngine
                       "Do not request file permissions, describe what you would write, or add any " +
                       "meta-commentary before or after the document.");
 
-        return await _claudeRunner.RunAsync(_synthesisSystemPrompt, sb.ToString(), timeout);
+        var systemPrompt = FillSynthesisTemplate(
+            _synthesisTemplate, question.Number, question.Title,
+            _configLoader.Defaults().Synthesis.MaxLedgerWords);
+
+        return await _claudeRunner.RunAsync(systemPrompt, sb.ToString(), timeout);
     }
 
     /// <summary>

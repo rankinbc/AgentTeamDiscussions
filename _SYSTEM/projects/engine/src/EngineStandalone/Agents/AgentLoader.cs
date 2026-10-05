@@ -66,8 +66,16 @@ public class AgentLoader : IAgentLoader
     /// </summary>
     public TeamConfig LoadTeamByName(string teamName)
     {
-        var teamPath = Path.Combine(_teamsDir, $"{teamName}.yaml");
-        return LoadTeam(teamPath);
+        return LoadTeam(ResolveTeamPath(teamName));
+    }
+
+    /// <summary>
+    /// Full path of the team YAML for a team name. SessionPreparer and SessionRunner
+    /// both go through here so they read the same file (and the same modes).
+    /// </summary>
+    public string ResolveTeamPath(string teamName)
+    {
+        return Path.GetFullPath(Path.Combine(_teamsDir, $"{teamName}.yaml"));
     }
 
     /// <summary>
@@ -330,6 +338,11 @@ public class AgentLoader : IAgentLoader
         if (raw.TryGetValue("pushback_on", out var pbObj) && pbObj is List<object> pbList)
         {
             config.PushbackOn = pbList.Select(x => x.ToString()!).ToList();
+        }
+
+        if (raw.TryGetValue("allergies", out var alObj) && alObj is List<object> alList)
+        {
+            config.Allergies = alList.Select(x => x.ToString()!).ToList();
         }
 
         return config;

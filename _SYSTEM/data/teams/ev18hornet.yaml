@@ -27,3 +27,13 @@ agents:
   agent_key: scope_warden
   name: Soren
   file: ev18hornet__scope_warden.yaml
+
+default_mode: default
+modes:
+  default:
+    description: "Flight dreamer + emergence theorist proposing, EV purist + player advocate critiquing, scope warden evaluating"
+    groups:
+      propose: [flight_dreamer, emergence_theorist]
+      critique: [ev_purist, player_advocate]
+      evaluate: [scope_warden]
+    agent_roles: {}

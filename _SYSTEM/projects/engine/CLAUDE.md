@@ -111,7 +111,7 @@ When `agents` is null, all team agents participate. When set, only listed agents
 
 ## Teams and Modes
 
-Teams are in `data/teams/*.yaml`. Each team defines its own modes (round structures):
+Teams are in `_SYSTEM/data/teams/*.yaml` (the `data_dir` from `config/defaults.yaml`; the engine-local `data/teams/` copy is not read at runtime). Each team defines its own modes (round structures):
 
 | Team | Agents | Default Mode |
 |------|--------|-------------|
@@ -176,7 +176,7 @@ Live/
 
 **Use** `config/defaults.yaml` to change timeouts, truncation, thresholds — not C# code.
 
-**Use** `data/teams/*.yaml` to add modes — modes are a team-level concern.
+**Use** `_SYSTEM/data/teams/*.yaml` to add modes — modes are a team-level concern.
 
 ## Tests
 
@@ -185,4 +185,4 @@ cd _SYSTEM/projects/engine
 dotnet test
 ```
 
-105 tests covering: agent loading, brief parsing, config loading, prompt building, context telemetry, context budget enforcement, discussion compression, decisions ledger, session persistence, session config serialization, and session preparation.
+118 tests covering: agent loading, brief parsing, config loading, prompt building, context telemetry, context budget enforcement, discussion compression, synthesis template filling, decisions ledger, session persistence (including resume counting), session config serialization, and session preparation.

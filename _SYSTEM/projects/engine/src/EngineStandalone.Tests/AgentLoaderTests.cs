@@ -105,6 +105,44 @@ public class AgentLoaderTests
     }
 
     [Fact]
+    public void LoadAgent_ParsesAllergies()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"agent-{Guid.NewGuid():N}.yaml");
+        File.WriteAllText(path, @"name: Test Agent
+position:
+  role: tester
+  intensity: 0.5
+  drives:
+    - find bugs
+  allergies:
+    - deferred decisions
+    - hand-waving
+");
+        try
+        {
+            var agent = new AgentLoader(Path.GetTempPath()).LoadAgent(path);
+
+            Assert.Equal(new List<string> { "deferred decisions", "hand-waving" }, agent.Position.Allergies);
+            Assert.Contains("allergic", new PromptBuilder().BuildSystemPrompt(agent));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void ResolveTeamPath_PointsIntoTeamsDir()
+    {
+        var loader = new AgentLoader(Path.Combine("some", "data"));
+
+        var path = loader.ResolveTeamPath("beta-agents");
+
+        Assert.EndsWith(Path.Combine("some", "data", "teams", "beta-agents.yaml"), path);
+        Assert.True(Path.IsPathRooted(path));
+    }
+
+    [Fact]
     public void ListTeams_ReturnsTeamInfo()
     {
         // Skip if data not available

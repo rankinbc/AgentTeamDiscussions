@@ -95,12 +95,10 @@ low-patience truncation, round instructions, overlays, cascade rules (propose fa
 fails → partial; synthesis under 50 chars → partial; 3 consecutive failures → circuit breaker), ledger
 extraction (ledger section → decision headings → stub), file layout and completion markers.
 
-Deliberate differences:
-- The synthesis template's `{{ question_number }}` / `{{ topic_tag }}` placeholders are filled (the engine
-  leaves them literal, so no engine run has ever produced a `## Ledger` section).
-- The ledger is included in "What's Already Decided" once; the engine appends it twice.
-- Resume detects completion per question from the design doc's marker; the engine's
-  `CountCompletedQuestions` counts round files too and over-counts.
+The engine bugs found while porting (double ledger, resume over-counting, unfilled synthesis placeholders,
+unparsed `allergies`, preparer/runner reading different team files) were fixed in the C# engine on 2026-10-05,
+so the two now agree on those points. One remaining difference: the plugin ignores `allergies` because the
+shared persona YAMLs don't define any; add them there and re-run `gen_agents.py` to pick them up.
 
 Not ported yet:
 - Context-budget enforcer (`Telemetry/ContextBudgetEnforcer.cs`) and `context_stats.json`.

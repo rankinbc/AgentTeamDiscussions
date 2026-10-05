@@ -89,7 +89,7 @@ public class SessionRunner
         Directory.CreateDirectory(sessionsRoot);
 
         // Team loading: from --team flag or default
-        var teamPath = teamYaml ?? Path.Combine(_baseDir, "data", "teams", $"{defaults.Paths.DefaultTeam}.yaml");
+        var teamPath = teamYaml ?? _agentLoader.ResolveTeamPath(defaults.Paths.DefaultTeam);
         var team = _agentLoader.LoadTeam(teamPath);
 
         // Mode loading: from the team's modes
@@ -133,7 +133,7 @@ public class SessionRunner
                 return;
             }
 
-            completed = SessionPersistence.CountCompletedQuestions(sessionDir);
+            completed = SessionPersistence.CountCompletedQuestions(sessionDir, allQuestions.Select(q => (q.Number, q.Title)));
             Console.WriteLine($"Resuming session: {Path.GetFileName(sessionDir)} ({completed}/{allQuestions.Count} completed)");
         }
         else
@@ -476,7 +476,7 @@ public class SessionRunner
         Directory.CreateDirectory(outPath);
 
         // Load team
-        var teamPath = teamYaml ?? Path.Combine(_baseDir, "data", "teams", $"{defaults.Paths.DefaultTeam}.yaml");
+        var teamPath = teamYaml ?? _agentLoader.ResolveTeamPath(defaults.Paths.DefaultTeam);
         var team = _agentLoader.LoadTeam(teamPath);
 
         var mode = team.GetMode(modeName);
@@ -863,9 +863,9 @@ public class SessionRunner
             ?? Path.Combine(_baseDir, defaults.Paths.SessionsDir);
         Directory.CreateDirectory(sessionsRoot);
 
-        // Resolve team
-        var teamPath = config.ResolvedTeamPath
-            ?? Path.Combine(_baseDir, "data", "teams", $"{config.Team}.yaml");
+        // Resolve team through the agent loader so the runner reads the same team file
+        // (and therefore the same modes) that SessionPreparer used to pick the mode.
+        var teamPath = config.ResolvedTeamPath ?? _agentLoader.ResolveTeamPath(config.Team);
         if (!File.Exists(teamPath))
         {
             Console.WriteLine($"ERROR: Team file not found: {teamPath}");
@@ -959,7 +959,7 @@ public class SessionRunner
                 return;
             }
 
-            completed = SessionPersistence.CountCompletedQuestions(sessionDir);
+            completed = SessionPersistence.CountCompletedQuestions(sessionDir, config.Questions.Select(q => (q.Number, q.Title)));
             Console.WriteLine($"Resuming: {Path.GetFileName(sessionDir)} ({completed}/{config.Questions.Count} completed)");
         }
         else
@@ -1127,9 +1127,11 @@ public class SessionRunner
                 ? string.Join("\n", accumulatedOpenQuestions.Select(oq => $"- [from Q{oq.FromQ}] {oq.Text}"))
                 : "";
 
+            // RunQuestionWithCascadeAsync appends the ledger itself; passing it here too
+            // would duplicate every ledger entry in the agents' "What's Already Decided".
             var result = await RunQuestionWithCascadeAsync(
                 question, team, systemPrompts,
-                decisionsText + (string.IsNullOrEmpty(ledgerText) ? "" : $"\n\n{ledgerText}"),
+                decisionsText,
                 ledgerText,
                 priorSpecs.Length > defaults.Truncation.PriorSpecs
                     ? priorSpecs[^defaults.Truncation.PriorSpecs..]
